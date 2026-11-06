@@ -9,6 +9,10 @@ describe("Dhwani AI brand and chat shell", () => {
     expect(codeforgeMarkup).toContain("dhwani-menu-toggle");
     expect(codeforgeMarkup).toContain('aria-label="Open menu"');
     expect(codeforgeMarkup).toContain('src="/dhwani/dhwani-mark.svg"');
+    const app = readFileSync(resolve(process.cwd(), "public/codeforge/app.js"), "utf8");
+    expect(app).toContain('class="cf-auth-logo" src="/dhwani/dhwani-mark.svg" alt="Dhwani logo"');
+    expect(app).toContain('class="cf-global-brand-loader-logo"');
+    expect(app).toContain('/dhwani/dhwani-mark.svg');
     expect(codeforgeMarkup).toContain("Dhwani AI");
     expect(codeforgeMarkup).toContain("What's on the agenda today?");
     expect(codeforgeMarkup).toContain('placeholder="How can I help you today?"');

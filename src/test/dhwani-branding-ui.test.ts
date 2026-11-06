@@ -27,6 +27,20 @@ describe("Dhwani AI visual identity", () => {
     expect(codeforgeMarkup).not.toContain("composer-tools");
   });
 
+  it("uses Dhwani branding in GitHub, approval and voice controls", () => {
+    const github = readFileSync(resolve(process.cwd(), "public/codeforge/github-client.js"), "utf8");
+    const approvals = readFileSync(resolve(process.cwd(), "public/codeforge/tool-approvals-ui.js"), "utf8");
+    const voices = readFileSync(resolve(process.cwd(), "public/codeforge/voice-options.js"), "utf8");
+
+    expect(github).toContain("[Dhwani AI GitHub]");
+    expect(github).toContain("Dhwani AI improvements");
+    expect(github).not.toContain("Tatv");
+    expect(approvals).toContain("Dhwani will ask you to confirm again");
+    expect(approvals).not.toContain("Tatv");
+    expect(voices).toContain("I’m Dhwani AI");
+    expect(voices).not.toContain("Tatv");
+  });
+
   it("uses Dhwani typing dots and animated chat bubbles instead of a live progress checklist", () => {
     const app = readFileSync(resolve(process.cwd(), "public/codeforge/app.js"), "utf8");
     const css = readFileSync(resolve(process.cwd(), "public/codeforge/styles.css"), "utf8");

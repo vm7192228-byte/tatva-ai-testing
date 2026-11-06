@@ -116,7 +116,7 @@ function supabaseAdminHeaders(key: string): Record<string, string> {
     "content-type": "application/json",
   };
   // sb_secret_* is an opaque API key, not a JWT; legacy service_role is a JWT.
-  if (!key.startsWith("sb_secret_")) headers.authorization = "Bearer " + key;
+  if (!key.startsWith("sb_secret_")) headers["authorization"] = "Bearer " + key;
   return headers;
 }
 function json(data: unknown, status = 200, extra: Record<string, string> = {}) {

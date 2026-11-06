@@ -1,3 +1,4 @@
+import { supabaseServiceHeaders } from "./supabase-service-headers.server";
 import { reserveUsageQuota, finalizeUsageQuota, finalizeUsageReservationsResponse, deriveUsageReservationKey } from "./usage-limits.server";
 import { consumeSharedRateLimit } from "./shared-rate-limit.server";
 import { streamWithFailover } from "./chat-failover.server";
@@ -149,11 +150,8 @@ async function getActiveSubscriptionPlan(runtimeEnv: unknown, userId: string | u
     const value = cfg[name] ?? processLike?.env?.[name];
     return typeof value === "string" && value.trim() ? value.trim() : undefined;
   };
-  const baseUrl = getEnv("TATV_SUPABASE_URL") ?? getEnv("SUPABASE_URL");
-  const dedicatedSecretKey = getEnv("TATV_SUPABASE_SECRET_KEY");
-  const serviceKey = dedicatedSecretKey?.startsWith("sb_secret_")
-    ? dedicatedSecretKey
-    : getEnv("SUPABASE_SECRET_KEY") ?? getEnv("SUPABASE_SERVICE_ROLE_KEY");
+  const baseUrl = getEnv("SUPABASE_URL");
+  const serviceKey = getEnv("SUPABASE_SERVICE_ROLE_KEY") ?? getEnv("SUPABASE_SECRET_KEY");
   if (!baseUrl || !serviceKey) return null;
   try {
     const query = new URL("/rest/v1/cf_subscriptions", baseUrl);
@@ -162,12 +160,8 @@ async function getActiveSubscriptionPlan(runtimeEnv: unknown, userId: string | u
     query.searchParams.set("status", "eq.active");
     query.searchParams.set("order", "expires_at.desc.nullslast");
     query.searchParams.set("limit", "10");
-    const headers: Record<string, string> = { apikey: serviceKey };
-    // Supabase's new sb_secret_* keys are opaque API keys, not JWTs.
-    // Send them only as apikey; legacy service_role keys are JWTs.
-    if (!serviceKey.startsWith("sb_secret_")) headers.authorization = "Bearer " + serviceKey;
     const response = await fetch(query, {
-      headers,
+      headers: supabaseServiceHeaders(serviceKey),
       signal: AbortSignal.timeout(2500),
     });
     if (!response.ok) return null;
@@ -353,7 +347,7 @@ function streamGeminiRequest(
             });
             if (timeout) {
               emit({
-                error: "Google Gemini did not respond within 25 seconds. Please try again; the AI service may be temporarily busy.",
+                error: "Tatv could not complete this reply. Please try again in a moment.",
                 done: true,
               });
               close();
@@ -372,17 +366,12 @@ function streamGeminiRequest(
             const status = upstream.status;
             try { await upstream.body?.cancel(); } catch { /* Discarding an error body must not mask its HTTP status. */ }
             if (status === 401 || status === 403) {
-              emit({ error: "Google Gemini could not authenticate this request. The workspace administrator needs to review the provider connection.", done: true });
+              emit({ error: "Tatv could not complete this reply. Please try again in a moment.", done: true });
               close();
               return;
             }
             if (status === 429) {
-              const retryAfterHeader = upstream.headers.get("retry-after");
-              const retryAfter = retryAfterHeader ? Number(retryAfterHeader) : Number.NaN;
-              const retryAfterSeconds = Number.isFinite(retryAfter) ? Math.max(0, Math.min(3_600, Math.ceil(retryAfter))) : undefined;
-              const message = "Google Gemini is rate-limited or its usage quota has been reached. Please try again later." +
-                (retryAfterSeconds ? " The provider suggests retrying in about " + retryAfterSeconds + " seconds." : "");
-              emit({ error: message, code: "UPSTREAM_RATE_LIMITED", retryAfterSeconds, done: true });
+              emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "UPSTREAM_RATE_LIMITED", done: true });
               close();
               return;
             }
@@ -390,17 +379,17 @@ function streamGeminiRequest(
 
             let message: string;
             if (status === 404) {
-              message = "The configured Google Gemini model is not available. Review the selected model configuration.";
+              message = "Tatv could not complete this reply. Please try again in a moment.";
             } else if (status === 400 || status === 422) {
-              message = "Google Gemini could not accept this request. Check the message format and selected model capabilities.";
+              message = "Tatv could not complete this reply. Please try again in a moment.";
             } else if (status === 413) {
-              message = "The request is too large for Google Gemini. Remove an attachment or shorten the conversation and try again.";
+              message = "Tatv could not complete this reply. Please try again in a moment.";
             } else if (status === 408 || status === 504) {
-              message = "Google Gemini did not finish responding in time. Please try again.";
+              message = "Tatv could not complete this reply. Please try again in a moment.";
             } else if (status >= 500) {
-              message = "Google Gemini is temporarily unavailable. Please try again shortly.";
+              message = "Tatv could not complete this reply. Please try again in a moment.";
             } else {
-              message = "Google Gemini could not complete this request (HTTP " + status + "). Please review the request and try again.";
+              message = "Tatv could not complete this reply. Please try again in a moment.";
             }
             emit({ error: message, code: status >= 500 ? "UPSTREAM_UNAVAILABLE" : "UPSTREAM_REQUEST_FAILED", done: true });
             close();
@@ -587,13 +576,6 @@ function providerSettings(runtimeEnv: unknown) {
   const freellmapiBaseUrl = normalizeOpenAICompatibleBaseUrl(envValue("FREELLMAPI_BASE_URL", runtimeEnv));
   const freellmapiApiKey = envValue("FREELLMAPI_API_KEY", runtimeEnv);
   const freellmapiModel = envValue("FREELLMAPI_MODEL", runtimeEnv) ?? "auto";
-  const freellmapiOwnerEmail = envValue("FREELLMAPI_OWNER_EMAIL", runtimeEnv)?.toLowerCase();
-  // Explicit opt-in: when true, every signed-in user's Tatv Smart chat is tried on
-  // FreeLLMAPI first (per-user Tatv plan limits still apply). Leftover FREELLMAPI_*
-  // values in an old environment never turn this on by themselves.
-  const freellmapiSharedPrimary = /^(1|true|yes|on)$/i.test(
-    envValue("FREELLMAPI_SHARED_PRIMARY", runtimeEnv) ?? "",
-  );
   const codeforgeGatewayBaseUrl = normalizeOpenAICompatibleBaseUrl(envValue("CODEFORGE_GATEWAY_URL", runtimeEnv));
   const codeforgeGatewayFallbackBaseUrl = normalizeOpenAICompatibleBaseUrl(
     envValue("CODEFORGE_GATEWAY_FALLBACK_URL", runtimeEnv),
@@ -621,20 +603,16 @@ function providerSettings(runtimeEnv: unknown) {
     qwen: Boolean(qwenBaseUrl && qwenApiKey),
     cloudflare: Boolean(cloudflareAccountId && cloudflareToken),
     pollinations: Boolean(pollinationsKey && pollinationsKey.startsWith("sk_")),
-    // Shared-primary use is an explicit operator opt-in. Without it, only the
-    // verified owner email may use this personal endpoint. It stays out of
-    // public provider discovery in either mode.
+    // Server-side first-hop route shared by Tatv Smart for owner and user traffic.
+    // The API key stays in this server runtime and is never exposed by discovery.
     freellmapi: Boolean(
       freellmapiBaseUrl &&
       freellmapiApiKey &&
-      (freellmapiOwnerEmail || freellmapiSharedPrimary) &&
       /^[a-zA-Z0-9._:/+-]{1,140}$/.test(freellmapiModel)
     ),
-    freellmapiSharedPrimary,
     freellmapiBaseUrl,
     freellmapiApiKey,
     freellmapiModel,
-    freellmapiOwnerEmail,
     codeforgeGateway: Boolean(
       codeforgeGatewayBaseUrl ||
       codeforgeGatewayFallbackBaseUrl ||
@@ -655,16 +633,6 @@ function providerSettings(runtimeEnv: unknown) {
     qwenBaseUrl,
     qwenApiKey,
   };
-}
-
-/** FreeLLMAPI is for the owner only, unless FREELLMAPI_SHARED_PRIMARY is explicitly enabled. */
-function canUseFreeLlmApi(
-  available: ReturnType<typeof providerSettings>,
-  userEmail: string | undefined,
-): boolean {
-  if (!available.freellmapi) return false;
-  if (available.freellmapiSharedPrimary) return true;
-  return Boolean(userEmail && userEmail === available.freellmapiOwnerEmail);
 }
 
 export function streamOpenAIProvider(
@@ -789,13 +757,10 @@ export function streamOpenAIProvider(
           }
           try { await upstream.body?.cancel(); } catch { /* Do not mask the provider's HTTP status. */ }
 
-          // Any FreeLLMAPI 429 (monthly budget, per-minute or daily free-tier limit) means this
-          // upstream cannot serve the request right now. Signal the failover chain to move on to
-          // the next configured backup instead of showing the user an error.
-          if (config.id === "freellmapi" && (status === 429 || status === 402 || freeLlmApiErrorCode === "quota_exceeded")) {
+          if (config.id === "freellmapi" && status === 429 && freeLlmApiErrorCode === "quota_exceeded") {
             const retryAfter = retryAfterSeconds(upstream.headers);
             emit({
-              error: "FreeLLMAPI quota or rate limit reached.",
+              error: "FreeLLMAPI monthly quota is exhausted.",
               code: "FREELLMAPI_QUOTA_EXHAUSTED",
               ...(retryAfter !== undefined ? { retryAfterSeconds: retryAfter } : {}),
               done: true,
@@ -804,9 +769,27 @@ export function streamOpenAIProvider(
             return;
           }
 
-          if (gatewayErrorCode === "NO_PROVIDER_MODEL") {
+          if (config.id.startsWith("codeforgeGateway") && (status === 401 || status === 403)) {
+            console.warn("[Tatv AI] private gateway rejected the requesting user's access", {
+              status,
+              code: "PRIVATE_GATEWAY_ACCESS_DENIED",
+            });
             emit({
-              error: `${config.label} has no enabled chat model in the private gateway. The gateway administrator needs to review and enable an eligible model.`,
+              error: "Tatv could not complete this reply. Please try again in a moment.",
+              code: "PRIVATE_GATEWAY_ACCESS_DENIED",
+              done: true,
+            });
+            close();
+            return;
+          }
+
+          if (gatewayErrorCode === "NO_PROVIDER_MODEL") {
+            console.warn("[Tatv AI] private gateway has no enabled chat model", {
+              provider: "private gateway",
+              code: "NO_PROVIDER_MODEL",
+            });
+            emit({
+              error: "Tatv could not complete this reply. Please try again in a moment.",
               code: "NO_PROVIDER_MODEL",
               done: true,
             });
@@ -815,7 +798,7 @@ export function streamOpenAIProvider(
           }
 
           const failure = safeProviderHttpFailure(config.label, status, upstream.headers);
-          emit({ error: failure.message, code: failure.code, ...(failure.retryAfterSeconds !== undefined ? { retryAfterSeconds: failure.retryAfterSeconds } : {}), done: true });
+          emit({ error: failure.message, code: failure.code, done: true });
           close();
           return;
         }
@@ -835,7 +818,7 @@ export function streamOpenAIProvider(
                 ? payload.result.response
                 : typeof payload.response === "string" ? payload.response : "";
             if (!reply.trim()) {
-              emit({ error: config.label + " returned an empty reply.", done: true });
+              emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "AI_REQUEST_FAILED", done: true });
             } else {
               emit({ activity: { id: "generating", label: "Generating your response", detail: "The model has returned its answer.", state: "complete" } });
               emit({ status: "generating", message: "Generating your answer…", model: displayModel });
@@ -844,7 +827,7 @@ export function streamOpenAIProvider(
               emit({ done: true, model: displayModel });
             }
           } catch {
-            emit({ error: config.label + " returned an unreadable response. Try again.", done: true });
+            emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "AI_REQUEST_FAILED", done: true });
           }
           close();
           return;
@@ -853,7 +836,7 @@ export function streamOpenAIProvider(
         emit({ activity: { id: "generating", label: "Generating your response", detail: "The answer will appear here as the model produces it.", state: "active" } });
         emit({ status: "generating", message: "Generating your answer…", model: displayModel });
         if (!upstream.body) {
-          emit({ error: config.label + " returned no response stream.", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "AI_REQUEST_FAILED", done: true });
           close();
           return;
         }
@@ -903,10 +886,7 @@ export function streamOpenAIProvider(
               const detailCode = typeof payload.error === "object" && payload.error && typeof payload.error.code === "string"
                 ? payload.error.code
                 : "";
-              const message = detailCode === "rate_limit_exceeded"
-                ? config.label + " is rate-limited. Please try again later."
-                : config.label + " reported a streaming error. Please retry your request.";
-              emit({ error: message, code: detailCode === "rate_limit_exceeded" ? "UPSTREAM_RATE_LIMITED" : "UPSTREAM_STREAM_FAILED", done: true });
+              emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: detailCode === "rate_limit_exceeded" ? "UPSTREAM_RATE_LIMITED" : "UPSTREAM_STREAM_FAILED", done: true });
               streamFailed = true;
             }
           } catch {
@@ -941,8 +921,8 @@ export function streamOpenAIProvider(
           try { await reader.cancel(); } catch { /* Stream may already be closed. */ }
           emit({
             error: receivedText
-              ? config.label + " stopped streaming before the answer finished."
-              : config.label + " did not start generating in time. Check its API configuration.",
+              ? "Tatv could not complete this reply. Please try again in a moment."
+              : "Tatv could not complete this reply. Please try again in a moment.",
             done: true,
           });
           close();
@@ -954,32 +934,32 @@ export function streamOpenAIProvider(
           return;
         }
         if (!upstreamStreamCompleted) {
-          emit({ error: config.label + " closed its stream without a completion signal. The visible answer may be incomplete; please retry.", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", done: true });
           close();
           return;
         }
         if (upstreamFinishReason === "length") {
-          emit({ error: config.label + " reached its output-token limit before the response was complete. You can ask Tatv to continue from the last point.", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", done: true });
           close();
           return;
         }
         if (upstreamFinishReason === "content_filter") {
-          emit({ error: config.label + " stopped the response because of its content policy. Please revise the request.", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", done: true });
           close();
           return;
         }
         if (upstreamFinishReason === "tool_calls") {
-          emit({ error: config.label + " requested a tool that is not enabled for this chat request. Please retry with a text-only instruction.", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", done: true });
           close();
           return;
         }
         if (upstreamFinishReason === "insufficient_system_resource" || upstreamFinishReason === "aborted") {
-          emit({ error: config.label + " could not finish this response because its inference service interrupted the request. Please try again.", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", done: true });
           close();
           return;
         }
         if (!receivedText) {
-          emit({ error: config.label + " returned an empty answer. Try another model.", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", done: true });
           close();
           return;
         }
@@ -987,7 +967,7 @@ export function streamOpenAIProvider(
         emit({ done: true, model: displayModel });
         close();
       })().catch(() => {
-        emit({ error: config.label + " encountered a server error. Please try again.", done: true });
+        emit({ error: "Tatv could not complete this reply. Please try again in a moment.", done: true });
         close();
       });
     },
@@ -1129,37 +1109,15 @@ function providerHttpFailureCode(status: number): string {
   return "UPSTREAM_REQUEST_FAILED";
 }
 
-function safeProviderHttpFailure(label: string, status: number, headers: Headers): {
-  message: string; code: string; retryAfterSeconds?: number
+function safeProviderHttpFailure(label: string, status: number, _headers: Headers): {
+  message: string; code: string
 } {
-  const retryAfter = retryAfterSeconds(headers);
-  let message: string;
-  if (status === 401) {
-    message = label + " could not authenticate this request. The workspace administrator needs to review its provider connection.";
-  } else if (status === 403) {
-    message = label + " denied access to this model or API feature. Check the provider account's permissions.";
-  } else if (status === 402) {
-    message = label + " requires an available billing balance or active provider plan.";
-  } else if (status === 400 || status === 422) {
-    message = label + " could not accept this request. The selected model may not support one of its options or message formats.";
-  } else if (status === 404) {
-    message = "The configured model or endpoint is not available on " + label + ". Check the provider model setting.";
-  } else if (status === 408 || status === 504) {
-    message = label + " did not finish responding in time. Please try again.";
-  } else if (status === 413) {
-    message = "The request is too large for " + label + ". Remove an attachment or shorten the conversation and try again.";
-  } else if (status === 429) {
-    message = label + " is rate-limited or its usage quota has been reached. Please try again later.";
-    if (retryAfter && retryAfter > 0) message += " The provider suggests retrying in about " + retryAfter + " seconds.";
-  } else if (status === 529 || status >= 500) {
-    message = label + " is temporarily overloaded or unavailable. Please try again shortly.";
-  } else {
-    message = label + " could not complete this request (HTTP " + status + "). Please review the request and try again.";
-  }
+  const code = providerHttpFailureCode(status);
+  // Provider diagnostics are kept in server logs only, never in user responses.
+  console.warn("[Tatv AI] upstream provider request failed", { provider: label, status, code });
   return {
-    message,
-    code: providerHttpFailureCode(status),
-    ...(retryAfter !== undefined ? { retryAfterSeconds: retryAfter } : {}),
+    message: "Tatv could not complete this reply. Please try again in a moment.",
+    code,
   };
 }
 
@@ -1262,13 +1220,13 @@ export function streamAnthropicProvider(
         if (!upstream.ok) {
           try { await upstream.body?.cancel(); } catch { /* Do not mask the HTTP status. */ }
           const failure = safeProviderHttpFailure("Claude", upstream.status, upstream.headers);
-          emit({ error: failure.message, code: failure.code, ...(failure.retryAfterSeconds !== undefined ? { retryAfterSeconds: failure.retryAfterSeconds } : {}), done: true });
+          emit({ error: failure.message, code: failure.code, done: true });
           close();
           return;
         }
         if (!upstream.headers.get("content-type")?.includes("text/event-stream") || !upstream.body) {
           try { await upstream.body?.cancel(); } catch { /* Empty or unexpected response. */ }
-          emit({ error: "Claude returned an unexpected response format. Please retry.", code: "UPSTREAM_INVALID_RESPONSE", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "UPSTREAM_INVALID_RESPONSE", done: true });
           close();
           return;
         }
@@ -1349,27 +1307,27 @@ export function streamAnthropicProvider(
         }
 
         if (streamError) {
-          emit({ error: streamError, code: "UPSTREAM_STREAM_FAILED", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "UPSTREAM_STREAM_FAILED", done: true });
           close();
           return;
         }
         if (!streamCompleted) {
-          emit({ error: "Claude closed its stream without a completion event. The visible answer may be incomplete; please retry.", code: "UPSTREAM_STREAM_INCOMPLETE", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "UPSTREAM_STREAM_INCOMPLETE", done: true });
           close();
           return;
         }
         if (stopReason === "max_tokens") {
-          emit({ error: "Claude reached its output-token limit before the response was complete. Ask Tatv to continue from the last point.", code: "OUTPUT_LIMIT_REACHED", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "OUTPUT_LIMIT_REACHED", done: true });
           close();
           return;
         }
         if (stopReason === "tool_use") {
-          emit({ error: "Claude requested a tool that is not enabled for this chat request. Please retry with a text-only instruction.", code: "UNSUPPORTED_TOOL_REQUEST", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "UNSUPPORTED_TOOL_REQUEST", done: true });
           close();
           return;
         }
         if (!receivedText) {
-          emit({ error: "Claude returned an empty answer. Please try again.", code: "EMPTY_PROVIDER_RESPONSE", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "EMPTY_PROVIDER_RESPONSE", done: true });
           close();
           return;
         }
@@ -1377,7 +1335,7 @@ export function streamAnthropicProvider(
         emit({ done: true, model: config.model });
         close();
       })().catch(() => {
-        emit({ error: "Claude encountered an unexpected server error. Please retry your message.", code: "UPSTREAM_INTERNAL_ERROR", done: true });
+        emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "UPSTREAM_INTERNAL_ERROR", done: true });
         close();
       });
     },
@@ -1491,7 +1449,7 @@ export function streamResponsesProvider(
         if (!upstream.ok) {
           try { await upstream.body?.cancel(); } catch { /* Do not mask the HTTP status. */ }
           const failure = safeProviderHttpFailure(config.label, upstream.status, upstream.headers);
-          emit({ error: failure.message, code: failure.code, ...(failure.retryAfterSeconds !== undefined ? { retryAfterSeconds: failure.retryAfterSeconds } : {}), done: true });
+          emit({ error: failure.message, code: failure.code, done: true });
           close();
           return;
         }
@@ -1506,7 +1464,7 @@ export function streamResponsesProvider(
             emit({ activity: { id: "response-complete", label: "Response complete", detail: config.label + " finished its response.", state: "complete" } });
             emit({ done: true, model: config.model });
           } else {
-            emit({ error: "The " + config.label + " Responses API returned an unexpected or incomplete response.", code: "UPSTREAM_INVALID_RESPONSE", done: true });
+            emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "UPSTREAM_INVALID_RESPONSE", done: true });
           }
           close();
           return;
@@ -1551,7 +1509,7 @@ export function streamResponsesProvider(
               const code = typeof event.error === "object" && event.error ? event.error.code : "";
               streamError = code === "rate_limit_exceeded"
                 ? config.label + " is rate-limited. Please try again later."
-                : config.label + " reported a streaming error. Please retry your request.";
+                : "Tatv could not complete this reply. Please try again in a moment.";
             }
           } catch {
             // Ignore unknown event types, comments and incomplete frames.
@@ -1590,17 +1548,17 @@ export function streamResponsesProvider(
         }
 
         if (streamError) {
-          emit({ error: streamError, code: incompleteReason === "max_output_tokens" ? "OUTPUT_LIMIT_REACHED" : "UPSTREAM_STREAM_FAILED", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: incompleteReason === "max_output_tokens" ? "OUTPUT_LIMIT_REACHED" : "UPSTREAM_STREAM_FAILED", done: true });
           close();
           return;
         }
         if (!streamCompleted) {
-          emit({ error: config.label + " closed its stream without a completion event. The visible answer may be incomplete; please retry.", code: "UPSTREAM_STREAM_INCOMPLETE", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "UPSTREAM_STREAM_INCOMPLETE", done: true });
           close();
           return;
         }
         if (!receivedText) {
-          emit({ error: config.label + " returned an empty answer. Please try again.", code: "EMPTY_PROVIDER_RESPONSE", done: true });
+          emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "EMPTY_PROVIDER_RESPONSE", done: true });
           close();
           return;
         }
@@ -1608,7 +1566,7 @@ export function streamResponsesProvider(
         emit({ done: true, model: config.model });
         close();
       })().catch(() => {
-        emit({ error: config.label + " encountered an unexpected server error. Please retry your message.", code: "UPSTREAM_INTERNAL_ERROR", done: true });
+        emit({ error: "Tatv could not complete this reply. Please try again in a moment.", code: "UPSTREAM_INTERNAL_ERROR", done: true });
         close();
       });
     },
@@ -2002,7 +1960,7 @@ export async function handleChatApiRequest(
     return json({
       ok: true,
       service: "Tatv AI chat API",
-      configured: configuredProviders.gemini || configuredProviders.openai || configuredProviders.anthropic || configuredProviders.deepseek || configuredProviders.xai || configuredProviders.qwen || configuredProviders.cloudflare || configuredProviders.pollinations || configuredProviders.codeforgeGateway,
+      configured: configuredProviders.gemini || configuredProviders.openai || configuredProviders.anthropic || configuredProviders.deepseek || configuredProviders.xai || configuredProviders.qwen || configuredProviders.cloudflare || configuredProviders.pollinations || configuredProviders.codeforgeGateway || configuredProviders.freellmapi,
       provider: "Tatv AI",
       providers: {
         gemini: configuredProviders.gemini,
@@ -2014,7 +1972,7 @@ export async function handleChatApiRequest(
         cloudflare: configuredProviders.cloudflare,
         pollinations: configuredProviders.pollinations,
         codeforgeGateway: configuredProviders.codeforgeGateway,
-        // Keep the personal endpoint out of client-controlled provider discovery.
+        // Keep the shared server-side FreeLLMAPI key out of public discovery.
         freellmapi: false,
       },
     });
@@ -2056,9 +2014,6 @@ export async function handleChatApiRequest(
   const sessionAccessToken = "accessToken" in session && typeof session.accessToken === "string"
     ? session.accessToken
     : undefined;
-  const sessionUserEmail = session.user && "email" in session.user && typeof session.user.email === "string"
-    ? session.user.email.toLowerCase()
-    : "";
   if (!executionOptions.workflowExecution) {
     const identity = session.user?.id ?? guestRateLimitIdentity(request);
     const limit = await checkChatRateLimit(
@@ -2382,7 +2337,7 @@ export async function handleChatApiRequest(
   if (legacyPublicGatewayRequested) {
     return json({
       error: "PUBLIC_GATEWAY_NOT_AVAILABLE",
-      message: "The public FreeLLMAPI single-user endpoint is not used for Tattv multi-user traffic. Choose Tatv Smart; it routes through the private CodeForge gateway.",
+      message: "FreeLLMAPI is managed internally by Tatv Smart and cannot be selected as a direct provider. Choose Tatv Smart to use the automatic routing sequence.",
     }, 410, {}, session.cookies);
   }
   if (durableGenerationId && durableGenerationProvider !== requestedProvider) {
@@ -2403,13 +2358,11 @@ export async function handleChatApiRequest(
   }
   let selectedProvider = requestedProvider;
   if (requestedProvider === "smart") {
-    // FreeLLMAPI is selected first only when the operator explicitly enables
-    // shared-primary mode, otherwise it remains restricted to its owner.
-    const personalFreeLlmApiReady = Boolean(
-      parseTatvChatMode(payload.chatMode) === "smart" &&
-      session.user?.id &&
-      sessionAccessToken &&
-      canUseFreeLlmApi(available, sessionUserEmail),
+    // Every Tatv Smart request starts at the server-side FreeLLMAPI route.
+    // Private gateway attempts are added only for authenticated users because
+    // each gateway must receive that user's own Supabase access token.
+    const freeLlmApiReady = Boolean(
+      available.freellmapi && available.freellmapiBaseUrl && available.freellmapiApiKey,
     );
     const privateGatewayReady = Boolean(
       (
@@ -2421,9 +2374,19 @@ export async function handleChatApiRequest(
       session.user?.id &&
       sessionAccessToken,
     );
-    selectedProvider = personalFreeLlmApiReady
+    const alternateProviderReady = Boolean(
+      available.openaiApiKey ||
+      available.anthropicApiKey ||
+      available.deepseekApiKey ||
+      available.xaiApiKey ||
+      (available.qwenBaseUrl && available.qwenApiKey) ||
+      (available.cloudflareAccountId && available.cloudflareToken) ||
+      available.pollinations
+    );
+    selectedProvider = freeLlmApiReady
       ? "freellmapi"
-      : privateGatewayReady ? "codeforgeGateway" : "none";
+      : privateGatewayReady ? "codeforgeGateway"
+        : alternateProviderReady ? "smartProviders" : "none";
   }
 
   if (hasInlineAttachments && selectedProvider !== "gemini") {
@@ -2446,13 +2409,13 @@ export async function handleChatApiRequest(
       }, 401, {}, session.cookies);
     }
     return json({
-      error: "PROVIDER_NOT_CONFIGURED",
-      message: "Tatv AI is not connected to an approved private gateway. Configure the primary private gateway and, for redundancy, a separate fallback instance.",
-    }, 424, {}, session.cookies);
+      error: "AI_REQUEST_FAILED",
+      message: "Tatv could not complete this reply. Please try again in a moment.",
+    }, 503, {}, session.cookies);
   }
 
   if (selectedProvider === "gemini" && !available.gemini) {
-    return json({ error: "PROVIDER_NOT_CONFIGURED", message: "Gemini is disabled for this release. Tatv Smart requires a signed-in account and an approved private CodeForge gateway." }, 424);
+    return json({ error: "PROVIDER_NOT_CONFIGURED", message: "Gemini is disabled for this release. Choose Tatv Smart to use the configured automatic routing sequence." }, 424);
   }
 
   // Reserve file-analysis usage before invoking a provider; text chat is included on every plan.
@@ -2644,6 +2607,137 @@ export async function handleChatApiRequest(
       executionContext,
     );
   };
+
+  // Final Smart tier: direct providers configured by the administrator.
+  // Keys stay server-side, and failures use the same sanitized failover stream.
+  const buildSmartFallbackAttempts = (): Array<{ label: string; retryErrors?: boolean; start: () => Response }> => {
+    const attempts: Array<{ label: string; retryErrors?: boolean; start: () => Response }> = [];
+    const add = (label: string, start: () => Response) => attempts.push({ label, retryErrors: true, start });
+    const validModel = /^[A-Za-z0-9._:/-]{1,140}$/;
+    const skipped = (provider: string) => console.warn("[Tatv AI] configured fallback provider skipped", {
+      provider, code: "INVALID_SERVER_CONFIG",
+    });
+
+    if (available.openaiApiKey) {
+      const model = envValue("OPENAI_MODEL", runtimeEnv) ?? DEFAULT_PROVIDER_MODELS.openai;
+      if (validModel.test(model)) {
+        const config: ResponsesProviderConfig = {
+          id: "openai", label: "OpenAI",
+          endpoint: "https://api.openai.com/v1/responses",
+          apiKey: available.openaiApiKey, model,
+        };
+        add("OpenAI", () => streamResponsesProvider(
+          config, messages, session.cookies, payload.voiceMode === true,
+          projectBundleRequested, activityHistory, providerSignal,
+        ));
+      } else skipped("OpenAI");
+    }
+
+    if (available.anthropicApiKey) {
+      const model = envValue("ANTHROPIC_MODEL", runtimeEnv) ?? DEFAULT_PROVIDER_MODELS.anthropic;
+      if (/^[A-Za-z0-9._:-]{1,140}$/.test(model)) {
+        const config = { label: "Claude", apiKey: available.anthropicApiKey, model };
+        add("Anthropic", () => streamAnthropicProvider(
+          config, messages, session.cookies, payload.voiceMode === true,
+          projectBundleRequested, activityHistory, providerSignal,
+        ));
+      } else skipped("Anthropic");
+    }
+
+    if (available.deepseekApiKey) {
+      const model = envValue("DEEPSEEK_MODEL", runtimeEnv) ?? DEFAULT_PROVIDER_MODELS.deepseek;
+      const thinking = (envValue("DEEPSEEK_THINKING", runtimeEnv) ?? "disabled").toLowerCase();
+      if (/^[A-Za-z0-9._:-]{1,140}$/.test(model) && (thinking === "enabled" || thinking === "disabled")) {
+        const config: OpenAIProviderConfig = {
+          id: "deepseek", label: "DeepSeek",
+          endpoint: "https://api.deepseek.com/chat/completions",
+          apiKey: available.deepseekApiKey, model,
+          extraBody: { thinking: { type: thinking } },
+        };
+        add("DeepSeek", () => streamOpenAIProvider(
+          config, messages, session.cookies, payload.voiceMode === true,
+          projectBundleRequested, activityHistory, providerSignal,
+        ));
+      } else skipped("DeepSeek");
+    }
+
+    if (available.xaiApiKey) {
+      const model = envValue("XAI_MODEL", runtimeEnv) ?? DEFAULT_PROVIDER_MODELS.xai;
+      const reasoning = (envValue("XAI_REASONING_EFFORT", runtimeEnv) ?? "low").toLowerCase();
+      if (/^[A-Za-z0-9._:-]{1,140}$/.test(model) && ["low", "medium", "high", "xhigh"].includes(reasoning)) {
+        const config: ResponsesProviderConfig = {
+          id: "xai", label: "Grok",
+          endpoint: "https://api.x.ai/v1/responses",
+          apiKey: available.xaiApiKey, model,
+          reasoningEffort: reasoning as "low" | "medium" | "high" | "xhigh",
+          headerTimeoutMs: 150_000, streamIdleTimeoutMs: 90_000,
+        };
+        add("xAI", () => streamResponsesProvider(
+          config, messages, session.cookies, payload.voiceMode === true,
+          projectBundleRequested, activityHistory, providerSignal,
+        ));
+      } else skipped("xAI");
+    }
+
+    if (available.qwenBaseUrl && available.qwenApiKey) {
+      const config: OpenAIProviderConfig = {
+        id: "qwen", label: "Qwen 3.8",
+        endpoint: available.qwenBaseUrl + "/chat/completions",
+        apiKey: available.qwenApiKey, model: DEFAULT_PROVIDER_MODELS.qwen,
+        extraBody: { chat_template_kwargs: { enable_thinking: false } },
+      };
+      add("Qwen", () => streamOpenAIProvider(
+        config, messages, session.cookies, payload.voiceMode === true,
+        projectBundleRequested, activityHistory, providerSignal,
+      ));
+    }
+
+    if (available.cloudflareAccountId && available.cloudflareToken) {
+      const model = envValue("CLOUDFLARE_MODEL", runtimeEnv) ?? "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+      if (/^@cf\/[a-zA-Z0-9._/-]{1,140}$/.test(model)) {
+        const endpoint = "https://api.cloudflare.com/client/v4/accounts/" +
+          encodeURIComponent(available.cloudflareAccountId) + "/ai/v1/chat/completions";
+        const config: OpenAIProviderConfig = {
+          id: "cloudflare", label: "Cloudflare Workers AI",
+          endpoint, apiKey: available.cloudflareToken, model,
+        };
+        add("Cloudflare", () => streamOpenAIProvider(
+          config, messages, session.cookies, payload.voiceMode === true,
+          projectBundleRequested, activityHistory, providerSignal,
+        ));
+      } else skipped("Cloudflare Workers AI");
+    }
+
+    if (available.pollinations && available.pollinationsKey) {
+      const model = envValue("POLLINATIONS_MODEL", runtimeEnv) ?? "openai";
+      if (/^[a-zA-Z0-9._/-]{1,140}$/.test(model)) {
+        const config: OpenAIProviderConfig = {
+          id: "pollinations", label: "Pollinations",
+          endpoint: "https://gen.pollinations.ai/v1/chat/completions",
+          apiKey: available.pollinationsKey, model,
+        };
+        add("Pollinations", () => streamOpenAIProvider(
+          config, messages, session.cookies, payload.voiceMode === true,
+          projectBundleRequested, activityHistory, providerSignal,
+        ));
+      } else skipped("Pollinations");
+    }
+
+    return attempts;
+  };
+
+  if (selectedProvider === "smartProviders") {
+    const usageError = await checkUsageAndChatQuota();
+    if (usageError) return usageError;
+    const attempts = buildSmartFallbackAttempts();
+    if (!attempts.length) {
+      return json({
+        error: "AI_REQUEST_FAILED",
+        message: "Tatv could not complete this reply. Please try again in a moment.",
+      }, 503, {}, session.cookies);
+    }
+    return finalizeChatResponse(streamWithFailover(attempts, session.cookies, providerSignal));
+  }
 
   if (selectedProvider === "openai") {
     if (!available.openaiApiKey) {
@@ -2899,19 +2993,14 @@ export async function handleChatApiRequest(
   }
 
   if (selectedProvider === "freellmapi") {
-    if (!session.user?.id || !sessionAccessToken ||
-        !canUseFreeLlmApi(available, sessionUserEmail) ||
-        !available.freellmapiBaseUrl || !available.freellmapiApiKey) {
+    if (!available.freellmapi || !available.freellmapiBaseUrl || !available.freellmapiApiKey) {
       return json({
-        error: "PERSONAL_PROVIDER_NOT_AUTHORIZED",
-        message: "FreeLLMAPI is not enabled for this account. Check the shared-primary setting or the verified owner allowlist.",
-      }, 403, {}, session.cookies);
+        error: "PROVIDER_NOT_CONFIGURED",
+        message: "Tatv Smart is temporarily unavailable. Please try again later.",
+      }, 424, {}, session.cookies);
     }
     const personalModel = available.freellmapiModel;
     const validModel = /^[a-zA-Z0-9._:/+-]{1,140}$/;
-    if (!validModel.test(personalModel)) {
-      return json({ error: "INVALID_SERVER_CONFIG", message: "The personal FreeLLMAPI model configuration is invalid." }, 500);
-    }
 
     const usageError = await checkUsageAndChatQuota();
     if (usageError) return usageError;
@@ -2933,25 +3022,32 @@ export async function handleChatApiRequest(
       { url: available.codeforgeGatewayFallback2BaseUrl, model: backup2GatewayModel, label: "Tatv second private backup gateway" },
       { url: available.codeforgeGatewayFallback3BaseUrl, model: backup3GatewayModel, label: "Tatv third private backup gateway" },
     ];
-    const attempts: Array<{ label: string; start: () => Response }> = [{
-      label: "Personal FreeLLMAPI",
-      start: () => streamOpenAIProvider({
-        id: "freellmapi",
-        label: "Tatv Smart",
-        endpoint: available.freellmapiBaseUrl + "/chat/completions",
-        apiKey: available.freellmapiApiKey!,
-        model: personalModel,
-      }, messages, session.cookies, payload.voiceMode === true, projectBundleRequested, activityHistory, providerSignal),
-    }];
+    const attempts: Array<{ label: string; retryErrors?: boolean; start: () => Response }> = [];
+    if (validModel.test(personalModel)) {
+      attempts.push({
+        label: "FreeLLMAPI",
+        retryErrors: true,
+        start: () => streamOpenAIProvider({
+          id: "freellmapi",
+          label: "Tatv Smart",
+          endpoint: available.freellmapiBaseUrl + "/chat/completions",
+          apiKey: available.freellmapiApiKey!,
+          model: personalModel,
+        }, messages, session.cookies, payload.voiceMode === true, projectBundleRequested, activityHistory, providerSignal),
+      });
+    } else {
+      console.warn("[Tatv AI] FreeLLMAPI route skipped", { code: "INVALID_SERVER_CONFIG" });
+    }
 
     // Each private backup receives only the authenticated user's JWT.
     // Never forward the personal API key to shared multi-user infrastructure.
     const seenGatewayUrls = new Set<string>();
     for (const gateway of gatewayEndpoints) {
-      if (!gateway.url || seenGatewayUrls.has(gateway.url)) continue;
+      if (!gateway.url || !session.user?.id || !sessionAccessToken || seenGatewayUrls.has(gateway.url)) continue;
       seenGatewayUrls.add(gateway.url);
       if (!validModel.test(gateway.model)) {
-        return json({ error: "INVALID_SERVER_CONFIG", message: "The private gateway model configuration is invalid." }, 500);
+        console.warn("[Tatv AI] private gateway route skipped", { code: "INVALID_SERVER_CONFIG" });
+        continue;
       }
       const config: OpenAIProviderConfig = {
         id: "codeforgeGateway",
@@ -2975,45 +3071,14 @@ export async function handleChatApiRequest(
       });
     }
 
-    // Optional last-resort backups that only exist when the operator configured their
-    // server-side keys. They are tried after FreeLLMAPI and every private gateway.
-    if (available.cloudflare && available.cloudflareAccountId && available.cloudflareToken) {
-      const cloudflareModel = envValue("CLOUDFLARE_MODEL", runtimeEnv) ?? "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
-      if (/^@cf\/[a-zA-Z0-9._/-]{1,140}$/.test(cloudflareModel)) {
-        const cloudflareConfig: OpenAIProviderConfig = {
-          id: "cloudflare",
-          label: "Tatv Smart",
-          endpoint: "https://api.cloudflare.com/client/v4/accounts/" +
-            encodeURIComponent(available.cloudflareAccountId) + "/ai/v1/chat/completions",
-          apiKey: available.cloudflareToken,
-          model: cloudflareModel,
-        };
-        attempts.push({
-          label: "Tatv backup service",
-          start: () => streamOpenAIProvider(cloudflareConfig, messages, session.cookies, payload.voiceMode === true, projectBundleRequested, activityHistory, providerSignal),
-        });
-      }
+    attempts.push(...buildSmartFallbackAttempts());
+    if (!attempts.length) {
+      return json({
+        error: "AI_REQUEST_FAILED",
+        message: "Tatv could not complete this reply. Please try again in a moment.",
+      }, 503, {}, session.cookies);
     }
-    if (available.pollinations && available.pollinationsKey) {
-      const pollinationsModel = envValue("POLLINATIONS_MODEL", runtimeEnv) ?? "openai";
-      if (/^[a-zA-Z0-9._/-]{1,140}$/.test(pollinationsModel)) {
-        const pollinationsConfig: OpenAIProviderConfig = {
-          id: "pollinations",
-          label: "Tatv Smart",
-          endpoint: "https://gen.pollinations.ai/v1/chat/completions",
-          apiKey: available.pollinationsKey,
-          model: pollinationsModel,
-        };
-        attempts.push({
-          label: "Tatv second backup service",
-          start: () => streamOpenAIProvider(pollinationsConfig, messages, session.cookies, payload.voiceMode === true, projectBundleRequested, activityHistory, providerSignal),
-        });
-      }
-    }
-
-    return attempts.length > 1
-      ? finalizeChatResponse(streamWithFailover(attempts, session.cookies, providerSignal))
-      : finalizeChatResponse(attempts[0]!.start());
+    return finalizeChatResponse(streamWithFailover(attempts, session.cookies, providerSignal));
   }
 
   if (selectedProvider === "codeforgeGateway") {
@@ -3049,14 +3114,6 @@ export async function handleChatApiRequest(
       }, 424, {}, session.cookies);
     }
     const validModel = /^[a-zA-Z0-9._:/+-]{1,140}$/;
-    if (
-      !validModel.test(primaryModel) ||
-      !validModel.test(fallbackModel) ||
-      !validModel.test(fallback2Model) ||
-      !validModel.test(fallback3Model)
-    ) {
-      return json({ error: "INVALID_SERVER_CONFIG", message: "The private gateway model configuration is invalid." }, 500);
-    }
 
     const usageError = await checkUsageAndChatQuota();
     if (usageError) return usageError;
@@ -3064,7 +3121,7 @@ export async function handleChatApiRequest(
     // Both endpoints must be independently operated CodeForge gateway instances.
     // Each receives only this user's verified Supabase access token, never a
     // shared administrator token or the public FreeLLMAPI single-user key.
-    const primaryConfig: OpenAIProviderConfig | null = primaryBaseUrl ? {
+    const primaryConfig: OpenAIProviderConfig | null = primaryBaseUrl && validModel.test(primaryModel) ? {
       id: "codeforgeGateway",
       label: publicModeLabel,
       endpoint: primaryBaseUrl + "/chat/completions",
@@ -3073,7 +3130,7 @@ export async function handleChatApiRequest(
       extraBody: { chatMode },
     } : null;
     const fallbackConfig: OpenAIProviderConfig | null =
-      fallbackBaseUrl && fallbackBaseUrl !== primaryBaseUrl ? {
+      fallbackBaseUrl && fallbackBaseUrl !== primaryBaseUrl && validModel.test(fallbackModel) ? {
         id: "codeforgeGatewayFallback",
         label: publicModeLabel,
         endpoint: fallbackBaseUrl + "/chat/completions",
@@ -3110,7 +3167,7 @@ export async function handleChatApiRequest(
           );
 
     const fallback2Config: OpenAIProviderConfig | null =
-      fallback2BaseUrl && ![primaryBaseUrl, fallbackBaseUrl].includes(fallback2BaseUrl) ? {
+      fallback2BaseUrl && ![primaryBaseUrl, fallbackBaseUrl].includes(fallback2BaseUrl) && validModel.test(fallback2Model) ? {
         id: "codeforgeGatewayFallback2",
         label: publicModeLabel,
         endpoint: fallback2BaseUrl + "/chat/completions",
@@ -3119,7 +3176,7 @@ export async function handleChatApiRequest(
         extraBody: { chatMode },
       } : null;
     const fallback3Config: OpenAIProviderConfig | null =
-      fallback3BaseUrl && ![primaryBaseUrl, fallbackBaseUrl, fallback2BaseUrl].includes(fallback3BaseUrl) ? {
+      fallback3BaseUrl && ![primaryBaseUrl, fallbackBaseUrl, fallback2BaseUrl].includes(fallback3BaseUrl) && validModel.test(fallback3Model) ? {
         id: "codeforgeGatewayFallback3",
         label: publicModeLabel,
         endpoint: fallback3BaseUrl + "/chat/completions",
@@ -3142,9 +3199,14 @@ export async function handleChatApiRequest(
       attempts.push({ label: fallback3Config.label, start: () => startProvider(fallback3Config) });
     }
 
-    return attempts.length > 1
-      ? finalizeChatResponse(streamWithFailover(attempts, session.cookies, providerSignal))
-      : finalizeChatResponse(attempts[0]!.start());
+    attempts.push(...buildSmartFallbackAttempts());
+    if (!attempts.length) {
+      return json({
+        error: "AI_REQUEST_FAILED",
+        message: "Tatv could not complete this reply. Please try again in a moment.",
+      }, 503, {}, session.cookies);
+    }
+    return finalizeChatResponse(streamWithFailover(attempts, session.cookies, providerSignal));
   }
   if (selectedProvider === "pollinations") {
     if (!available.pollinations || !available.pollinationsKey) {

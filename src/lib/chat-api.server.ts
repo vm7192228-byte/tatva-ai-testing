@@ -2353,7 +2353,7 @@ export async function handleChatApiRequest(
   if (premiumProviders.has(requestedProvider) && !paidAccess) {
     return json({
       error: "SUBSCRIPTION_REQUIRED",
-      message: "Direct AI providers are included with Dhwani Plus and Dhwani Max. Dhwani Smart uses the private CodeForge gateway for signed-in users.",
+      message: "Direct provider choices are included with Dhwani Plus and Dhwani Max. Dhwani Smart automatically tries FreeLLMAPI first, then authenticated private gateways for signed-in users, and finally configured provider backups.",
     }, 402, {}, session.cookies);
   }
   let selectedProvider = requestedProvider;
@@ -2405,7 +2405,7 @@ export async function handleChatApiRequest(
     ) && !session.user?.id) {
       return json({
         error: "SIGN_IN_REQUIRED",
-        message: "Sign in to use Dhwani AI. The private gateway verifies each user's Supabase session and applies fair-use limits.",
+        message: "Only authenticated private gateways are configured on this deployment. Sign in so Dhwani can verify your account before using that route.",
       }, 401, {}, session.cookies);
     }
     return json({
@@ -3234,7 +3234,7 @@ export async function handleChatApiRequest(
   if (!apiKey) {
     return json({
       error: "PROVIDER_NOT_CONFIGURED",
-      message: "This provider is not available in Dhwani. Choose one of the three Dhwani modes and sign in to use the private gateway.",
+      message: "Gemini is disabled in this release. Choose Dhwani Flash, Dhwani Smart, or Dhwani Ultra instead.",
     }, 424);
   }
 

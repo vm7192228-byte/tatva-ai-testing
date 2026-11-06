@@ -1,0 +1,538 @@
+/* Dhwani AI — calm, spacious Gemini-inspired workspace skin.
+   This layer intentionally changes presentation only; interaction hooks and
+   component IDs remain in the original markup. */
+:root {
+  color-scheme: light;
+  --bg: #f7f8fd;
+  --sidebar: #f5f7fd;
+  --surface: #ffffff;
+  --surface-soft: #f0f3fb;
+  --line: #e4e8f3;
+  --line-strong: #d5dced;
+  --text: #20243a;
+  --muted: #68718a;
+  --subtle: #929bb1;
+  --accent: #637bea;
+  --accent-strong: #4f68df;
+  --accent-soft: #edf1ff;
+  --good: #268665;
+  --warn: #a8752b;
+  --radius: 16px;
+  --shadow: 0 18px 48px rgba(50, 67, 125, .10);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111521;
+  --sidebar: #151a29;
+  --surface: #1a2031;
+  --surface-soft: #222a3e;
+  --line: #2d3750;
+  --line-strong: #3b4863;
+  --text: #edf1ff;
+  --muted: #a9b3cc;
+  --subtle: #7f8ba8;
+  --accent: #8da0ff;
+  --accent-strong: #a7b4ff;
+  --accent-soft: #242e50;
+  --good: #75d0ad;
+  --warn: #e7bd78;
+  --shadow: 0 20px 54px rgba(0, 0, 0, .28);
+}
+html, body {
+  background: var(--bg) !important;
+  color: var(--text);
+  font-family: "DM Sans", "Outfit", system-ui, sans-serif;
+}
+body { background-image: radial-gradient(ellipse at 76% 0%, rgba(218, 226, 255, .35), transparent 38%); }
+:root[data-theme="dark"] body {
+  background-image: radial-gradient(ellipse at 76% 0%, rgba(67, 81, 145, .18), transparent 42%);
+}
+.app-shell { background: var(--bg); }
+.sidebar {
+  width: 274px;
+  min-width: 274px;
+  padding: 20px 14px 14px;
+  background: var(--sidebar);
+  border-right: 1px solid var(--line);
+}
+.brand {
+  gap: 12px;
+  padding: 4px 10px 25px;
+  color: var(--text);
+}
+.brand-mark { width: 38px; height: 38px; object-fit: contain; }
+.brand-wordmark {
+  font: 700 17px/1.12 "Outfit", "DM Sans", sans-serif;
+  letter-spacing: -.35px;
+  color: var(--text);
+}
+.brand-wordmark b {
+  color: var(--accent-strong);
+  font-weight: 750;
+}
+.new-chat {
+  min-height: 48px;
+  margin: 2px 0 25px;
+  border: 1px solid #dce3fa;
+  border-radius: 15px;
+  background: linear-gradient(110deg, #edf2ff, #f5f1ff);
+  color: #394a85;
+  font-weight: 650;
+  box-shadow: 0 2px 8px rgba(75, 100, 185, .04);
+}
+:root[data-theme="dark"] .new-chat {
+  border-color: #39466e;
+  background: linear-gradient(110deg, #202b49, #2b2446);
+  color: #e0e7ff;
+}
+.new-chat:hover {
+  border-color: #b9c8f6;
+  background: linear-gradient(110deg, #e6edff, #f0eaff);
+}
+.nav-caption {
+  padding: 0 12px 9px;
+  color: var(--subtle);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .14em;
+}
+.side-nav { gap: 5px; }
+.nav-item {
+  min-height: 42px;
+  margin: 1px 0;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 550;
+}
+.nav-item:hover, .nav-item.active {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--text);
+}
+.nav-item.active {
+  box-shadow: 0 2px 9px rgba(42, 59, 112, .045);
+}
+.nav-icon { color: var(--accent-strong); }
+.sidebar-footer {
+  padding-top: 11px;
+  border-top: 1px solid var(--line);
+}
+.sidebar-note {
+  background: rgba(255,255,255,.68);
+  border-color: var(--line);
+  border-radius: 14px;
+}
+:root[data-theme="dark"] .sidebar-note { background: rgba(255,255,255,.025); }
+.profile-button {
+  min-height: 58px;
+  border-radius: 14px;
+  border-color: var(--line);
+  background: var(--surface);
+  box-shadow: 0 2px 10px rgba(42, 59, 112, .04);
+}
+.profile-button:hover { border-color: #bdc9ed; background: var(--surface-soft); }
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dce5ff, #efe1ff);
+  color: #4c5fbe;
+}
+.sidebar-upgrade {
+  min-height: 42px;
+  margin: 9px 0 0;
+  padding: 0 13px;
+  border: 1px solid rgba(99, 123, 234, .12);
+  border-radius: 13px;
+  background: linear-gradient(110deg, #667fe9, #806ce8);
+  box-shadow: 0 5px 15px rgba(99, 123, 234, .18);
+}
+.sidebar-upgrade:hover { filter: brightness(1.04); box-shadow: 0 8px 20px rgba(99, 123, 234, .22); }
+.main-area {
+  background:
+    radial-gradient(ellipse at 48% 0%, rgba(231, 237, 255, .55), transparent 46%),
+    var(--bg);
+}
+:root[data-theme="dark"] .main-area {
+  background:
+    radial-gradient(ellipse at 48% 0%, rgba(48, 61, 112, .22), transparent 46%),
+    var(--bg);
+}
+.main-area:has(#chatView.active-view) .topbar {
+  position: relative;
+  inset: auto;
+  height: 66px;
+  flex: 0 0 66px;
+  padding: 0 clamp(18px, 3vw, 36px);
+  border-bottom: 1px solid rgba(220, 226, 241, .72);
+  background: rgba(248, 249, 255, .74);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  pointer-events: auto;
+}
+:root[data-theme="dark"] .main-area:has(#chatView.active-view) .topbar {
+  border-bottom-color: rgba(55, 67, 96, .7);
+  background: rgba(18, 23, 37, .76);
+}
+.main-area:has(#chatView.active-view) .topbar > *,
+.main-area:has(#chatView.active-view) .topbar-actions > * { pointer-events: auto; }
+.sidebar-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border-color: var(--line);
+  background: var(--surface);
+}
+.sidebar-toggle img { width: 28px; height: 28px; }
+.topbar-brand-copy { gap: 3px; }
+.topbar-brand-copy strong {
+  color: var(--text);
+  font: 700 19px/1 "Tiro Devanagari Hindi", "Outfit", sans-serif;
+}
+.topbar-brand-copy span {
+  color: var(--muted);
+  font: 650 9px/1 "Manrope", sans-serif;
+  letter-spacing: .18em;
+}
+.model-chip {
+  min-height: 38px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(42, 59, 112, .035);
+}
+.model-chip:hover { border-color: #bdc9ed; background: var(--surface-soft); }
+.model-dot { background: linear-gradient(135deg, #6687f4, #9675e9); box-shadow: 0 0 0 4px rgba(103, 130, 238, .10); }
+.breadcrumb { color: var(--subtle); font-size: 12px; }
+.breadcrumb strong { color: var(--muted); font-weight: 600; }
+.icon-button {
+  border-radius: 12px;
+  border-color: var(--line);
+  background: var(--surface);
+}
+.icon-button:hover { border-color: #bdc9ed; background: var(--surface-soft); }
+#chatView { position: relative; }
+#chatView:not(.has-messages) .chat-scroll {
+  justify-content: center;
+  padding: 34px 28px 92px;
+}
+#chatView:not(.has-messages) .welcome {
+  width: min(900px, 100%);
+  margin: auto;
+  animation: fadeIn .34s ease both;
+}
+.hero-brand-mark {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 23px;
+  background: linear-gradient(140deg, rgba(224, 233, 255, .92), rgba(244, 234, 255, .94));
+  box-shadow: 0 10px 26px rgba(92, 112, 191, .10), inset 0 1px 0 rgba(255,255,255,.9);
+}
+:root[data-theme="dark"] .hero-brand-mark {
+  background: linear-gradient(140deg, #26375c, #35284f);
+  box-shadow: 0 10px 26px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.hero-mark { width: 52px; height: 52px; object-fit: contain; }
+.hero-greeting {
+  justify-content: center;
+  margin: 0 0 12px !important;
+  color: var(--text) !important;
+  font: 650 clamp(33px, 4.2vw, 48px)/1.15 "Outfit", "Tiro Devanagari Hindi", sans-serif !important;
+  letter-spacing: -1.5px !important;
+}
+.hero-subtitle {
+  max-width: 590px;
+  margin: 0 auto 25px !important;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.75;
+}
+.tatv-suggestions.dhwani-suggestions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(850px, 100%);
+  gap: 12px;
+  margin: 31px auto 0;
+  text-align: left;
+}
+.dhwani-suggestions button {
+  min-height: 104px;
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) 14px;
+  align-items: start;
+  gap: 10px;
+  padding: 15px 13px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.78);
+  color: var(--text);
+  text-align: left;
+  box-shadow: 0 4px 14px rgba(50, 67, 125, .035);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+:root[data-theme="dark"] .dhwani-suggestions button { background: rgba(26,32,49,.88); }
+.dhwani-suggestions button:hover {
+  transform: translateY(-2px);
+  border-color: #c2cdf1;
+  background: var(--surface);
+  box-shadow: 0 10px 25px rgba(63, 82, 150, .09);
+}
+.dhwani-suggestion-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #edf2ff, #f3edff);
+  color: var(--accent-strong);
+  font-size: 16px;
+  font-weight: 700;
+}
+:root[data-theme="dark"] .dhwani-suggestion-icon { background: #2b3657; color: #b8c5ff; }
+.dhwani-suggestion-copy { min-width: 0; display: block; }
+.dhwani-suggestion-copy strong {
+  display: block;
+  margin: 1px 0 6px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.dhwani-suggestion-copy small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+.dhwani-suggestion-arrow { color: var(--subtle); font-size: 12px; }
+#chatView:not(.has-messages) .composer-zone {
+  position: absolute;
+  left: 50%;
+  top: 76%;
+  transform: translate(-50%, -50%);
+  width: min(900px, calc(100% - 64px));
+  margin: 0;
+  padding: 0;
+  z-index: 6;
+}
+#chatView.has-messages .composer-zone {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  width: min(900px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 9px 0 18px;
+}
+.composer-zone::before {
+  height: 32px;
+  background: linear-gradient(transparent, var(--bg));
+}
+.composer {
+  position: relative;
+  padding: 15px 16px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 25px;
+  background: var(--surface);
+  box-shadow: 0 14px 42px rgba(52, 68, 124, .10), 0 2px 8px rgba(52,68,124,.035);
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+.composer:focus-within {
+  border-color: #aab9ed;
+  box-shadow: 0 16px 44px rgba(66, 88, 164, .14), 0 0 0 3px rgba(104, 130, 237, .08);
+}
+.composer-bottom { align-items: center; gap: 12px; }
+.composer textarea {
+  min-height: 44px;
+  max-height: 180px;
+  padding: 8px 3px;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.composer textarea::placeholder { color: #929bb1; }
+.dhwani-plus-button {
+  width: 39px;
+  height: 39px;
+  flex: 0 0 39px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--accent-strong);
+  font-size: 24px;
+  font-weight: 350;
+}
+.dhwani-plus-button:hover,
+.dhwani-plus-button[aria-expanded="true"] {
+  border-color: #b7c5f4;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+.composer-right { gap: 8px; }
+.composer-voice-button {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #74809e;
+}
+.composer-voice-button:hover { border-color: var(--line); background: var(--surface-soft); color: var(--accent-strong); }
+.composer-voice-button.is-active { color: var(--accent-strong); border-color: #b6c4f3; background: var(--accent-soft); }
+.send-button {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6481ef, #786bdf);
+  color: #fff;
+  box-shadow: 0 5px 13px rgba(90, 112, 220, .25);
+}
+.send-button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.send-button svg { width: 19px; height: 19px; stroke: currentColor; }
+.composer-hint { padding: 10px 4px 0; color: var(--subtle); font-size: 10px; }
+.plus-menu {
+  bottom: calc(100% + 13px);
+  left: 0;
+  padding: 9px;
+  border-color: var(--line);
+  border-radius: 17px;
+  box-shadow: 0 18px 48px rgba(32, 45, 88, .16);
+}
+.plus-menu-item { border-radius: 11px; }
+.messages { width: min(820px, 100%); gap: 24px; }
+#chatView.has-messages .chat-scroll { padding: 28px 28px 8px; }
+#chatView .message.user .message-content {
+  border: 0;
+  border-radius: 21px 21px 7px 21px;
+  background: linear-gradient(135deg, #627deb, #766de1);
+  color: #fff;
+  padding: 13px 17px;
+  box-shadow: 0 6px 18px rgba(86, 107, 206, .13);
+}
+#chatView .message.user .message-text { color: #fff; }
+#chatView .message:not(.user) .message-text {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 3px 0;
+}
+#chatView .message-avatar {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+#chatView .message-avatar img { width: 31px; height: 31px; object-fit: contain; }
+#chatView .message-actions button {
+  border-radius: 10px;
+  border-color: var(--line);
+  background: var(--surface);
+}
+#chatView .message-actions button:hover { background: var(--surface-soft); }
+.page-heading h1,
+.connectors-page-heading h1,
+.library-view h1 {
+  color: var(--text);
+  font-family: "Outfit", "Tiro Devanagari Hindi", sans-serif;
+  letter-spacing: -.8px;
+}
+.button-primary, .button-secondary {
+  min-height: 40px;
+  border-radius: 12px;
+}
+.button-primary {
+  border-color: transparent;
+  background: linear-gradient(120deg, #637fec, #786de3);
+  box-shadow: 0 5px 14px rgba(91, 111, 210, .18);
+}
+.button-primary:hover { filter: brightness(1.05); }
+.auth-modal, .modal-card, .subscription-page-card {
+  border-color: var(--line);
+  border-radius: 22px;
+  box-shadow: 0 24px 70px rgba(24, 36, 78, .18);
+}
+:root[data-theme="dark"] .auth-modal,
+:root[data-theme="dark"] .modal-card,
+:root[data-theme="dark"] .subscription-page-card { background: var(--surface); }
+.app-footer { color: var(--subtle); }
+.app-footer span:first-child { color: var(--accent-strong); font-weight: 700; }
+
+@media (max-width: 1050px) {
+  .sidebar { width: 248px; min-width: 248px; }
+  .tatv-suggestions.dhwani-suggestions { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 640px; }
+  .dhwani-suggestions button { min-height: 82px; }
+  #chatView:not(.has-messages) .composer-zone { top: 79%; }
+}
+@media (max-width: 760px) {
+  .sidebar { width: 280px; min-width: 280px; }
+  .main-area:has(#chatView.active-view) .topbar {
+    height: 58px;
+    flex-basis: 58px;
+    padding: 0 13px;
+    gap: 8px;
+  }
+  .topbar-brand-copy { display: flex; }
+  .topbar-brand-copy strong { font-size: 16px; }
+  .topbar-brand-copy span { font-size: 8px; }
+  .model-chip { min-height: 34px; padding: 0 9px; font-size: 11px; }
+  #chatView:not(.has-messages) .chat-scroll { padding: 24px 14px 116px; }
+  .hero-brand-mark { width: 52px; height: 52px; border-radius: 19px; margin-bottom: 14px; }
+  .hero-mark { width: 43px; height: 43px; }
+  .hero-greeting { font-size: clamp(27px, 7vw, 36px) !important; letter-spacing: -.9px !important; }
+  .hero-subtitle { max-width: 34ch; font-size: 12px; margin-bottom: 17px !important; }
+  .tatv-suggestions.dhwani-suggestions {
+    width: min(520px, 100%);
+    gap: 8px;
+    margin-top: 21px;
+  }
+  .dhwani-suggestions button {
+    min-height: 76px;
+    grid-template-columns: 30px minmax(0,1fr) 10px;
+    gap: 7px;
+    padding: 10px 8px;
+    border-radius: 14px;
+  }
+  .dhwani-suggestion-icon { width: 29px; height: 29px; border-radius: 10px; }
+  .dhwani-suggestion-copy strong { font-size: 11px; margin-bottom: 3px; }
+  .dhwani-suggestion-copy small { font-size: 9px; }
+  #chatView:not(.has-messages) .composer-zone {
+    top: auto;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 24px);
+  }
+  #chatView.has-messages .composer-zone { width: calc(100% - 20px); padding-bottom: max(9px, env(safe-area-inset-bottom)); }
+  .composer { padding: 10px 10px 9px; border-radius: 21px; }
+  .composer-bottom { gap: 7px; }
+  .composer textarea { min-height: 39px; font-size: 14px; padding: 7px 1px; }
+  .dhwani-plus-button { width: 34px; height: 34px; flex-basis: 34px; font-size: 22px; }
+  .composer-right { gap: 4px; }
+  .composer-voice-button { width: 32px; height: 32px; flex-basis: 32px; }
+  .send-button { width: 36px; height: 36px; }
+  #chatView.has-messages .chat-scroll { padding: 16px 13px 5px; }
+}
+@media (max-width: 430px) {
+  .main-area:has(#chatView.active-view) .topbar { padding: 0 9px; }
+  .sidebar-toggle { width: 34px; height: 34px; }
+  .topbar-brand-copy { display: none; }
+  .tatv-suggestions.dhwani-suggestions { gap: 7px; }
+  .dhwani-suggestions button { min-height: 69px; }
+  .dhwani-suggestion-copy small { display: none; }
+  #chatView:not(.has-messages) .chat-scroll { padding: 17px 10px 112px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dhwani-suggestions button, .composer, .send-button { transition: none; }
+}

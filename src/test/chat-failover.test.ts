@@ -102,7 +102,7 @@ describe("streamWithFailover", () => {
       ]));
       expect(backupStarted, code).toBe(false);
       expect(output[output.length - 1]).toMatchObject({
-        error: "Tatv could not complete this reply. Please try again in a moment.",
+        error: "Dhwani could not complete this reply. Please try again in a moment.",
         code: "AI_REQUEST_FAILED",
         done: true,
       });
@@ -118,7 +118,7 @@ describe("streamWithFailover", () => {
     ]));
     expect(backupStarted).toBe(false);
     expect(output[output.length - 1]).toMatchObject({
-      error: "Tatv could not complete this reply. Please try again in a moment.",
+      error: "Dhwani could not complete this reply. Please try again in a moment.",
       code: "AI_REQUEST_FAILED",
       done: true,
     });
@@ -132,7 +132,7 @@ describe("streamWithFailover", () => {
       { label: "B", start: () => { backupStarted = true; return sse({ text: "Other model" }, { done: true }); } },
     ]));
     expect(output.map(item => item["text"]).filter(Boolean)).toEqual(["Partial"]);
-    expect(output.some(item => item["error"] === "Tatv could not complete this reply. Please try again in a moment.")).toBe(true);
+    expect(output.some(item => item["error"] === "Dhwani could not complete this reply. Please try again in a moment.")).toBe(true);
     expect(JSON.stringify(output)).not.toContain("stream stalled");
     expect(backupStarted).toBe(false);
   });
@@ -172,7 +172,7 @@ describe("streamWithFailover", () => {
       { label: "B", start: () => { backupStarted = true; return sse({ text: "must not rerun" }, { done: true }); } },
     ]));
     expect(output.some(item => (item["activity"] as Record<string, unknown> | undefined)?.["id"] === "tool-1")).toBe(true);
-    expect(output.some(item => item["error"] === "Tatv could not complete this reply. Please try again in a moment.")).toBe(true);
+    expect(output.some(item => item["error"] === "Dhwani could not complete this reply. Please try again in a moment.")).toBe(true);
     expect(JSON.stringify(output)).not.toContain("provider stream failed after tool execution");
     expect(backupStarted).toBe(false);
   });
@@ -187,7 +187,7 @@ describe("streamWithFailover", () => {
       { label: "B", start: () => { backupStarted = true; return sse({ text: "must not duplicate approval" }, { done: true }); } },
     ]));
     expect(output.some(item => (item["approvalRequired"] as Record<string, unknown> | undefined)?.["id"] === "approval-1")).toBe(true);
-    expect(output.some(item => item["error"] === "Tatv could not complete this reply. Please try again in a moment.")).toBe(true);
+    expect(output.some(item => item["error"] === "Dhwani could not complete this reply. Please try again in a moment.")).toBe(true);
     expect(JSON.stringify(output)).not.toContain("provider failed after approval was created");
     expect(backupStarted).toBe(false);
   });
@@ -198,7 +198,7 @@ describe("streamWithFailover", () => {
       { label: "B", start: () => sse({ error: "second", code: "UPSTREAM_UNAVAILABLE", done: true }) },
     ]));
     expect(output[output.length - 1]).toMatchObject({
-      error: "Tatv could not complete this reply. Please try again in a moment.",
+      error: "Dhwani could not complete this reply. Please try again in a moment.",
       code: "AI_REQUEST_FAILED",
       done: true,
     });
@@ -216,7 +216,7 @@ describe("streamWithFailover", () => {
 
     expect(backupStarted).toBe(true);
     expect(output[output.length - 1]).toMatchObject({
-      error: "Tatv could not complete this reply. Please try again in a moment.",
+      error: "Dhwani could not complete this reply. Please try again in a moment.",
       code: "AI_REQUEST_FAILED",
       done: true,
     });
@@ -230,7 +230,7 @@ describe("streamWithFailover", () => {
     ]));
 
     expect(output[output.length - 1]).toMatchObject({
-      error: "Tatv could not complete this reply. Please try again in a moment.",
+      error: "Dhwani could not complete this reply. Please try again in a moment.",
       code: "AI_REQUEST_FAILED",
       done: true,
     });
@@ -274,7 +274,7 @@ describe("streamWithFailover", () => {
     const output = await events(streamWithFailover(attempts));
     expect(started).toBe(12);
     expect(output[output.length - 1]).toMatchObject({
-      error: "Tatv could not complete this reply. Please try again in a moment.",
+      error: "Dhwani could not complete this reply. Please try again in a moment.",
       code: "AI_REQUEST_FAILED",
       done: true,
     });

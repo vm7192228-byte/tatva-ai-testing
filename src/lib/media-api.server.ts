@@ -576,12 +576,12 @@ async function finalizeImageQuotaReservation(
   try {
     const result = await finalizeUsageQuota(runtimeEnv, userId, reservationId, action);
     if (!result.ok || result.status !== (action === "commit" ? "committed" : "released")) {
-      console.error("[Tatv AI] Image quota reservation could not be finalized.");
+      console.error("[Dhwani AI] Image quota reservation could not be finalized.");
       return false;
     }
     return true;
   } catch {
-    console.error("[Tatv AI] Image quota reservation finalization failed.");
+    console.error("[Dhwani AI] Image quota reservation finalization failed.");
     return false;
   }
 }
@@ -633,7 +633,7 @@ export async function handleMediaApiRequest(request: Request, runtimeEnv: unknow
   if (isMediaRoute && request.method === "GET") {
     return json({
       ok: true,
-      service: "Tatv AI media API",
+      service: "Dhwani AI media API",
       providers: {
         image: privateGatewayConfigured,
         imagePrimary: Boolean(privateMedia?.primaryBaseUrl),
@@ -656,9 +656,9 @@ export async function handleMediaApiRequest(request: Request, runtimeEnv: unknow
   }
   if (!sameOrigin(request)) return json({ error: "ORIGIN_NOT_ALLOWED", message: "This request origin is not allowed." }, 403);
   const hasAuthCookie = /(?:^|;\s*)cf_(?:access|refresh)=/.test(request.headers.get("cookie") ?? "");
-  if (!hasAuthCookie) return json({ error: "AUTH_REQUIRED", message: "Sign in to your Tatv account before generating media." }, 401);
+  if (!hasAuthCookie) return json({ error: "AUTH_REQUIRED", message: "Sign in to your Dhwani account before generating media." }, 401);
   const session = await getAuthenticatedSession(request, runtimeEnv, 2500);
-  if (!session.configured) return json({ error: "AUTH_NOT_CONFIGURED", message: "Media generation requires the Tatv Supabase sign-in service to be configured." }, 503);
+  if (!session.configured) return json({ error: "AUTH_NOT_CONFIGURED", message: "Media generation requires the Dhwani Supabase sign-in service to be configured." }, 503);
   if (session.unavailable) return json({
       error: "AUTH_UNAVAILABLE",
       message: "The account service is temporarily unavailable. Your existing session has been preserved; please retry.",
@@ -719,7 +719,7 @@ export async function handleMediaApiRequest(request: Request, runtimeEnv: unknow
     } catch {
       return json({
         error: "IMAGE_USAGE_UNAVAILABLE",
-        message: "Tatv could not reserve your image allowance. No image provider request was sent.",
+        message: "Dhwani could not reserve your image allowance. No image provider request was sent.",
       }, 503);
     }
 
@@ -748,16 +748,16 @@ export async function handleMediaApiRequest(request: Request, runtimeEnv: unknow
         limit,
         used,
         remaining: 0,
-        message: message + " Upgrade your Tatv plan to generate more images.",
+        message: message + " Upgrade your Dhwani plan to generate more images.",
       }, 402);
     }
 
     const reservationId = reservation["reservationId"];
     if (!reservationId) {
-      console.error("[Tatv AI] Image quota reservation was allowed without a reservation ID.");
+      console.error("[Dhwani AI] Image quota reservation was allowed without a reservation ID.");
       return json({
         error: "IMAGE_USAGE_UNAVAILABLE",
-        message: "Tatv could not verify the image allowance reservation. No provider request was sent.",
+        message: "Dhwani could not verify the image allowance reservation. No provider request was sent.",
       }, 503);
     }
 
@@ -789,7 +789,7 @@ export async function handleMediaApiRequest(request: Request, runtimeEnv: unknow
     if (!committed) {
       return json({
         error: "IMAGE_QUOTA_FINALIZATION_FAILED",
-        message: "Tatv could not confirm the image usage record, so the generated image was not delivered. The temporary reservation expires automatically within 15 minutes.",
+        message: "Dhwani could not confirm the image usage record, so the generated image was not delivered. The temporary reservation expires automatically within 15 minutes.",
       }, 503);
     }
     return generated;

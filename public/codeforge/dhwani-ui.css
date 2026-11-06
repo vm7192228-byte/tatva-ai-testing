@@ -536,3 +536,88 @@ body { background-image: radial-gradient(ellipse at 76% 0%, rgba(218, 226, 255, 
 @media (prefers-reduced-motion: reduce) {
   .dhwani-suggestions button, .composer, .send-button { transition: none; }
 }
+
+
+
+/* Dhwani AI — restrained ChatGPT / Claude-inspired workspace. */
+:root{--bg:#fff;--sidebar:#fafafa;--surface:#fff;--surface-soft:#f4f4f4;--line:#e5e5e5;--line-strong:#d8d8d8;--text:#202020;--muted:#666;--subtle:#8a8a8a;--accent:#333;--accent-strong:#222;--accent-soft:#f0f0f0}
+:root[data-theme="dark"]{--bg:#171717;--sidebar:#1e1e1e;--surface:#222;--surface-soft:#2c2c2c;--line:#373737;--line-strong:#494949;--text:#eee;--muted:#b6b6b6;--subtle:#929292;--accent:#eee;--accent-strong:#fff;--accent-soft:#303030}
+html,body,.app-shell,.main-area,#chatView.active-view{background:var(--bg)!important;color:var(--text)}
+body{background-image:none!important;font-family:"DM Sans","Inter",system-ui,sans-serif}
+.app-shell{min-height:100dvh}
+.sidebar{width:286px;min-width:286px;padding:17px 12px 12px;background:var(--sidebar)!important;border-right:1px solid var(--line);box-shadow:none}
+.brand{gap:10px;padding:3px 9px 22px;color:var(--text)}.brand-mark{width:30px;height:30px;object-fit:contain}
+.brand-wordmark{font:650 18px/1.1 "DM Sans","Inter",system-ui,sans-serif;letter-spacing:-.4px;color:var(--text)}.brand-wordmark b{color:var(--text);font-weight:750}
+.sidebar .new-chat{min-height:40px;height:40px;margin:2px 0 18px;padding:0 11px;border:0;border-radius:9px;background:#eee!important;color:#252525;box-shadow:none;font-size:13px;font-weight:550}
+:root[data-theme="dark"] .sidebar .new-chat{background:#303030!important;color:#f1f1f1}.sidebar .new-chat:hover{background:#e8e8e8!important}
+.nav-caption,.sidebar .nav-caption{margin:12px 10px 7px;padding:0;color:var(--subtle);font-size:11px;font-weight:550;letter-spacing:.02em}
+.sidebar-scroll-content{overflow-y:auto;min-height:0}.sidebar-scroll-content .side-nav{display:grid;gap:2px;margin:0 0 18px}
+.sidebar-scroll-content .side-nav .nav-item{min-height:37px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--text);font-size:13px;font-weight:450}
+.sidebar-scroll-content .side-nav .nav-item:hover,.sidebar-scroll-content .side-nav .nav-item:focus-visible,.sidebar-scroll-content .side-nav .nav-item.active{background:#eee;color:#202020}
+:root[data-theme="dark"] .sidebar-scroll-content .side-nav .nav-item:hover,:root[data-theme="dark"] .sidebar-scroll-content .side-nav .nav-item:focus-visible,:root[data-theme="dark"] .sidebar-scroll-content .side-nav .nav-item.active{background:#303030;color:#fff}
+.nav-icon{width:20px;color:inherit;opacity:.8;font-size:14px}.sidebar .recent-caption{margin-top:16px}.recent-list{padding:2px 0 8px}
+.recent-empty{color:var(--subtle);font-size:11px;line-height:1.55;padding:10px}.recent-list .recent-item,.recent-list button{border-radius:7px;color:var(--text)}
+.recent-list .recent-item:hover,.recent-list button:hover{background:var(--surface-soft)}
+.sidebar-footer{padding-top:10px;border-top:1px solid var(--line)}
+.sidebar .profile-button{width:100%;min-height:45px;padding:5px 7px;border:0;border-radius:8px;background:transparent;box-shadow:none}
+.sidebar .profile-button:hover{background:var(--surface-soft)}.sidebar .profile-copy strong{font-size:12px;font-weight:600}.sidebar .profile-copy small{font-size:10px;color:var(--subtle)}
+.sidebar-upgrade.dhwani-top-upgrade{min-height:32px;margin:0 4px 0 10px;padding:0 13px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;color:#333;box-shadow:none;font-size:12px;font-weight:550}
+:root[data-theme="dark"] .sidebar-upgrade.dhwani-top-upgrade{background:#242424;color:#eee}.sidebar-upgrade.dhwani-top-upgrade:hover{background:var(--surface-soft)}
+.main-area{min-width:0;background:#fff!important}:root[data-theme="dark"] .main-area{background:#171717!important}
+.main-area:has(#chatView.active-view) .topbar{position:relative;inset:auto;display:flex;flex:0 0 56px;align-items:center;height:56px;padding:0 18px;border:0;background:var(--bg)!important;pointer-events:auto}
+.main-area:has(#chatView.active-view) .topbar>*,.main-area:has(#chatView.active-view) .topbar-actions>*{pointer-events:auto}
+.sidebar-toggle{width:34px;height:34px;border:0;border-radius:8px;background:transparent;box-shadow:none}.sidebar-toggle:hover{background:var(--surface-soft)}.sidebar-toggle img{width:21px;height:21px}
+.topbar-brand-copy,.breadcrumb{display:none!important}
+.model-chip{min-height:33px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:transparent;box-shadow:none;color:var(--text);font-size:12px}
+.model-chip:hover{border-color:var(--line-strong);background:var(--surface-soft)}.model-dot{background:#777;box-shadow:none}
+.topbar-actions{display:flex;align-items:center;gap:7px;margin-left:auto}
+.dhwani-theme-toggle{width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--text);box-shadow:none;font-size:17px}.dhwani-theme-toggle:hover{background:var(--surface-soft)}
+.topbar-menu-button{width:34px;height:34px;border:0;background:transparent;color:var(--text)}.topbar-menu-button:hover{background:var(--surface-soft)}
+#chatView.active-view{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow:hidden;position:relative;background:var(--bg)!important;color:var(--text)}
+#chatView:not(.has-messages){justify-content:flex-start;padding:0}
+#chatView:not(.has-messages) .chat-scroll{display:flex;flex:1 1 auto;flex-direction:column;align-items:center;justify-content:center;min-height:0;overflow-y:auto;padding:0 24px 110px;background:transparent}
+#chatView:not(.has-messages) .welcome{width:min(760px,100%);margin:0;transform:translateY(-66px);animation:none;text-align:center}
+.hero-brand-mark{display:none!important}
+.hero-greeting{display:block;margin:0 0 18px!important;color:var(--text)!important;font-family:"DM Sans","Inter",system-ui,sans-serif!important;font-size:clamp(25px,3.1vw,31px)!important;font-weight:450!important;line-height:1.3!important;letter-spacing:-.65px!important}
+.hero-subtitle{display:none!important}.tatv-suggestions,.dhwani-suggestions{display:none!important}
+#chatView:not(.has-messages) .composer-zone{position:absolute;z-index:6;top:52%;left:50%;width:min(720px,calc(100% - 52px));margin:0;padding:0;transform:translate(-50%,0)}
+#chatView.has-messages .composer-zone{position:relative;top:auto;left:auto;width:min(820px,calc(100% - 48px));margin:0 auto;padding:8px 0 14px;transform:none}
+#chatView .composer-zone::before{display:none}
+#chatView .composer{display:flex;flex-direction:column;gap:4px;min-height:58px;padding:8px 10px;border:1px solid #dedede;border-radius:20px;background:#fff;box-shadow:0 2px 9px rgba(0,0,0,.045)}
+:root[data-theme="dark"] #chatView .composer{border-color:#454545;background:#222;box-shadow:0 2px 9px rgba(0,0,0,.18)}
+#chatView .composer:focus-within{border-color:#bcbcbc;box-shadow:0 2px 10px rgba(0,0,0,.065)}
+#chatView .composer-bottom{display:flex;align-items:center;gap:8px;min-width:0}
+#chatView .composer textarea{flex:1 1 auto;width:100%;min-width:0;min-height:40px;max-height:150px;padding:9px 3px;border:0;border-radius:0;background:transparent;color:var(--text);font-size:14px;line-height:1.45}
+#chatView .composer textarea:focus{outline:none;box-shadow:none}#chatView .composer textarea::placeholder{color:#8b8b8b}
+#chatView .dhwani-plus-button{width:34px;height:34px;min-width:34px;border:0;border-radius:50%;background:transparent;color:var(--text);box-shadow:none;font-size:23px}
+#chatView .dhwani-plus-button:hover{background:var(--surface-soft)}
+#chatView .composer-right{display:flex;flex:0 0 auto;align-items:center;gap:4px}
+#chatView .composer-voice-button{width:33px;height:33px;min-width:33px;border:0;border-radius:50%;background:transparent;color:#555;box-shadow:none}
+#chatView .composer-voice-button:hover{background:var(--surface-soft);color:var(--text)}
+#chatView .send-button{width:34px;height:34px;min-width:34px;border:0;border-radius:50%;background:#242424;color:#fff;box-shadow:none}
+:root[data-theme="dark"] #chatView .send-button{background:#eee;color:#171717}
+#chatView .quick-tags{display:flex!important;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:13px}
+#chatView .quick-tag{min-height:30px;padding:5px 10px;border:1px solid #e8e8e8;border-radius:8px;background:#fafafa;color:#555;box-shadow:none;font-size:11px}
+#chatView .quick-tag:hover{border-color:#d2d2d2;background:#f2f2f2;color:#222}
+:root[data-theme="dark"] #chatView .quick-tag{border-color:#454545;background:#242424;color:#ccc}
+#chatView.has-messages .quick-tags{display:none!important}
+#chatView.has-messages .chat-scroll{flex:1 1 auto;min-height:0;padding:20px 24px 10px;background:var(--bg)}
+#chatView.has-messages .messages{width:min(820px,100%);max-width:100%;margin:0 auto}
+#chatView .message.user .message-content{border:0;border-radius:17px 17px 5px 17px;background:#f0f0f0;color:#222;padding:10px 14px}
+#chatView .message.user .message-text{color:#222}
+:root[data-theme="dark"] #chatView .message.user .message-content{background:#303030;color:#eee}
+:root[data-theme="dark"] #chatView .message.user .message-text{color:#eee}
+#chatView .message:not(.user) .message-text{border:0;border-radius:0;background:transparent;color:var(--text);padding:2px 0}
+#chatView .message-avatar{border:0;background:transparent;box-shadow:none}#chatView .message-avatar img{width:26px;height:26px;object-fit:contain}
+@media(max-width:760px){
+ .sidebar{width:280px;min-width:280px;padding:16px 12px max(12px,env(safe-area-inset-bottom))}
+ .main-area:has(#chatView.active-view) .topbar{flex-basis:52px;height:52px;padding:0 10px}
+ #chatView:not(.has-messages) .chat-scroll{padding:0 12px 130px}
+ #chatView:not(.has-messages) .welcome{transform:translateY(-60px)}
+ #chatView:not(.has-messages) .composer-zone{top:52%;width:calc(100% - 24px)}
+ #chatView.has-messages .composer-zone{width:calc(100% - 18px);padding-bottom:max(8px,env(safe-area-inset-bottom))}
+ #chatView .composer{border-radius:18px;padding:7px 8px}
+ #chatView .composer textarea{min-height:38px;font-size:13px}
+ #chatView .dhwani-plus-button,#chatView .composer-voice-button,#chatView .send-button{width:32px;height:32px;min-width:32px}
+ #chatView .quick-tags{gap:6px;margin-top:9px}
+}

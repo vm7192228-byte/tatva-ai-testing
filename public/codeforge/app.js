@@ -5289,7 +5289,7 @@ function applyTheme(theme) {
   if (themeGlyph) themeGlyph.textContent = isDark ? '☀' : '☾';
   if (themeMenuLabel) themeMenuLabel.textContent = isDark ? 'Light theme' : 'Dark theme';
   if (themeToggle) { themeToggle.title = isDark ? 'Switch to light theme' : 'Switch to dark theme'; themeToggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme'); themeToggle.setAttribute('aria-pressed', String(isDark)); }
-  const tc = $('meta[name="theme-color"]'); if (tc) tc.content = isDark ? '#0c0912' : '#f6f3fb';
+  const tc = $('meta[name="theme-color"]'); if (tc) tc.content = isDark ? '#171717' : '#ffffff';
 }
 function saveTheme(theme) {
   try { localStorage.setItem('codeforge-ai-theme', theme); } catch { /* Storage may be unavailable in private browsing. */ }
@@ -5411,6 +5411,7 @@ document.addEventListener("click", event => {
     event.preventDefault(); closeMobileSidebar();
     if (sidebarAction.dataset.sidebarAction === "project") startProjectTask();
     else if (sidebarAction.dataset.sidebarAction === "code") startCodeTask();
+    else if (sidebarAction.dataset.sidebarAction === "search") startSearchTask();
     return;
   }
   const sidebarLogoutButton = event.target.closest("#sidebarLogout");
@@ -5673,7 +5674,9 @@ document.addEventListener('keydown', event => {
 function updateHeroGreeting() {
   const name = currentUser?.displayName?.trim();
   const element = document.getElementById("heroGreeting");
-  if (element) element.textContent = name ? "नमस्ते, " + name + "! मैं ध्वनि हूँ" : "नमस्ते, मैं ध्वनि हूँ";
+  if (element) element.textContent = name
+    ? "Good to see you, " + name + ". What's on the agenda today?"
+    : "What's on the agenda today?";
 }
 updateHeroGreeting();
 

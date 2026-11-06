@@ -23,7 +23,7 @@ describe("Dhwani AI visual identity", () => {
     expect(codeforgeMarkup).toContain('data-action="upload-media"');
     expect(codeforgeMarkup).toContain('data-action="upload-files"');
     expect(codeforgeMarkup).toContain('id="sendButton"');
-    expect(codeforgeMarkup).toContain("topbar-plus-button");
+    expect(codeforgeMarkup).toContain("topbar-menu-button");
     expect(codeforgeMarkup).not.toContain("composer-tools");
   });
 

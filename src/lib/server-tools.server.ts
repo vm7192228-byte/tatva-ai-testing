@@ -547,7 +547,7 @@ export async function executeServerToolCall(
   context?: ToolExecutionContext,
 ): Promise<ServerToolResult> {
   if (!TOOL_REGISTRY.some(tool => tool.name === name && tool.available(runtimeEnv, context))) {
-    return toolError("UNKNOWN_TOOL", "This tool is not available in Tatv for this request.");
+    return toolError("UNKNOWN_TOOL", "This tool is not available in Dhwani for this request.");
   }
 
   let parsedInput = input;
@@ -611,7 +611,7 @@ export async function executeServerToolCall(
     instagram_publish_post: instagramPublishArguments,
   } as const;
   const schema = actionSchemas[name as keyof typeof actionSchemas];
-  if (!schema) return toolError("UNKNOWN_TOOL", "This tool is not available in Tatv.");
+  if (!schema) return toolError("UNKNOWN_TOOL", "This tool is not available in Dhwani.");
   const validated = schema.safeParse(parsedInput);
   if (!validated.success) return toolError("INVALID_TOOL_ARGUMENTS", "The proposed action arguments are incomplete or invalid.");
   if (!isWriteToolAuthorized(name as ApprovalToolName, context)) {
@@ -651,6 +651,6 @@ export async function executeServerToolCall(
     const code = error instanceof Error ? error.message : "TOOL_APPROVAL_FAILED";
     return toolError(code, code === "TOOL_APPROVAL_ALREADY_RESOLVED"
       ? "This exact proposal was already resolved. Ask the user before creating a new action."
-      : "Tatv could not save the approval request. Nothing was sent to the social platform.");
+      : "Dhwani could not save the approval request. Nothing was sent to the social platform.");
   }
 }

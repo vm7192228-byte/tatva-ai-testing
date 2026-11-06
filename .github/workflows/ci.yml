@@ -43,7 +43,11 @@ jobs:
             src/test/chat-api-file-quota.test.ts \
             src/test/chat-quota-reservations.test.ts \
             src/test/media-api-quota-reservations.test.ts \
-            src/test/usage-limits-reservations.test.ts
+            src/test/usage-limits-reservations.test.ts \
+            src/test/app-routing.test.tsx \
+            src/test/dhwani-branding-ui.test.ts \
+            src/test/dhwani-branding.test.ts \
+            src/test/dhwani-plan-limits.test.ts
 
       - name: Lint changed server routing and quota modules
         run: |

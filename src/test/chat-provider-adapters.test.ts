@@ -105,7 +105,7 @@ describe("Claude Messages API adapter", () => {
     }, conversation);
     const output = await response.text();
 
-    expect(output).toContain("could not authenticate");
+    expect(output).toContain("Tatv could not complete this reply. Please try again in a moment.");
     expect(output).not.toContain("private provider diagnostic");
     expect(output).not.toContain("test-anthropic-key");
   });
@@ -185,7 +185,7 @@ describe("OpenAI Responses API adapter", () => {
     const output = await response.text();
 
     expect(output).toContain("UPSTREAM_RATE_LIMITED");
-    expect(output).toContain("12");
+    expect(output).toContain("Tatv could not complete this reply. Please try again in a moment.");
     expect(output).not.toContain("private upstream diagnostic");
     expect(output).not.toContain("test-openai-key");
   });

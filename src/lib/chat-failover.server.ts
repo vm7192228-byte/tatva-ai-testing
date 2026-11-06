@@ -190,12 +190,12 @@ export function streamWithFailover(
 
             if (committed) {
               if (hasError) {
-                console.warn("[Tatv AI] provider stream failed after response commitment", {
+                console.warn("[Dhwani AI] provider stream failed after response commitment", {
                   provider: attempt.label,
                   code: typeof data?.["code"] === "string" ? data["code"] : "UPSTREAM_ERROR",
                 });
                 write(errorFrame(
-                  "Tatv could not complete this reply. Please try again in a moment.",
+                  "Dhwani could not complete this reply. Please try again in a moment.",
                   "AI_REQUEST_FAILED",
                 ), false);
                 terminalFrameSeen = true;
@@ -235,7 +235,7 @@ export function streamWithFailover(
                 attempt.retryErrors === true || RETRYABLE_UPSTREAM_CODES.has(code)
               );
               if (shouldRetry) {
-                console.warn("[Tatv AI] retrying next provider after upstream failure", {
+                console.warn("[Dhwani AI] retrying next provider after upstream failure", {
                   provider: attempt.label,
                   code: code || "UPSTREAM_ERROR",
                 });
@@ -246,13 +246,13 @@ export function streamWithFailover(
               // Do not bypass authentication, permission, billing, invalid-model,
               // or provider-policy failures. Keep diagnostics in server logs and
               // return only a neutral error to the user.
-              console.warn("[Tatv AI] provider attempt ended without failover", {
+              console.warn("[Dhwani AI] provider attempt ended without failover", {
                 provider: attempt.label,
                 code: typeof data?.["code"] === "string" ? data["code"] : "UPSTREAM_ERROR",
               });
               committed = true;
               write(errorFrame(
-                "Tatv could not complete this reply. Please try again in a moment.",
+                "Dhwani could not complete this reply. Please try again in a moment.",
                 "AI_REQUEST_FAILED",
               ), false);
               terminalFrameSeen = true;
@@ -341,12 +341,12 @@ export function streamWithFailover(
           const failureCode = onlyCatalogEmptyFailures && lastErrorFrame
             ? "NO_PROVIDER_MODEL"
             : lastErrorFrame ? "ALL_PROVIDERS_FAILED" : "PROVIDER_NOT_CONFIGURED";
-          console.warn("[Tatv AI] provider chain exhausted", {
+          console.warn("[Dhwani AI] provider chain exhausted", {
             attempts: list.length,
             failureCode,
           });
           emit({
-            error: "Tatv could not complete this reply. Please try again in a moment.",
+            error: "Dhwani could not complete this reply. Please try again in a moment.",
             code: "AI_REQUEST_FAILED",
             done: true,
           });

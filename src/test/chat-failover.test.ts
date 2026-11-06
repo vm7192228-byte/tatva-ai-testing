@@ -58,15 +58,55 @@ describe("streamWithFailover", () => {
     expect(output.some(item => item["status"] === "retrying")).toBe(true);
   });
 
-  it("does not hide an authentication or permission error by trying another provider", async () => {
-    for (const code of ["UPSTREAM_AUTH_FAILED", "UPSTREAM_PERMISSION_DENIED", "UPSTREAM_BILLING_REQUIRED", "UPSTREAM_MODEL_NOT_FOUND"]) {
+  it("falls through provider credential, permission, billing and model errors from the private gateway", async () => {
+    for (const code of ["UPSTREAM_AUTH_FAILED", "UPSTREAM_PERMISSION_DENIED", "UPSTREAM_BILLING_REQUIRED", "UPSTREAM_MODEL_NOT_FOUND", "UPSTREAM_RATE_LIMITED"]) {
       let backupStarted = false;
       const output = await events(streamWithFailover([
-        { label: "A", start: () => sse({ error: "provider configuration needs attention", code, done: true }) },
-        { label: "B", start: () => { backupStarted = true; return sse({ text: "must not hide the failure" }, { done: true }); } },
+        { label: "Private gateway", start: () => sse({ error: "provider configuration needs attention", code, done: true }) },
+        { label: "Direct provider", start: () => {
+          backupStarted = true;
+          return sse({ text: "Direct provider answered." }, { done: true });
+        } },
+      ]));
+      expect(backupStarted, code).toBe(true);
+      expect(output.some(item => item["text"] === "Direct provider answered.")).toBe(true);
+      expect(JSON.stringify(output)).not.toContain("provider configuration needs attention");
+    }
+  });
+
+  it("retries every non-policy upstream failure for the shared FreeLLMAPI or direct-provider hops", async () => {
+    for (const code of ["UPSTREAM_RATE_LIMITED", "UPSTREAM_REQUEST_FAILED", "UPSTREAM_AUTH_FAILED"]) {
+      let backupStarted = false;
+      const output = await events(streamWithFailover([
+        { label: "Shared provider", retryErrors: true, start: () => sse({ error: "shared provider diagnostics", code, done: true }) },
+        { label: "Next provider", start: () => {
+          backupStarted = true;
+          return sse({ text: "Fallback answered." }, { done: true });
+        } },
+      ]));
+      expect(backupStarted, code).toBe(true);
+      expect(output.some(item => item["text"] === "Fallback answered.")).toBe(true);
+      expect(JSON.stringify(output)).not.toContain("shared provider diagnostics");
+    }
+  });
+
+  it("does not bypass a private gateway user-access, account block or user quota decision", async () => {
+    for (const code of ["PRIVATE_GATEWAY_ACCESS_DENIED", "USER_AUTH_REQUIRED", "AUTH_REQUIRED", "USER_BANNED", "ACCOUNT_SUSPENDED", "USER_ACCESS_BLOCKED", "USER_PERMISSION_DENIED", "USER_RATE_LIMITED", "USER_QUOTA_EXCEEDED", "PLAN_LIMIT_REACHED"]) {
+      let backupStarted = false;
+      const output = await events(streamWithFailover([
+        { label: "Private gateway", retryErrors: true, start: () => sse({ error: "user access blocked", code, done: true }) },
+        { label: "Direct provider", retryErrors: true, start: () => {
+          backupStarted = true;
+          return sse({ text: "must not bypass the user's access decision" }, { done: true });
+        } },
       ]));
       expect(backupStarted, code).toBe(false);
-      expect(output.some(item => item["code"] === code && item["error"] === "provider configuration needs attention")).toBe(true);
+      expect(output[output.length - 1]).toMatchObject({
+        error: "Tatv could not complete this reply. Please try again in a moment.",
+        code: "AI_REQUEST_FAILED",
+        done: true,
+      });
+      expect(JSON.stringify(output)).not.toContain("user access blocked");
     }
   });
 
@@ -77,11 +117,12 @@ describe("streamWithFailover", () => {
       { label: "B", start: () => { backupStarted = true; return sse({ text: "must not bypass the first provider policy" }, { done: true }); } },
     ]));
     expect(backupStarted).toBe(false);
-    expect(output).toContainEqual(expect.objectContaining({
-      error: "The provider blocked this request.",
-      code: "UPSTREAM_CONTENT_FILTERED",
+    expect(output[output.length - 1]).toMatchObject({
+      error: "Tatv could not complete this reply. Please try again in a moment.",
+      code: "AI_REQUEST_FAILED",
       done: true,
-    }));
+    });
+    expect(JSON.stringify(output)).not.toContain("The provider blocked this request.");
   });
 
   it("never mixes models once answer text has reached the user", async () => {
@@ -91,7 +132,8 @@ describe("streamWithFailover", () => {
       { label: "B", start: () => { backupStarted = true; return sse({ text: "Other model" }, { done: true }); } },
     ]));
     expect(output.map(item => item["text"]).filter(Boolean)).toEqual(["Partial"]);
-    expect(output.some(item => item["error"] === "stream stalled")).toBe(true);
+    expect(output.some(item => item["error"] === "Tatv could not complete this reply. Please try again in a moment.")).toBe(true);
+    expect(JSON.stringify(output)).not.toContain("stream stalled");
     expect(backupStarted).toBe(false);
   });
 
@@ -130,7 +172,8 @@ describe("streamWithFailover", () => {
       { label: "B", start: () => { backupStarted = true; return sse({ text: "must not rerun" }, { done: true }); } },
     ]));
     expect(output.some(item => (item["activity"] as Record<string, unknown> | undefined)?.["id"] === "tool-1")).toBe(true);
-    expect(output.some(item => item["error"] === "provider stream failed after tool execution")).toBe(true);
+    expect(output.some(item => item["error"] === "Tatv could not complete this reply. Please try again in a moment.")).toBe(true);
+    expect(JSON.stringify(output)).not.toContain("provider stream failed after tool execution");
     expect(backupStarted).toBe(false);
   });
 
@@ -144,7 +187,8 @@ describe("streamWithFailover", () => {
       { label: "B", start: () => { backupStarted = true; return sse({ text: "must not duplicate approval" }, { done: true }); } },
     ]));
     expect(output.some(item => (item["approvalRequired"] as Record<string, unknown> | undefined)?.["id"] === "approval-1")).toBe(true);
-    expect(output.some(item => item["error"] === "provider failed after approval was created")).toBe(true);
+    expect(output.some(item => item["error"] === "Tatv could not complete this reply. Please try again in a moment.")).toBe(true);
+    expect(JSON.stringify(output)).not.toContain("provider failed after approval was created");
     expect(backupStarted).toBe(false);
   });
 
@@ -154,8 +198,8 @@ describe("streamWithFailover", () => {
       { label: "B", start: () => sse({ error: "second", code: "UPSTREAM_UNAVAILABLE", done: true }) },
     ]));
     expect(output[output.length - 1]).toMatchObject({
-      error: "I couldn't get a response from any available AI service. Please try again in a moment.",
-      code: "ALL_PROVIDERS_FAILED",
+      error: "Tatv could not complete this reply. Please try again in a moment.",
+      code: "AI_REQUEST_FAILED",
       done: true,
     });
   });
@@ -172,8 +216,8 @@ describe("streamWithFailover", () => {
 
     expect(backupStarted).toBe(true);
     expect(output[output.length - 1]).toMatchObject({
-      error: "The private AI gateway is reachable, but no eligible chat model is enabled. The gateway administrator must connect an eligible provider and enable a reviewed chat model.",
-      code: "NO_PROVIDER_MODEL",
+      error: "Tatv could not complete this reply. Please try again in a moment.",
+      code: "AI_REQUEST_FAILED",
       done: true,
     });
     expect(JSON.stringify(output)).not.toContain("internal catalog detail");
@@ -186,8 +230,8 @@ describe("streamWithFailover", () => {
     ]));
 
     expect(output[output.length - 1]).toMatchObject({
-      error: "I couldn't get a response from any available AI service. Please try again in a moment.",
-      code: "ALL_PROVIDERS_FAILED",
+      error: "Tatv could not complete this reply. Please try again in a moment.",
+      code: "AI_REQUEST_FAILED",
       done: true,
     });
   });
@@ -221,17 +265,17 @@ describe("streamWithFailover", () => {
     expect(backupStarted).toBe(false);
   });
 
-  it("bounds provider attempts to the complete configured fallback chain", async () => {
+  it("bounds the number of provider attempts", async () => {
     let started = 0;
-    const attempts = Array.from({ length: 8 }, (_, index) => ({
+    const attempts = Array.from({ length: 13 }, (_, index) => ({
       label: "Provider " + index,
       start: () => { started += 1; return sse({ error: "failed", code: "UPSTREAM_UNAVAILABLE", done: true }); },
     }));
     const output = await events(streamWithFailover(attempts));
-    expect(started).toBe(7);
+    expect(started).toBe(12);
     expect(output[output.length - 1]).toMatchObject({
-      error: "I couldn't get a response from any available AI service. Please try again in a moment.",
-      code: "ALL_PROVIDERS_FAILED",
+      error: "Tatv could not complete this reply. Please try again in a moment.",
+      code: "AI_REQUEST_FAILED",
       done: true,
     });
   });

@@ -29,10 +29,10 @@ export async function withSocialUsageQuota(
     reservation = await reserveUsageQuota(runtimeEnv, userId, feature, idempotencyKey);
   } catch (error) {
     const reason = error instanceof Error ? error.message.slice(0, 120) : "unknown";
-    console.error("[Tatv AI] Social quota reservation failed:", reason);
+    console.error("[Dhwani AI] Social quota reservation failed:", reason);
     return json({
       error: "USAGE_QUOTA_UNAVAILABLE",
-      message: "Tatv could not reserve this social usage allowance. No platform request was sent.",
+      message: "Dhwani could not reserve this social usage allowance. No platform request was sent.",
     }, 503);
   }
 
@@ -57,12 +57,12 @@ export async function withSocialUsageQuota(
         message: (limit === 0
           ? "This feature is not included in your current plan."
           : "You have used " + used + " of " + limit + " monthly " + featureName + ".") +
-          " Upgrade your Tatv plan to continue.",
+          " Upgrade your Dhwani plan to continue.",
       }, 402);
     }
     return json({
       error: "USAGE_QUOTA_UNAVAILABLE",
-      message: "Tatv could not verify your social usage allowance. No platform request was sent.",
+      message: "Dhwani could not verify your social usage allowance. No platform request was sent.",
     }, 503);
   }
 
@@ -70,7 +70,7 @@ export async function withSocialUsageQuota(
   if (!reservationId) {
     return json({
       error: "USAGE_QUOTA_UNAVAILABLE",
-      message: "Tatv could not verify the social allowance reservation. No platform request was sent.",
+      message: "Dhwani could not verify the social allowance reservation. No platform request was sent.",
     }, 503);
   }
 
@@ -83,7 +83,7 @@ export async function withSocialUsageQuota(
         // Retry once if the database committed before the request timed out.
       }
     }
-    console.error("[Tatv AI] Social usage reservation finalization was not confirmed.");
+    console.error("[Dhwani AI] Social usage reservation finalization was not confirmed.");
     return false;
   };
 
@@ -226,7 +226,7 @@ async function getToken(request: Request, p: Provider, e: unknown, cookiesOut: s
   const secret = env("SOCIAL_TOKEN_SECRET", e);
   if (!secret || !ownerUserId) return null;
   const t = await unseal<TokenData>(readCookie(request, tokenCookie(p)), secret);
-  // A social connection belongs to one Tatv account, not merely to a browser.
+  // A social connection belongs to one Dhwani account, not merely to a browser.
   // Legacy cookies without an owner binding are intentionally rejected and must reconnect.
   if (!t || t.owner_user_id !== ownerUserId) return null;
   if (p === "youtube" && t.expires_at && t.expires_at < Date.now() + 60_000 && t.refresh_token) {
@@ -427,7 +427,7 @@ export async function getYouTubeAnalysisContext(
     const missing = missingEnv("youtube", e);
     if (missing.length) {
       return {
-        context: JSON.stringify({ status: "not_configured", message: "YouTube account analysis is not available on this Tatv deployment yet. Please try again later or contact Tatv support." }),
+        context: JSON.stringify({ status: "not_configured", message: "YouTube account analysis is not available on this Dhwani deployment yet. Please try again later or contact Dhwani support." }),
         cookies: cookiesOut,
       };
     }
@@ -695,7 +695,7 @@ export async function getMetaAnalysisContext(
         platform,
         token: null,
         setupMissing: true,
-        error: "This social account connection is not available on this Tatv deployment yet. Please try again later or contact Tatv support.",
+        error: "This social account connection is not available on this Dhwani deployment yet. Please try again later or contact Dhwani support.",
       });
       continue;
     }
@@ -818,7 +818,7 @@ export async function handleSocialApiRequest(request: Request, e: unknown): Prom
   // All social mutations (upload, publish, disconnect, and channel edits) must
   // originate from this app. OAuth connect/callback are GET flows protected by state.
   if (request.method === "POST" && !sameOrigin(request)) {
-    return json({ error: "ORIGIN_NOT_ALLOWED", message: "This social action must come from the Tatv website." }, 403);
+    return json({ error: "ORIGIN_NOT_ALLOWED", message: "This social action must come from the Dhwani website." }, 403);
   }
 
   try {
@@ -1138,7 +1138,7 @@ export async function handleSocialApiRequest(request: Request, e: unknown): Prom
       message: "The account service is temporarily unavailable. Your existing session has been preserved; please retry.",
     }, 503, cookiesOut);
     if (!session.configured) return json({ error: "AUTH_NOT_CONFIGURED", message: "Sign in is required to use connected social accounts." }, 503, cookiesOut);
-    if (!session.user) return json({ error: "AUTH_REQUIRED", message: "Sign in to the Tatv account that owns this social connection." }, 401, cookiesOut);
+    if (!session.user) return json({ error: "AUTH_REQUIRED", message: "Sign in to the Dhwani account that owns this social connection." }, 401, cookiesOut);
     const token = await getToken(request, provider, e, cookiesOut, session.user.id);
     if (!token) return json({ error: "NOT_CONNECTED", message: `Connect ${provider} first.` }, 401);
 
@@ -1156,7 +1156,7 @@ export async function handleSocialApiRequest(request: Request, e: unknown): Prom
       const page = (token.pages ?? []).find(item => Boolean(item.ig));
       if (!page?.ig) return json({
         error: "PROFESSIONAL_ACCOUNT_REQUIRED",
-        message: "Instagram Business Discovery requires Tatv to be connected through an eligible Instagram Business or Creator account linked to a Facebook Page.",
+        message: "Instagram Business Discovery requires Dhwani to be connected through an eligible Instagram Business or Creator account linked to a Facebook Page.",
       }, 403, cookiesOut);
       const instagramId = page.ig;
       const pageToken = page.token;
@@ -1262,7 +1262,7 @@ export async function handleSocialApiRequest(request: Request, e: unknown): Prom
       const description = typeof body.description === "string" ? body.description : String(channel.snippet?.description ?? "");
       if (description.length > 1000) return json({ error: "INVALID_CHANNEL_DETAILS", message: "Channel description must be at most 1,000 characters." }, 400, cookiesOut);
       if (titleChangeRequested && typeof body.description !== "string") {
-        return json({ error: "CHANNEL_TITLE_API_UNSUPPORTED", message: "YouTube's official Data API does not allow changing a channel's display name. Open YouTube Studio to change the name. Tatv can update the channel description." }, 400, cookiesOut);
+        return json({ error: "CHANNEL_TITLE_API_UNSUPPORTED", message: "YouTube's official Data API does not allow changing a channel's display name. Open YouTube Studio to change the name. Dhwani can update the channel description." }, 400, cookiesOut);
       }
       return withSocialUsageQuota(request, e, session.user.id, "social_edit", async () => {
       let savedDescription = String(channel.snippet?.description ?? "");
@@ -1373,7 +1373,7 @@ export async function handleSocialApiRequest(request: Request, e: unknown): Prom
       }
       return withSocialUsageQuota(request, e, session.user.id, "social_edit", async () => {
       const meta = {
-        snippet: { title: String(form.get("title") ?? "Tatv video").slice(0, 100), description: String(form.get("description") ?? "").slice(0, 5000), tags: String(form.get("tags") ?? "").split(",").map(s => s.trim()).filter(Boolean).slice(0, 30) },
+        snippet: { title: String(form.get("title") ?? "Dhwani video").slice(0, 100), description: String(form.get("description") ?? "").slice(0, 5000), tags: String(form.get("tags") ?? "").split(",").map(s => s.trim()).filter(Boolean).slice(0, 30) },
         status: { privacyStatus: ["public", "unlisted", "private"].includes(String(form.get("privacy"))) ? String(form.get("privacy")) : "private" },
       };
       const init = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {

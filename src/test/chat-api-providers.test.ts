@@ -55,14 +55,14 @@ describe("paid AI chat entitlement and shared quota policy", () => {
     expect(isPaidAiChatPlanCode(null)).toBe(false);
   });
 
-  it("never consumes a paid chat counter for any Tatv mode or subscription tier", () => {
+  it("never consumes a paid chat counter for any Dhwani mode or subscription tier", () => {
     for (const provider of ["smart", "freellmapi", "openai", "anthropic", "deepseek", "xai", "qwen", "cloudflare", "pollinations", "gemini", null]) {
       expect(shouldConsumeSuperChatAllowance(provider, true), String(provider)).toBe(false);
       expect(shouldConsumeSuperChatAllowance(provider, false), String(provider)).toBe(false);
     }
   });
 
-  it("accepts only the three branded Tatv modes and defaults safely to Smart", () => {
+  it("accepts only the three branded Dhwani modes and defaults safely to Smart", () => {
     expect(parseTatvChatMode("flash")).toBe("flash");
     expect(parseTatvChatMode("smart")).toBe("smart");
     expect(parseTatvChatMode("ultra")).toBe("ultra");
@@ -277,7 +277,7 @@ describe("Claude Messages API stream adapter", () => {
     const failure = events.find(event => event["error"]);
 
     expect(failure?.["code"]).toBe("UPSTREAM_UNAVAILABLE");
-    expect(failure?.["error"]).toBe("Tatv could not complete this reply. Please try again in a moment.");
+    expect(failure?.["error"]).toBe("Dhwani could not complete this reply. Please try again in a moment.");
     expect(failure?.["retryAfterSeconds"]).toBeUndefined();
     expect(JSON.stringify(events)).not.toContain("internal details");
   });
@@ -350,7 +350,7 @@ describe("provider throttling and safe error handling", () => {
 
     expect(failure?.["code"]).toBe("UPSTREAM_RATE_LIMITED");
     expect(failure?.["retryAfterSeconds"]).toBeUndefined();
-    expect(failure?.["error"]).toBe("Tatv could not complete this reply. Please try again in a moment.");
+    expect(failure?.["error"]).toBe("Dhwani could not complete this reply. Please try again in a moment.");
     expect(JSON.stringify(events)).not.toContain("raw account-specific details");
     expect(JSON.stringify(events)).not.toContain("deepseek-test-secret");
   });

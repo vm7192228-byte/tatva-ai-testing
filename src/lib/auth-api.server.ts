@@ -131,7 +131,7 @@ function normalizeUser(user: SupabaseUser | undefined): TatvUser | null {
   return {
     id: user.id,
     email: user.email,
-    displayName: displayName.trim() || user.email.split("@")[0] || "Tatv user",
+    displayName: displayName.trim() || user.email.split("@")[0] || "Dhwani user",
     avatarUrl: typeof metadata["avatar_url"] === "string" ? metadata["avatar_url"] : "",
     ...(Number.isInteger(age) && age >= 13 && age <= 120 ? { age } : {}),
   };

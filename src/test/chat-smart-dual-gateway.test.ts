@@ -62,7 +62,7 @@ function authResponse(url: string, init?: RequestInit) {
   });
 }
 
-describe("Tatv Smart private gateway routing", () => {
+describe("Dhwani Smart private gateway routing", () => {
   it("fails over between configured private gateways when FreeLLMAPI is not configured", async () => {
     const calls: Array<{ url: string; headers: Headers; body: Record<string, unknown> }> = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -352,7 +352,7 @@ describe("Tatv Smart private gateway routing", () => {
     ]);
     expect(events[events.length - 1]).toMatchObject({
       code: "AI_REQUEST_FAILED",
-      error: "Tatv could not complete this reply. Please try again in a moment.",
+      error: "Dhwani could not complete this reply. Please try again in a moment.",
       done: true,
     });
     expect(JSON.stringify(events)).not.toContain("fourth gateway");
@@ -383,7 +383,7 @@ describe("Tatv Smart private gateway routing", () => {
     const events = await readEvents(response!);
     const failure = events.find(event => typeof event["error"] === "string");
     expect(failure?.["code"]).toBe("AI_REQUEST_FAILED");
-    expect(failure?.["error"]).toBe("Tatv could not complete this reply. Please try again in a moment.");
+    expect(failure?.["error"]).toBe("Dhwani could not complete this reply. Please try again in a moment.");
     expect(failure?.["error"]).not.toContain("local catalog");
   });
 

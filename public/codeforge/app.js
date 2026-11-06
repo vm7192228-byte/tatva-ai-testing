@@ -32,19 +32,19 @@ document.addEventListener("click", event => {
 }, true);
 
 const integrations = [
-  { id: 'github', name: 'GitHub', mark: 'GH', className: 'github', tagline: 'Your code and repositories', detail: 'Connect repositories to discuss code, review project structure, and plan changes. Access will be limited to the permissions you approve.', permissions: 'Repositories · Issues · Pull requests', steps: ['Create a GitHub OAuth App or GitHub App for Tatv AI.', 'Add the exact callback URL after the website is deployed.', 'Keep client secrets on the server and request only the repository permissions that are needed.'] },
+  { id: 'github', name: 'GitHub', mark: 'GH', className: 'github', tagline: 'Your code and repositories', detail: 'Connect repositories to discuss code, review project structure, and plan changes. Access will be limited to the permissions you approve.', permissions: 'Repositories · Issues · Pull requests', steps: ['Create a GitHub OAuth App or GitHub App for Dhwani AI.', 'Add the exact callback URL after the website is deployed.', 'Keep client secrets on the server and request only the repository permissions that are needed.'] },
   { id: 'youtube', name: 'YouTube', mark: '▶', className: 'youtube', tagline: 'Your video workspace', detail: 'Plan videos and, after authorization, work with channel data that you explicitly approve.', permissions: 'Channel · Videos · Analytics (as approved)', steps: ['Create a Google Cloud project and enable the YouTube Data API.', 'Configure the OAuth consent screen and final callback URL.', 'Request only the scopes required for the features you decide to build.'] },
   { id: 'instagram', name: 'Instagram', mark: '◎', className: 'instagram', tagline: 'Your social content ideas', detail: 'Plan captions and content now. Account data and publishing features require an eligible account and approved Meta permissions.', permissions: 'Profile and publishing scopes (if eligible)', steps: ['Create a Meta developer app and add the relevant Instagram product.', 'Use an eligible professional account and complete any required review.', 'Keep app secrets server-side and request user authorization.'] },
   { id: 'facebook', name: 'Facebook', mark: 'f', className: 'facebook', tagline: 'Your pages and community', detail: 'Connect your Facebook profile first. Page access for publishing and Insights is a separate optional permission step, available only when Meta approves it.', permissions: 'Profile · Optional Pages · Insights · Publishing (as approved)', steps: ['Configure Facebook Login and basic profile access.', 'Connect your profile first; the login does not request Page permissions.', 'Choose Connect Facebook Pages later if you need Page publishing or Insights, then complete any Meta review required for those permissions.'] },
 ];
 const providers = [
-  { id: "tatv-flash", name: "Tatv Flash", mark: "✳", className: "tatv", desc: "Fast replies for everyday questions, quick tasks and simple explanations.", status: "Automatic Tatv routing" },
-  { id: "tatv-smart", name: "Tatv Smart", mark: "✦", className: "tatv", desc: "Balanced help for study, research, writing and everyday coding.", status: "Automatic Tatv routing" },
-  { id: "tatv-ultra", name: "Tatv Ultra", mark: "✧", className: "tatv", desc: "Deeper reasoning for complex questions, planning and coding.", status: "Automatic Tatv routing" }
+  { id: "tatv-flash", name: "Dhwani Flash", mark: "✳", className: "tatv", desc: "Fast replies for everyday questions, quick tasks and simple explanations.", status: "Automatic Dhwani routing" },
+  { id: "tatv-smart", name: "Dhwani Smart", mark: "✦", className: "tatv", desc: "Balanced help for study, research, writing and everyday coding.", status: "Automatic Dhwani routing" },
+  { id: "tatv-ultra", name: "Dhwani Ultra", mark: "✧", className: "tatv", desc: "Deeper reasoning for complex questions, planning and coding.", status: "Automatic Dhwani routing" }
 ];
 let activeView = 'chat';
 let messageCount = 0;
-let activeModel = 'Tatv Smart';
+let activeModel = 'Dhwani Smart';
 let subscriptionStatus = { loaded: false, paid: false, planCode: null, expiresAt: null };
 let aiProviderStatus = { codeforgeGateway: false, loaded: false };
 let toastTimer;
@@ -316,7 +316,7 @@ function escapeHTML(value) {
 function openAuthModal(mode = "welcome", notice = "") {
   const backdrop = $("#modalBackdrop");
   const modal = $(".modal", backdrop);
-  openModal("Welcome to Tatv AI", "Sign in to continue.", "", "Close");
+  openModal("Welcome to Dhwani AI", "Sign in to continue.", "", "Close");
   backdrop.classList.add("auth-welcome-backdrop");
   modal.classList.add("auth-welcome-modal");
   $("#modalClose").hidden = true;
@@ -326,21 +326,21 @@ function openAuthModal(mode = "welcome", notice = "") {
   $("#modalDescription").hidden = true;
   $(".modal-actions", modal).hidden = true;
   $("#modalBody").innerHTML =
-    '<main class="cf-auth-screen" aria-label="Tatv account access">' +
+    '<main class="cf-auth-screen" aria-label="Dhwani account access">' +
       '<a class="cf-auth-contact" href="mailto:codefroge.academy@gmail.com">Contact us <span aria-hidden="true">↗</span></a>' +
       '<section class="cf-auth-content">' +
-        '<div class="cf-auth-brand-stage"><img class="cf-auth-logo" src="/tatv/tatv-mark.svg" alt="Tatv logo">' +
-        '<div class="cf-auth-brand-name">Tatv <span>AI</span></div><p class="cf-auth-tagline">Your workspace for ideas, learning and creation.</p></div>' +
+        '<div class="cf-auth-brand-stage"><img class="cf-auth-logo" src="/tatv/tatv-mark.svg" alt="Dhwani logo">' +
+        '<div class="cf-auth-brand-name">Dhwani <span>AI</span></div><p class="cf-auth-tagline">Your workspace for ideas, learning and creation.</p></div>' +
         '<div class="cf-auth-options">' +
           '<button type="button" class="cf-auth-action cf-auth-google" id="cfWelcomeGoogle"><span class="cf-auth-google-icon" aria-hidden="true">G</span><span>Continue with Google</span></button>' +
           '<button type="button" class="cf-auth-action cf-auth-facebook" id="cfWelcomeFacebook"><span class="cf-auth-facebook-icon" aria-hidden="true">f</span><span>Continue with Facebook</span></button>' +
           '<button type="button" class="cf-auth-action cf-auth-github" id="cfWelcomeGithub"><svg class="cf-auth-github-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.08c-3.1.67-3.76-1.32-3.76-1.32-.5-1.28-1.24-1.62-1.24-1.62-1.01-.69.08-.68.08-.68 1.12.08 1.71 1.15 1.71 1.15.99 1.7 2.6 1.21 3.23.93.1-.72.39-1.21.71-1.49-2.48-.28-5.09-1.24-5.09-5.52 0-1.22.44-2.22 1.15-3-.12-.28-.5-1.42.11-2.96 0 0 .94-.3 3.05 1.15a10.6 10.6 0 0 1 5.55 0c2.11-1.45 3.05-1.15 3.05-1.15.61 1.54.23 2.68.11 2.96.72.78 1.15 1.78 1.15 3 0 4.29-2.61 5.23-5.1 5.51.4.35.76 1.03.76 2.08v3.09c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z"/></svg><span>Continue with GitHub</span></button>' +
-          '<label class="cf-auth-consent"><input type="checkbox" id="cfAuthConsent"><span>I confirm that I have read and agree to Tatv\'s <a href="/terms-and-conditions.html" target="_blank" rel="noopener noreferrer">Terms of Use</a> and <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</span></label>' +
+          '<label class="cf-auth-consent"><input type="checkbox" id="cfAuthConsent"><span>I confirm that I have read and agree to Dhwani\'s <a href="/terms-and-conditions.html" target="_blank" rel="noopener noreferrer">Terms of Use</a> and <a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</span></label>' +
           '<p class="cf-auth-consent-hint" id="cfAuthConsentHint" role="status" aria-live="polite">Please accept the terms to continue.</p>' +
           '<button type="button" class="cf-auth-guest" id="cfWelcomeGuest" disabled>Continue as guest</button>' +
         '</div>' +
       '</section>' +
-      '<footer class="cf-auth-footer"><span>© ' + new Date().getFullYear() + ' Tatv AI</span><span>Secure account access</span></footer>' +
+      '<footer class="cf-auth-footer"><span>© ' + new Date().getFullYear() + ' Dhwani AI</span><span>Secure account access</span></footer>' +
     '</main>';
   const consent = $("#cfAuthConsent");
   const guestButton = $("#cfWelcomeGuest");
@@ -368,7 +368,7 @@ function openAuthModal(mode = "welcome", notice = "") {
     modal.classList.remove("auth-welcome-modal");
     backdrop.hidden = true;
     $(".modal-actions", modal).hidden = false;
-    toast("You're using Tatv AI as a guest. Sign in later to sync chats and manage your account.");
+    toast("You're using Dhwani AI as a guest. Sign in later to sync chats and manage your account.");
   });
 }
 function setAuthState(user) {
@@ -383,7 +383,7 @@ function setAuthState(user) {
   if (profileButton) {
     profileButton.hidden = false;
     const avatar = $(".avatar", profileButton);
-    const name = currentUser?.displayName || currentUser?.email?.split("@")[0] || "Tatv user";
+    const name = currentUser?.displayName || currentUser?.email?.split("@")[0] || "Dhwani user";
     if (avatar) {
       avatar.replaceChildren();
       if (currentUser?.avatarUrl && /^https:\/\//i.test(currentUser.avatarUrl)) {
@@ -398,7 +398,7 @@ function setAuthState(user) {
     if (small) small.textContent = currentUser?.email || "Edit details and manage account";
     const menu = $(".profile-menu", profileButton);
     if (menu) menu.textContent = currentUser ? "···" : "↗";
-    profileButton.title = currentUser ? "Open profile and settings" : "Sign in to Tatv AI";
+    profileButton.title = currentUser ? "Open profile and settings" : "Sign in to Dhwani AI";
   }
   const note = $(".sidebar-note");
   if (note) {
@@ -445,8 +445,8 @@ async function refreshSidebarUsage() {
     const response = await fetch("/api/billing/usage", { credentials: "same-origin", cache: "no-store" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) throw new Error("Usage unavailable");
-    const labels = { starter_monthly: "Legacy Go · ₹299", pro_monthly: "Tatv Plus · ₹499", creator_monthly: "Tatv Max · ₹1,999", pro_yearly: "Legacy yearly plan", free: "Free plan" };
-    plan.textContent = labels[data.planCode] || "Tatv plan";
+    const labels = { starter_monthly: "Legacy Go · ₹299", pro_monthly: "Dhwani Plus · ₹499", creator_monthly: "Dhwani Max · ₹1,999", pro_yearly: "Legacy yearly plan", free: "Free plan" };
+    plan.textContent = labels[data.planCode] || "Dhwani plan";
     videos.textContent = data.video?.mode === "coming-soon"
       ? "Coming soon"
       : formatQuota(data.video);
@@ -476,14 +476,14 @@ async function refreshSidebarUsage() {
 
 function openProfileSetupModal() {
   if (!currentUser || (Number.isInteger(currentUser.age) && currentUser.age >= 13 && currentUser.age <= 120)) return;
-  openModal("One last step", "Tell us your name and age to personalize your Tatv AI workspace.", "", "Close");
+  openModal("One last step", "Tell us your name and age to personalize your Dhwani AI workspace.", "", "Close");
   $(".modal-actions").hidden = true;
   $("#modalBody").innerHTML =
     '<form class="auth-form profile-setup-form" id="profileSetupForm">' +
     '<label class="auth-label" for="setupName">Your name</label><input id="setupName" class="auth-input" autocomplete="name" maxlength="70" required value="' + escapeHTML(currentUser.displayName || "") + '" placeholder="Enter your name">' +
     '<label class="auth-label" for="setupAge">Your age</label><input id="setupAge" class="auth-input" type="number" inputmode="numeric" min="13" max="120" step="1" required value="' + (Number.isInteger(currentUser.age) ? currentUser.age : "") + '" placeholder="Age">' +
     '<div class="auth-feedback" id="profileSetupFeedback" role="status" aria-live="polite"></div>' +
-    '<button type="submit" class="button-primary auth-submit" id="profileSetupSubmit">Continue to Tatv AI</button></form>';
+    '<button type="submit" class="button-primary auth-submit" id="profileSetupSubmit">Continue to Dhwani AI</button></form>';
   $("#profileSetupForm").addEventListener("submit", async event => {
     event.preventDefault();
     const displayName = $("#setupName").value.trim();
@@ -508,7 +508,7 @@ function openProfileSetupModal() {
       }
       setAuthState(payload.user);
       closeModal();
-      toast("Welcome to Tatv AI, " + payload.user.displayName + "!");
+      toast("Welcome to Dhwani AI, " + payload.user.displayName + "!");
     } catch {
       feedback.textContent = "Could not reach the account service. Check your connection and try again.";
     } finally {
@@ -520,7 +520,7 @@ function openProfileSetupModal() {
 function renderSettings() {
   const view = $("#settingsView");
   if (!currentUser) {
-    view.innerHTML = '<div class="page-heading"><div><div class="eyebrow left-eyebrow">PREFERENCES</div><h1>Settings</h1><p>Personalize your Tatv AI workspace.</p></div></div>' +
+    view.innerHTML = '<div class="page-heading"><div><div class="eyebrow left-eyebrow">PREFERENCES</div><h1>Settings</h1><p>Personalize your Dhwani AI workspace.</p></div></div>' +
       '<div class="settings-stack"><section class="settings-card"><div class="settings-card-icon">☾</div><div class="settings-card-copy"><strong>Appearance</strong><p>Choose your preferred theme from the profile menu.</p><small>Your theme preference is saved on this device.</small></div><button type="button" class="button-secondary" id="guestThemeToggle">Switch theme</button></section><section class="settings-card"><div class="settings-card-icon">◎</div><div class="settings-card-copy"><strong>Account</strong><p>Sign in to edit profile details and sync conversations.</p></div><button type="button" class="button-primary" id="guestSignIn">Sign in</button></section></div>';
     $("#guestThemeToggle")?.addEventListener("click", () => { const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; applyTheme(next); saveTheme(next); toast((next === "dark" ? "Dark" : "Light") + " theme enabled."); });
     $("#guestSignIn")?.addEventListener("click", () => openAuthModal("login"));
@@ -531,7 +531,7 @@ function renderSettings() {
     '<form class="settings-stack profile-settings" id="profileForm">' +
     '<section class="settings-card"><div class="settings-card-icon">☾</div><div class="settings-card-copy"><strong>Appearance</strong><p>Choose Light or Dark mode for your workspace.</p><small>Your selection is saved on this device.</small></div><button type="button" class="button-secondary" id="accountThemeToggle">Switch theme</button></section>' +
     '<section class="settings-card profile-edit-card"><div class="settings-card-icon">◎</div><div class="profile-fields">' +
-    '<strong>Profile details</strong><p>Choose how your name and avatar appear in Tatv AI.</p>' +
+    '<strong>Profile details</strong><p>Choose how your name and avatar appear in Dhwani AI.</p>' +
     '<label class="profile-label" for="profileName">Display name</label><input class="profile-input" id="profileName" maxlength="70" required value="' + escapeHTML(currentUser.displayName || "") + '">' +
     '<label class="profile-label" for="profileEmail">Email address</label><input class="profile-input" id="profileEmail" value="' + escapeHTML(currentUser.email || "") + '" readonly>' +
     '<label class="profile-label" for="profileAge">Age</label><input class="profile-input" id="profileAge" type="number" min="13" max="120" step="1" value="' + (Number.isInteger(currentUser.age) ? currentUser.age : "") + '">' +
@@ -540,7 +540,7 @@ function renderSettings() {
     '<section class="settings-card profile-edit-card"><div class="settings-card-icon">◇</div><div class="profile-fields"><strong>Change password</strong><p>Leave blank to keep your current password.</p>' +
     '<label class="profile-label" for="profilePassword">New password</label><input class="profile-input" id="profilePassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="At least 8 characters"></div></section>' +
     '<div class="profile-form-actions"><button type="submit" class="button-primary" id="saveProfileButton">Save changes</button><button type="button" class="button-secondary" id="logoutButton">Log out</button></div>' +
-    '<section class="settings-card legal-links-card"><div class="settings-card-icon">§</div><div class="settings-card-copy"><strong>Privacy & your data</strong><p>Read how Tatv AI handles account information, prompts, uploaded files, and connected services.</p><div class="legal-links"><a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy ↗</a><a href="/data-deletion.html" target="_blank" rel="noopener noreferrer">Request data deletion ↗</a></div></div></section>' +
+    '<section class="settings-card legal-links-card"><div class="settings-card-icon">§</div><div class="settings-card-copy"><strong>Privacy & your data</strong><p>Read how Dhwani AI handles account information, prompts, uploaded files, and connected services.</p><div class="legal-links"><a href="/privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy ↗</a><a href="/data-deletion.html" target="_blank" rel="noopener noreferrer">Request data deletion ↗</a></div></div></section>' +
     '<div class="profile-save-feedback" id="profileSaveFeedback" role="status" aria-live="polite"></div></form>';
   $("#accountThemeToggle")?.addEventListener("click", () => { const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; applyTheme(next); saveTheme(next); toast((next === "dark" ? "Dark" : "Light") + " theme enabled."); });
   $("#closeProfileSettings").addEventListener("click", () => setView("chat"));
@@ -623,7 +623,7 @@ async function initializeAuth() {
         await loadSavedConversations();
         setView("chat");
         if (!Number.isInteger(sessionPayload.user.age)) openProfileSetupModal();
-        else toast("You are signed in to Tatv AI.");
+        else toast("You are signed in to Dhwani AI.");
         return;
       }
       authSetupMessage = sessionPayload.message || "Google sign-in could not be completed. Please try again.";
@@ -766,8 +766,8 @@ function providerIdForModel() {
   return "smart";
 }
 function chatModeForModel(name) {
-  if (name === "Tatv Flash") return "flash";
-  if (name === "Tatv Ultra") return "ultra";
+  if (name === "Dhwani Flash") return "flash";
+  if (name === "Dhwani Ultra") return "ultra";
   return "smart";
 }
 async function refreshProviderStatus() {
@@ -803,8 +803,8 @@ async function refreshProviderStatus() {
 
 const subscriptionPlans = [
   { code: "free", name: "Free", price: "₹0", period: "forever", description: "Free chat and search, with small creator-tool allowances.", features: ["Text chat with fair-use safeguards", "Web search included", "YouTube, Facebook & Instagram Analysis — 3 uses/month", "Social edit/action requests — 1 use/month", "PDF and document analysis — 3 files/month", "Up to 2 AI image generations/month", "AI video generation — not included"], note: "Chat and web search are included at no subscription charge. Free includes 3 file analyses and 2 image generations each month; video generation is not included." },
-  { code: "pro_monthly", name: "Tatv Plus", price: "₹499", period: "per month", description: "More room for regular study and creator workflows.", features: ["Text chat with fair-use safeguards", "Web search included", "Unlimited YouTube, Facebook & Instagram Analysis", "Unlimited social edit/action requests", "PDF and document analysis — 20 files/month", "Up to 20 AI image generations/month", "AI video generation — 3 credits/month (up to 3 × 5-second clips)", "Automatic provider routing across eligible services"], note: "Monthly allowance: 20 file analyses, 20 generated images and 3 video credits. Current KIE Studio makes 5-second 720p text-to-video clips; Plus uses 1 credit per clip (up to 3 clips)." },
-  { code: "creator_monthly", name: "Tatv Max", price: "₹1,999", period: "per month", description: "The larger creator workspace for high-volume use.", features: ["Text chat with fair-use safeguards", "Web search included", "Unlimited YouTube, Facebook & Instagram Analysis", "Unlimited social edit/action requests", "PDF and document analysis — 60 files/month", "Up to 60 AI image generations/month", "AI video generation — 24 credits/month (up to 12 × 5-second clips)", "Automatic provider routing across eligible services"], note: "Monthly allowance: 60 file analyses, 60 generated images and 24 video credits. Current KIE Studio makes 5-second 720p text-to-video clips; Max uses 2 credits per clip (up to 12 clips/month)." }
+  { code: "pro_monthly", name: "Dhwani Plus", price: "₹499", period: "per month", description: "More room for regular study and creator workflows.", features: ["Text chat with fair-use safeguards", "Web search included", "Unlimited YouTube, Facebook & Instagram Analysis", "Unlimited social edit/action requests", "PDF and document analysis — 20 files/month", "Up to 20 AI image generations/month", "AI video generation — 3 credits/month (up to 3 × 5-second clips)", "Automatic provider routing across eligible services"], note: "Monthly allowance: 20 file analyses, 20 generated images and 3 video credits. Current KIE Studio makes 5-second 720p text-to-video clips; Plus uses 1 credit per clip (up to 3 clips)." },
+  { code: "creator_monthly", name: "Dhwani Max", price: "₹1,999", period: "per month", description: "The larger creator workspace for high-volume use.", features: ["Text chat with fair-use safeguards", "Web search included", "Unlimited YouTube, Facebook & Instagram Analysis", "Unlimited social edit/action requests", "PDF and document analysis — 60 files/month", "Up to 60 AI image generations/month", "AI video generation — 24 credits/month (up to 12 × 5-second clips)", "Automatic provider routing across eligible services"], note: "Monthly allowance: 60 file analyses, 60 generated images and 24 video credits. Current KIE Studio makes 5-second 720p text-to-video clips; Max uses 2 credits per clip (up to 12 clips/month)." }
 ];
 let subscriptionBillingType = "monthly";
 let subscriptionSelectedPlanCode = "pro_monthly";
@@ -850,16 +850,16 @@ function renderSubscriptionPlans(status, unavailable = false) {
     : paid && activeCode === selectedPlan.code
       ? '<button class="subscription-main-cta subscription-main-cta-current" type="button" disabled>Current plan active</button>'
       : '<button class="subscription-main-cta" type="button" data-buy-plan="' + selectedPlan.code + '">Continue with ' + escapeHTML(selectedPlan.name) + ' · ' + escapeHTML(selectedPlan.price) + ' <span aria-hidden="true">→</span></button>';
-  openModal("Upgrade to Tatv AI Plus", detail,
+  openModal("Upgrade to Dhwani AI Plus", detail,
     '<section class="subscription-content subscription-upgrade" aria-label="Upgrade subscription">' +
-      '<header class="subscription-upgrade-header"><span class="subscription-upgrade-icon" aria-hidden="true"><img src="/tatv/tatv-mark.svg" alt="Tatv AI logo"></span><div><span class="subscription-eyebrow">तत्व · TATV AI</span><h2>Choose your plan</h2><p>Simple plans. Clear benefits. Pick what works for you.</p></div></header>' +
+      '<header class="subscription-upgrade-header"><span class="subscription-upgrade-icon" aria-hidden="true"><img src="/tatv/tatv-mark.svg" alt="Dhwani AI logo"></span><div><span class="subscription-eyebrow">ध्वनि · DHWANI AI</span><h2>Choose your plan</h2><p>Simple plans. Clear benefits. Pick what works for you.</p></div></header>' +
       toggle +
       '<div class="subscription-carousel-hint"><span>Choose your plan</span><span class="subscription-desktop-hint">Compare plans side by side</span><span class="subscription-mobile-hint" aria-hidden="true">Swipe ← →</span></div>' +
       '<div class="subscription-plan-carousel" aria-label="Available plans">' + options + '</div>' +
       (subscriptionBillingType === "monthly" ? (
       '<section class="subscription-comparison" aria-label="Free and paid plan comparison">' +
         '<h3>Plan comparison</h3><p>Compare monthly limits and creator tools across all plans.</p>' +
-        '<div class="subscription-comparison-scroll"><table><thead><tr><th scope="col">Feature</th><th scope="col"><span>Free</span><strong>₹0</strong></th><th scope="col"><span>Tatv Plus</span><strong>₹499<span>/mo</span></strong></th><th scope="col"><span>Tatv Max</span><strong>₹1,999<span>/mo</span></strong></th></tr></thead><tbody>' +
+        '<div class="subscription-comparison-scroll"><table><thead><tr><th scope="col">Feature</th><th scope="col"><span>Free</span><strong>₹0</strong></th><th scope="col"><span>Dhwani Plus</span><strong>₹499<span>/mo</span></strong></th><th scope="col"><span>Dhwani Max</span><strong>₹1,999<span>/mo</span></strong></th></tr></thead><tbody>' +
           '<tr><th scope="row">Text chat</th><td><span class="comparison-yes">✓</span><small>Included · fair-use safeguards</small></td><td><span class="comparison-yes">✓</span><small>Included · fair-use safeguards</small></td><td><span class="comparison-yes">✓</span><small>Included · fair-use safeguards</small></td></tr>' +
           '<tr><th scope="row">Web search</th><td><span class="comparison-yes">✓</span><small>Included</small></td><td><span class="comparison-yes">✓</span><small>Included</small></td><td><span class="comparison-yes">✓</span><small>Included</small></td></tr>' +
           '<tr><th scope="row">Social analysis</th><td><span class="comparison-yes">✓</span><small>3 uses</small></td><td><span class="comparison-yes">✓</span><small>Unlimited</small></td><td><span class="comparison-yes">✓</span><small>Unlimited</small></td></tr>' +
@@ -1252,7 +1252,7 @@ function renderYouTubeStudio(data) {
       ? 'Reconnect YouTube to enable private 28-day analytics.'
       : '28-day views will appear when Analytics access is available.');
   return '<div class="cf-studio">' +
-    '<header class="cf-studio-topbar"><div class="cf-studio-brand"><span class="cf-studio-brandmark">✳</span><span><strong>Tatv Studio</strong><small>YouTube channel workspace</small></span></div><span class="cf-studio-connected"><i></i> Connected</span></header>' +
+    '<header class="cf-studio-topbar"><div class="cf-studio-brand"><span class="cf-studio-brandmark">✳</span><span><strong>Dhwani Studio</strong><small>YouTube channel workspace</small></span></div><span class="cf-studio-connected"><i></i> Connected</span></header>' +
     '<div class="cf-studio-channel"><img class="cf-studio-avatar" src="' + escapeHTML(channel.thumbnail || '') + '" alt=""><div class="cf-studio-channel-copy"><strong>' + escapeHTML(channel.title || 'Connected channel') + '</strong><small>@' + escapeHTML(channel.handle || channel.customUrl || channel.title || 'YouTube channel') + '</small></div><a class="cf-studio-open" href="' + escapeHTML(studioUrl) + '" target="_blank" rel="noopener noreferrer">Open YouTube Studio ↗</a></div>' +
     '<section class="cf-studio-content"><div class="cf-studio-section-head"><strong>Latest video</strong><a href="' + escapeHTML(studioUrl) + '" target="_blank" rel="noopener noreferrer">Manage videos ↗</a></div>' +
       latestMarkup +
@@ -1374,7 +1374,7 @@ async function connectIntegration(id) {
   hideGlobalBrandLoader();
   if (status && status.connected) {
     // The YouTube card is an external launch point: open the real Studio UI
-    // instead of trapping the user in Tatv's channel-summary modal.
+    // instead of trapping the user in Dhwani's channel-summary modal.
     if (id === "youtube") {
       window.location.assign("https://studio.youtube.com/");
       return;
@@ -1383,8 +1383,8 @@ async function connectIntegration(id) {
       ? (status.pagesConnected
           ? '<p>Your Facebook profile and authorized Pages are connected.</p><p class="integration-detail">Page Insights and publishing are available only for the Pages and actions that Meta has authorized for this app.</p>'
           : '<p>Your Facebook profile is connected. No Page access has been requested yet.</p><p class="integration-detail">To publish to a Page or read Page Insights, authorize Pages separately. This will ask Meta only for the additional Page permissions.</p><button type="button" class="primary-button" data-facebook-page-connect>Connect Facebook Pages</button>')
-      : '<p>Your account is connected. Tatv can help with workflows supported by the permissions you approved.</p>';
-    openModal(`${item.name} workspace`, `Your ${item.name} account is connected to Tatv AI.`, initialBody,
+      : '<p>Your account is connected. Dhwani can help with workflows supported by the permissions you approved.</p>';
+    openModal(`${item.name} workspace`, `Your ${item.name} account is connected to Dhwani AI.`, initialBody,
       'Disconnect', async () => {
         await fetch(`/api/social/${id}/disconnect`, { method: "POST", credentials: "same-origin" });
         integrationStatuses[id] = { ...(integrationStatuses[id] || {}), connected: false };
@@ -1491,7 +1491,7 @@ async function resumePendingSocialTask(provider) {
         .then(resumed => {
           if (!resumed) toast(message);
         })
-        .catch(() => toast("The account connected, but Tatv could not resume the saved request. Please send it again."));
+        .catch(() => toast("The account connected, but Dhwani could not resume the saved request. Please send it again."));
     } else {
       try { sessionStorage.removeItem("cf-pending-social-resume"); } catch {}
       toast(message);
@@ -1573,7 +1573,7 @@ async function pollKieVideoJob(jobId) {
     }
     const text = result.status === "in_progress"
       ? "KIE is rendering your video…"
-      : "Your video is queued. Tatv will check again shortly.";
+      : "Your video is queued. Dhwani will check again shortly.";
     setKieVideoStatus(text, "working");
     const retryAfterSeconds = Number(result.retryAfterSeconds);
     const retryDelayMs = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
@@ -1644,7 +1644,7 @@ async function loadKieVideoHistory() {
 async function openWanVideoStudio(initialPrompt = "", autoSubmit = false) {
   stopKieVideoPolling();
   const body =
-    '<section class="kie-video-studio" aria-label="Tatv video studio">' +
+    '<section class="kie-video-studio" aria-label="Dhwani video studio">' +
       '<div class="kie-video-studio-head"><div><span class="vs-eyebrow">TATV STUDIO</span><h2>AI video generation</h2><p>Generate a short 5-second video and track its rendering status.</p></div><span class="vs-pill">KIE · Preview</span></div>' +
       '<form id="cfKieVideoForm" class="kie-video-form">' +
         '<label class="vs-label" for="cfKieVideoPrompt">Describe your video</label>' +
@@ -1767,7 +1767,7 @@ async function openWanVideoStudio(initialPrompt = "", autoSubmit = false) {
       if (jobIdNode) jobIdNode.textContent = activeKieVideoJobId;
       setKieVideoStatus(
         result.status === "submission_pending"
-          ? "The provider may have accepted this request. Tatv will reconcile its status; do not submit it again."
+          ? "The provider may have accepted this request. Dhwani will reconcile its status; do not submit it again."
           : "Your request was accepted. Waiting for the video provider…",
         "working"
       );
@@ -1793,9 +1793,9 @@ async function openWanVideoStudio(initialPrompt = "", autoSubmit = false) {
 }
 function showAbout() {
   openModal(
-    'About Tatv AI',
+    'About Dhwani AI',
     'A chat-first AI workspace with secure accounts, personal settings, and streamed AI replies.',
-    `<ul><li>Sign in is required for Tatv Smart in this private alpha; the private gateway applies per-user usage limits.</li><li>AI responses stream to the screen as they are generated.</li><li>Only integrations with configured OAuth credentials and approved permissions can connect.</li><li>Signed-in conversations are saved to your Tatv account.</li><li>Inline image, audio and video analysis is disabled until an approved multimodal provider is configured.</li></ul>`,
+    `<ul><li>Sign in is required for Dhwani Smart in this private alpha; the private gateway applies per-user usage limits.</li><li>AI responses stream to the screen as they are generated.</li><li>Only integrations with configured OAuth credentials and approved permissions can connect.</li><li>Signed-in conversations are saved to your Dhwani account.</li><li>Inline image, audio and video analysis is disabled until an approved multimodal provider is configured.</li></ul>`,
     'Back to workspace'
   );
 }
@@ -1807,9 +1807,9 @@ async function showModelPicker() {
     return `<button class="model-option" data-model="${item.name}" ${enabled ? "" : "disabled"} style="display:flex;width:100%;align-items:center;gap:10px;padding:10px;border:0;border-radius:8px;text-align:left;background:${selected ? "var(--accent-soft)" : "transparent"};color:var(--text);margin-top:4px;opacity:${enabled ? "1" : ".55"};cursor:${enabled ? "pointer" : "not-allowed"}"><span class="platform-mark ${item.className}" style="width:28px;height:28px;font-size:13px">${item.mark}</span><span style="flex:1"><strong style="display:block;font-size:12px;font-weight:600">${item.name}</strong><small style="display:block;color:var(--muted);font-size:10px;margin-top:3px">${item.desc}</small></span><span aria-hidden="true">${selected ? "✓" : enabled ? "›" : "·"}</span></button>`;
   }).join("");
   const description = enabled
-    ? "Choose a Tatv mode. Provider selection and failover happen automatically; you do not need to choose an API or vendor."
+    ? "Choose a Dhwani mode. Provider selection and failover happen automatically; you do not need to choose an API or vendor."
     : "The private AI routing service is not configured yet. Connect an eligible provider in the private gateway to enable chat.";
-  openModal("Choose your Tatv mode", description, list, "Done");
+  openModal("Choose your Dhwani mode", description, list, "Done");
   $$("#modalBody [data-model]:not(:disabled)").forEach(button => button.addEventListener("click", () => {
     activeModel = button.dataset.model;
     $("#selectedModel").textContent = activeModel;
@@ -2307,7 +2307,7 @@ async function resumeSavedConversationGeneration(conversationId, sessionToken, g
 
     pending = document.createElement("article");
     pending.className = "message response pending-message";
-    pending.innerHTML = `<span class="message-avatar" aria-hidden="true"><img src="/tatv/tatv-mark.svg" alt=""></span><div class="message-content"><div class="message-text pending-typing" role="status" aria-live="polite" aria-label="Tatv is responding"><span class="cf-typing-indicator" aria-hidden="true"><span></span><span></span><span></span></span></div></div>`;
+    pending.innerHTML = `<span class="message-avatar" aria-hidden="true"><img src="/tatv/tatv-mark.svg" alt=""></span><div class="message-content"><div class="message-text pending-typing" role="status" aria-live="polite" aria-label="Dhwani is responding"><span class="cf-typing-indicator" aria-hidden="true"><span></span><span></span><span></span></span></div></div>`;
     const messageContent = $(".message-content", pending);
     const text = $(".message-text", pending);
     const revealRecoveredText = () => {
@@ -2381,7 +2381,7 @@ async function resumeSavedConversationGeneration(conversationId, sessionToken, g
         const note = document.createElement("p");
         note.className = "cf-response-state-note";
         note.textContent = terminalStatus === "cancel_requested"
-          ? "Cancellation requested · Tatv is confirming the stop."
+          ? "Cancellation requested · Dhwani is confirming the stop."
           : "Still generating · This is a live partial preview. Reopen this chat to continue recovering the complete response.";
         messageContent.appendChild(note);
       }
@@ -2674,10 +2674,10 @@ async function cleanupChatUploads(paths) {
       body: JSON.stringify({ operation: "delete", paths })
     });
     if (!response.ok) {
-      console.warn("[Tatv uploads] Temporary private files could not be cleaned up.");
+      console.warn("[Dhwani uploads] Temporary private files could not be cleaned up.");
     }
   } catch {
-    console.warn("[Tatv uploads] Temporary private files could not be cleaned up.");
+    console.warn("[Dhwani uploads] Temporary private files could not be cleaned up.");
   }
 }
 
@@ -2798,8 +2798,8 @@ async function handleSelectedFiles(event) {
 function openGoogleDriveSetup() {
   openModal(
     "Google Drive",
-    "Google Drive file picking needs an OAuth client and the Google Picker API. That connection is not configured in Tatv yet.",
-    '<div class="media-generator"><p class="media-generator-help">For now, open Drive, download the file to this device, then use + → Documents &amp; files or Photos &amp; videos. The file picker in Tatv will attach it locally.</p><p><a href="https://drive.google.com/drive/my-drive" target="_blank" rel="noopener noreferrer" id="openDriveLink">Open Google Drive in a new tab ↗</a></p><p class="media-generator-help">Official setup guide: <a href="https://developers.google.com/drive/picker/guides/overview" target="_blank" rel="noopener noreferrer">Google Picker API</a>.</p></div>',
+    "Google Drive file picking needs an OAuth client and the Google Picker API. That connection is not configured in Dhwani yet.",
+    '<div class="media-generator"><p class="media-generator-help">For now, open Drive, download the file to this device, then use + → Documents &amp; files or Photos &amp; videos. The file picker in Dhwani will attach it locally.</p><p><a href="https://drive.google.com/drive/my-drive" target="_blank" rel="noopener noreferrer" id="openDriveLink">Open Google Drive in a new tab ↗</a></p><p class="media-generator-help">Official setup guide: <a href="https://developers.google.com/drive/picker/guides/overview" target="_blank" rel="noopener noreferrer">Google Picker API</a>.</p></div>',
     "Got it"
   );
 }
@@ -2808,7 +2808,7 @@ function openGoogleDriveSetup() {
 function askMediaPermission(pending, type) {
   const isVideo = type === "video";
   const label = isVideo ? "video" : "photo";
-  const model = isVideo ? "Tatv Video Studio (KIE)" : "Image model (private AI gateway)";
+  const model = isVideo ? "Dhwani Video Studio (KIE)" : "Image model (private AI gateway)";
   const text = $(".message-text", pending);
   pending.classList.remove("cf-connecting-state");
   if (text) text.textContent = `क्या आपको ${isVideo ? "वीडियो" : "फोटो"} चाहिए? हाँ कहने पर मैं ${model} पर switch करके ${label} बनाऊँगा। नहीं कहने पर मैं सिर्फ़ text में जवाब दूँगा।`;
@@ -3045,14 +3045,14 @@ function createDocumentPdf(text, kind, requestText = "") {
       ctx.fillStyle = "#ee9e37"; ctx.fillRect(0, 112, width, 8);
       ctx.textAlign = "left"; ctx.fillStyle = "#ffffff";
       ctx.font = "bold 26px Arial, 'Noto Sans Devanagari', sans-serif";
-      ctx.fillText("तत्व · TATV AI  ·  LEARNING NOTES", margin, 66);
+      ctx.fillText("ध्वनि · DHWANI AI  ·  LEARNING NOTES", margin, 66);
       ctx.fillStyle = "#77829b"; ctx.font = "18px Arial, 'Noto Sans Devanagari', sans-serif"; ctx.textAlign = "right";
       ctx.fillText("Page " + pageNumber, width - margin, height - 38);
       y = 170;
     } else {
       ctx.textAlign = "left"; ctx.fillStyle = "#263c67";
       ctx.font = "bold 24px Arial, 'Noto Sans Devanagari', sans-serif";
-      ctx.fillText("Tatv AI · Generated " + (kind === "pdf" ? "PDF" : "document"), margin, 62);
+      ctx.fillText("Dhwani AI · Generated " + (kind === "pdf" ? "PDF" : "document"), margin, 62);
       ctx.strokeStyle = "#e1e5ee"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(margin, 88); ctx.lineTo(width - margin, 88); ctx.stroke();
       ctx.fillStyle = "#8a8a8a"; ctx.font = "18px Arial, 'Noto Sans Devanagari', sans-serif"; ctx.textAlign = "right";
       ctx.fillText("Page " + pageNumber, width - margin, height - 45);
@@ -3182,7 +3182,7 @@ async function buildYouTubeContext(prompt, signal) {
             topVideos: (data.analytics.topVideos || []).slice(0, 10),
           })}`
         : `Private YouTube Studio Analytics are unavailable. Status: ${data.analyticsError || 'UNAVAILABLE'}. If the user asks for watch time, retention, or other private Studio metrics, explain that the connected account must be re-authorized with read-only Analytics permission; never invent missing metrics.`;
-      return `\n\n[REAL YOUTUBE CHANNEL CONTEXT — fetched from the user's connected YouTube account]\nChannel Name: ${channel.title || 'Unavailable'}\nChannel Description: ${channel.description || 'Not provided'}\nSubscribers: ${Number(channel.subscribers || 0)}\nTotal Channel Views: ${Number(channel.views || 0)}\nTotal Videos: ${Number(channel.videoCount || 0)}\nTop Videos by public views: ${JSON.stringify(top)}\nRecent Videos: ${JSON.stringify(recent)}\n${suggestedContext}\n${analyticsContext}\nUse the real channel and related-video context to compare titles, public view counts, thumbnails, and topics. Suggest improved title/description/tag drafts when requested, but do not claim a change was saved unless a write endpoint confirms it. Channel metadata can be saved through the Tatv Studio edit forms; profile photo/banner and the actual uploaded video footage still require YouTube Studio or a separate video-editing workflow. Do not invent metrics or claim these search results are the exact personalized recommendation feed.`;
+      return `\n\n[REAL YOUTUBE CHANNEL CONTEXT — fetched from the user's connected YouTube account]\nChannel Name: ${channel.title || 'Unavailable'}\nChannel Description: ${channel.description || 'Not provided'}\nSubscribers: ${Number(channel.subscribers || 0)}\nTotal Channel Views: ${Number(channel.views || 0)}\nTotal Videos: ${Number(channel.videoCount || 0)}\nTop Videos by public views: ${JSON.stringify(top)}\nRecent Videos: ${JSON.stringify(recent)}\n${suggestedContext}\n${analyticsContext}\nUse the real channel and related-video context to compare titles, public view counts, thumbnails, and topics. Suggest improved title/description/tag drafts when requested, but do not claim a change was saved unless a write endpoint confirms it. Channel metadata can be saved through the Dhwani Studio edit forms; profile photo/banner and the actual uploaded video footage still require YouTube Studio or a separate video-editing workflow. Do not invent metrics or claim these search results are the exact personalized recommendation feed.`;
     }
     if (data.videos && data.videos.length > 0) {
       const top = data.videos.slice(0, 5).map(v => `- "${v.title}" by ${v.channel} (${Number(v.views || 0).toLocaleString()} views)`).join('\n');
@@ -3383,12 +3383,12 @@ function updateVoiceButtons() {
   document.body.classList.toggle("cf-voice-speaking", voiceConversationEnabled && voiceBusy);
   document.body.classList.toggle("cf-voice-listening", voiceConversationEnabled && !voiceBusy && !voiceInputMuted && recognitionActive);
   const orbLabel = $("#cfVoiceOrb .cf-voice-orb-label");
-  if (orbLabel) orbLabel.textContent = !voiceConversationEnabled ? "Tatv AI voice" : voiceBusy ? "Tatv AI बोल रहा है…" : voiceInputMuted ? "आवाज़ साफ़ हो रही है…" : recognitionActive ? "सुन रहा है — आपकी बात लिख रहा हूँ…" : "Tatv AI तैयार है…";
+  if (orbLabel) orbLabel.textContent = !voiceConversationEnabled ? "Dhwani AI voice" : voiceBusy ? "Dhwani AI बोल रहा है…" : voiceInputMuted ? "आवाज़ साफ़ हो रही है…" : recognitionActive ? "सुन रहा है — आपकी बात लिख रहा हूँ…" : "Dhwani AI तैयार है…";
   if (voiceButton) {
     voiceButton.classList.toggle("is-active", voiceConversationEnabled);
     voiceButton.setAttribute("aria-pressed", String(voiceConversationEnabled));
     voiceButton.setAttribute("aria-label", voiceConversationEnabled ? "Stop voice conversation" : "Start voice conversation");
-    voiceButton.title = voiceConversationEnabled ? "Stop voice conversation" : "Talk with Tatv AI — choose a voice";
+    voiceButton.title = voiceConversationEnabled ? "Stop voice conversation" : "Talk with Dhwani AI — choose a voice";
   }
   if (micButton) {
     const listening = recognitionPurpose === "dictation" && recognitionActive;
@@ -3428,7 +3428,7 @@ function speakVoicePreview(voiceURI, sampleText = "") {
   const voice = availableSpeechVoices().find(v => v.voiceURI === voiceURI);
   if (!voice) { toast("This voice is not currently available on your device."); return; }
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(sampleText || "Hello! I am Tatv AI. How can I help you today?");
+  const utterance = new SpeechSynthesisUtterance(sampleText || "Hello! I am Dhwani AI. How can I help you today?");
   utterance.lang = voice.lang || "en-IN";
   utterance.voice = voice;
   utterance.rate = 1.05;
@@ -3824,7 +3824,7 @@ async function startMultilingualVoiceInput() {
     },
     onError: error => {
       const status = Number(error?.status || 0);
-      console.error("Tatv voice transcription failed", error);
+      console.error("Dhwani voice transcription failed", error);
       const isConfigurationError = status === 503 && /not configured/i.test(String(error?.message || ""));
       if ([401, 403, 502].includes(status) || isConfigurationError || error instanceof TypeError) {
         // Never switch back to browser SpeechRecognition: it reopens the OS
@@ -3870,7 +3870,7 @@ async function beginVoiceConversation() {
   }
 
   // Keep the microphone stream open, but mute its recording path in software
-  // while Tatv is generating or speaking. This prevents delayed browser
+  // while Dhwani is generating or speaking. This prevents delayed browser
   // SpeechRecognition results from feeding the assistant's own voice back as
   // the next user turn.
   if (activeRecognition) stopRecognition();
@@ -3937,13 +3937,13 @@ function installVoiceControls() {
     return button;
   };
   const dictation = makeButton("dictationButton", "Speak to type a message", '<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>');
-  const voice = makeButton("voiceChatButton", "Talk with Tatv AI — choose a voice", '<path d="M3 12h2l2-5 3 10 3-14 3 14 2-5h3"/><path d="M5 18c2 2 4 3 7 3s5-1 7-3"/>');
+  const voice = makeButton("voiceChatButton", "Talk with Dhwani AI — choose a voice", '<path d="M3 12h2l2-5 3 10 3-14 3 14 2-5h3"/><path d="M5 18c2 2 4 3 7 3s5-1 7-3"/>');
   dictation.addEventListener("click", toggleDictation);
   voice.addEventListener("click", toggleVoiceConversation);
   right.insertBefore(dictation, send); right.insertBefore(voice, send);
   const orb = document.createElement("div");
   orb.id = "cfVoiceOrb"; orb.className = "cf-voice-orb-wrap"; orb.setAttribute("aria-hidden", "true");
-  orb.innerHTML = '<div class="cf-voice-orb"><span class="cf-orb-core"></span><span class="cf-orb-ring cf-orb-ring-one"></span><span class="cf-orb-ring cf-orb-ring-two"></span><span class="cf-orb-glow"></span></div><div class="cf-voice-orb-label">Tatv AI voice</div>';
+  orb.innerHTML = '<div class="cf-voice-orb"><span class="cf-orb-core"></span><span class="cf-orb-ring cf-orb-ring-one"></span><span class="cf-orb-ring cf-orb-ring-two"></span><span class="cf-orb-glow"></span></div><div class="cf-voice-orb-label">Dhwani AI voice</div>';
   const zone = $(".composer-zone");
   if (zone) zone.prepend(orb);
   try { selectedSpeechVoiceURI = localStorage.getItem("cf-speech-voice-uri") || ""; } catch {}
@@ -3993,7 +3993,7 @@ function renderConnectorRequiredCard(pending, connector, prompt, session) {
   heading.textContent = providers.length > 1 ? "Connect to continue" : "Connect " + providerNames[providers[0].id];
   const description = document.createElement("p");
   description.className = "cf-connect-request-description";
-  description.textContent = connector.description || "Connect your account to let Tatv use the information you requested.";
+  description.textContent = connector.description || "Connect your account to let Dhwani use the information you requested.";
   introCopy.append(eyebrow, heading, description);
   intro.append(introIcon, introCopy);
 
@@ -4115,13 +4115,13 @@ function detectSocialActionIntent(prompt, attachments = []) {
   if (youtubeCommunityPost && imageAttachment) {
     return {
       unsupported: true,
-      message: "मैंने तुम्हारी फोटो पहचान ली है। लेकिन YouTube Community में फोटो/text पोस्ट करना अभी Tatv के connected YouTube API से उपलब्ध नहीं है। इसलिए मैंने कुछ भी पोस्ट नहीं किया है। इसे YouTube Studio के Create → Create post विकल्प से प्रकाशित करना होगा।"
+      message: "मैंने तुम्हारी फोटो पहचान ली है। लेकिन YouTube Community में फोटो/text पोस्ट करना अभी Dhwani के connected YouTube API से उपलब्ध नहीं है। इसलिए मैंने कुछ भी पोस्ट नहीं किया है। इसे YouTube Studio के Create → Create post विकल्प से प्रकाशित करना होगा।"
     };
   }
   if (youtubeCommunityPost && !imageAttachment) {
     return {
       unsupported: true,
-      message: "YouTube Community post अभी Tatv के connected YouTube API से उपलब्ध नहीं है। अगर तुम फोटो पोस्ट करना चाहते हो, तो फोटो attach कर सकते हो; मैं तुम्हें सही तरीका बता दूँगा, लेकिन अपने-आप पोस्ट नहीं कर पाऊँगा।"
+      message: "YouTube Community post अभी Dhwani के connected YouTube API से उपलब्ध नहीं है। अगर तुम फोटो पोस्ट करना चाहते हो, तो फोटो attach कर सकते हो; मैं तुम्हें सही तरीका बता दूँगा, लेकिन अपने-आप पोस्ट नहीं कर पाऊँगा।"
     };
   }
   const thumbnailRequest = /\b(?:youtube\s+)?thumbnail\s+(?:update|change|set)|थंबनेल\s+(?:बदल|अपडेट)/i.test(text);
@@ -4133,7 +4133,7 @@ function detectSocialActionIntent(prompt, attachments = []) {
     return { provider: "youtube", action: "thumbnail-update", body: { videoId }, fileAttachmentName: imageAttachment.name, summary: "YouTube video thumbnail update", detail: "Video ID: " + videoId + "\nImage: " + imageAttachment.name };
   }
   const bannerRequest = /\b(?:youtube\s+)?banner\s+(?:update|change|set)|चैनल\s+बैनर\s+(?:बदल|अपडेट)/i.test(text);
-  if (bannerRequest && !imageAttachment) return { unsupported: true, message: "To update your YouTube banner, attach a JPG/PNG image and ask Tatv to use it as your channel banner." };
+  if (bannerRequest && !imageAttachment) return { unsupported: true, message: "To update your YouTube banner, attach a JPG/PNG image and ask Dhwani to use it as your channel banner." };
   if (bannerRequest && imageAttachment) {
     return { provider: "youtube", action: "banner-update", body: {}, fileAttachmentName: imageAttachment.name, summary: "YouTube channel banner update", detail: "Image: " + imageAttachment.name };
   }
@@ -4373,7 +4373,7 @@ async function sendMessage(text, options = {}) {
 
   const pending = document.createElement("article");
   pending.className = "message response pending-message";
-  pending.innerHTML = `<span class="message-avatar" aria-hidden="true"><img src="/tatv/tatv-mark.svg" alt=""></span><div class="message-content"><div class="message-text pending-typing" role="status" aria-live="polite" aria-label="Tatv is responding"><span class="cf-typing-indicator" aria-hidden="true"><span></span><span></span><span></span></span></div><button type="button" class="pending-stop-button" data-stop-generation aria-label="Stop response" title="Stop response"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"></rect></svg></button></div>`;
+  pending.innerHTML = `<span class="message-avatar" aria-hidden="true"><img src="/tatv/tatv-mark.svg" alt=""></span><div class="message-content"><div class="message-text pending-typing" role="status" aria-live="polite" aria-label="Dhwani is responding"><span class="cf-typing-indicator" aria-hidden="true"><span></span><span></span><span></span></span></div><button type="button" class="pending-stop-button" data-stop-generation aria-label="Stop response" title="Stop response"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"></rect></svg></button></div>`;
   $("#messages").appendChild(pending);
 
   const stopButton = $("[data-stop-generation]", pending);
@@ -4457,7 +4457,7 @@ async function sendMessage(text, options = {}) {
           completeActivity("complete");
         } else {
           updateActivity("Cancellation not confirmed", "The server did not confirm the stop request. The saved generation may still be running.", "error", "stop-request-failed");
-          toast("Tatv could not confirm the stop request. The generation may continue; reopen this chat to recover its result.");
+          toast("Dhwani could not confirm the stop request. The generation may continue; reopen this chat to recover its result.");
         }
       });
     } else {
@@ -4505,7 +4505,7 @@ async function sendMessage(text, options = {}) {
       updateActivity("Checking YouTube account access", "Verifying the connected channel before requesting its analytics.", "active", "creator-context");
     } else if (/\b(?:instagram|insta|facebook|fb)\b|इंस्टाग्राम|फेसबुक/i.test(clean) &&
                /\b(?:my|mine|our|analy[sz]e|analysis|insights?|analytics|performance)\b|(?:मेरा|मेरी|मेरे|एनालिसिस|विश्लेषण|आंकड़े|आँकड़े)/i.test(clean)) {
-      updateActivity("Checking social account access", "Verifying the account and permissions you asked Tatv to use.", "active", "creator-context");
+      updateActivity("Checking social account access", "Verifying the account and permissions you asked Dhwani to use.", "active", "creator-context");
     } else {
       updateActivity("Preparing your request", "Validating the conversation and gathering any context needed before the AI starts.", "active", "request-preparation");
     }
@@ -4529,12 +4529,12 @@ async function sendMessage(text, options = {}) {
     const documentIntent = attachmentsToSend.length === 0 ? detectComposerDocumentIntent(clean) : null;
     const mediaIntent = mediaApproved && !documentIntent && !channelAnalysisIntent ? candidateMedia : null;
     if (mediaIntent === "video") {
-      updateActivity("Opening Tatv Video Studio", "Preparing your approved video brief for the configured KIE video model.", "active", "video-studio");
+      updateActivity("Opening Dhwani Video Studio", "Preparing your approved video brief for the configured KIE video model.", "active", "video-studio");
       await openWanVideoStudio(clean, Boolean(currentUser));
       if (session !== chatSessionToken) return;
       const studioMessage = currentUser
-        ? "I have opened Tatv Video Studio with your video brief. The Studio checks your account, plan and available credits before submitting the KIE job, then shows the rendering status and finished video."
-        : "Your video brief is ready in Tatv Video Studio. Sign in to submit the request and track the generated video.";
+        ? "I have opened Dhwani Video Studio with your video brief. The Studio checks your account, plan and available credits before submitting the KIE job, then shows the rendering status and finished video."
+        : "Your video brief is ready in Dhwani Video Studio. Sign in to submit the request and track the generated video.";
       pending.className = "message response";
       revealPendingAnswer();
       renderAssistantContent($(".message-text", pending), studioMessage);
@@ -4738,7 +4738,7 @@ async function sendMessage(text, options = {}) {
           }
         } catch {
           // Durable recovery is an enhancement; an unavailable recovery store
-          // must not make normal Tatv chat fail.
+          // must not make normal Dhwani chat fail.
           updateActivity("Starting a standard chat", "Saved-response recovery could not be reached; normal chat will continue.", "active", "generation-fallback");
         }
       }
@@ -4755,7 +4755,7 @@ async function sendMessage(text, options = {}) {
     let payload = {};
     let reply = directActionReply || "";
     let responseWasStreamed = false;
-    let responseModel = directActionReply ? "Tatv Action Center" : activeModel;
+    let responseModel = directActionReply ? "Dhwani Action Center" : activeModel;
     if (response && !response.ok) {
       try { payload = await response.json(); } catch { /* An API error payload is expected. */ }
       preserveDurableGenerationOnFailure =
@@ -4774,7 +4774,7 @@ async function sendMessage(text, options = {}) {
         }
         return;
       }
-      const error = new Error(payload.message || "Tatv AI could not complete this request. Please try again.");
+      const error = new Error(payload.message || "Dhwani AI could not complete this request. Please try again.");
       error.code = payload.error || "REQUEST_FAILED";
       throw error;
     }
@@ -4834,7 +4834,7 @@ async function sendMessage(text, options = {}) {
           const mediaBlob = await fetch(mediaUrl).then(result => result.blob());
           const file = new File([mediaBlob], isVideo ? "tatv-ai-video.mp4" : "tatv-ai-image.png", { type: mediaBlob.type || (isVideo ? "video/mp4" : "image/png") });
           if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
-            await navigator.share({ files: [file], title: isVideo ? "Tatv AI video" : "Tatv AI image" });
+            await navigator.share({ files: [file], title: isVideo ? "Dhwani AI video" : "Dhwani AI image" });
           } else {
             download.click();
             share.title = "Sharing unavailable — image downloaded";
@@ -4992,7 +4992,7 @@ async function sendMessage(text, options = {}) {
       if (!directActionReply) {
         try { payload = await response.json(); } catch { /* Handle invalid API responses below. */ }
         reply = typeof payload.reply === "string" ? payload.reply : "";
-        responseModel = payload.model || "Tatv Smart";
+        responseModel = payload.model || "Dhwani Smart";
       }
     }
     if (activeGenerationId && !durableStreamAccepted && !preserveDurableGenerationOnFailure) {
@@ -5011,7 +5011,7 @@ async function sendMessage(text, options = {}) {
     } else if (zipEditRequested) {
       reply += (reply ? "\n\n" : "") + "No archive changes were applied because I could not verify a complete, safe file-change bundle. Your original ZIP remains unchanged.";
     }
-    if (documentIntent) responseModel = "Tatv Document Studio";
+    if (documentIntent) responseModel = "Dhwani Document Studio";
     pending.className = "message response";
     revealPendingAnswer();
     if (!voiceReply && voiceConversationEnabled && !projectBundleRequested) {
@@ -5177,7 +5177,7 @@ async function sendMessage(text, options = {}) {
       if (partialReply.trim()) {
         const stateNote = document.createElement("p");
         stateNote.className = "cf-response-state-note";
-        stateNote.textContent = "Still running · The latest text is only a partial preview. Tatv has kept the original user turn so the complete response can be recovered later.";
+        stateNote.textContent = "Still running · The latest text is only a partial preview. Dhwani has kept the original user turn so the complete response can be recovered later.";
         $(".message-content", pending).appendChild(stateNote);
       }
       if (currentConversationId) pendingDurableGenerations.set(currentConversationId, activeGenerationId);
@@ -5353,7 +5353,7 @@ async function showCreatorMilestones() {
       ? "Your video crossed " + celebration.milestone.label + ". Keep creating — your audience is growing!"
       : latestUpload
         ? "Your channel has a new video. Keep sharing what you know with the world."
-        : "Your Tatv workspace is ready. Let’s make your next video count.";
+        : "Your Dhwani workspace is ready. Let’s make your next video count.";
     const video = celebration?.video || latestUpload;
     const thumb = video?.thumbnail ? '<img class="creator-celebration-thumb" src="' + escapeHTML(video.thumbnail) + '" alt="" loading="lazy">' : '<span class="creator-celebration-play" aria-hidden="true">▶</span>';
     const videoLink = video?.url ? '<a class="creator-celebration-video" href="' + escapeHTML(video.url) + '" target="_blank" rel="noopener noreferrer">' + thumb + '<span><strong>' + escapeHTML(video.title || "View your video") + '</strong><small>' + number(video.views) + ' views · Watch video ↗</small></span></a>' : "";
@@ -5376,7 +5376,7 @@ function renderLibrary() {
     view = document.createElement("section");
     view.className = "view library-view";
     view.id = "libraryView";
-    view.innerHTML = '<div class="page-heading"><div><div class="eyebrow left-eyebrow">YOUR WORKSPACE</div><h1>Library</h1><p>Keep useful files close while you work with Tatv AI.</p></div></div><div class="library-empty-card"><span class="library-empty-icon" aria-hidden="true">▤</span><h2>Your library starts here</h2><p>Attach a PDF, document, spreadsheet, or image to a chat. You can add files whenever you need help understanding or working with them.</p><button class="button-primary" id="libraryUpload" type="button">＋ Add a file to chat</button></div>';
+    view.innerHTML = '<div class="page-heading"><div><div class="eyebrow left-eyebrow">YOUR WORKSPACE</div><h1>Library</h1><p>Keep useful files close while you work with Dhwani AI.</p></div></div><div class="library-empty-card"><span class="library-empty-icon" aria-hidden="true">▤</span><h2>Your library starts here</h2><p>Attach a PDF, document, spreadsheet, or image to a chat. You can add files whenever you need help understanding or working with them.</p><button class="button-primary" id="libraryUpload" type="button">＋ Add a file to chat</button></div>';
     document.querySelector(".main-area")?.insertBefore(view, document.querySelector(".app-footer"));
     document.getElementById("libraryUpload")?.addEventListener("click", () => {
       setView("chat");
@@ -5507,13 +5507,13 @@ document.querySelector(".side-nav")?.addEventListener("click", event => {
 
 function currentConversationTitle() {
   const firstUser = conversationHistory.find(message => message && message.role === "user" && typeof message.content === "string");
-  const title = firstUser?.content?.trim() || "Tatv AI conversation";
+  const title = firstUser?.content?.trim() || "Dhwani AI conversation";
   return title.length > 90 ? title.slice(0, 90) + "…" : title;
 }
 function currentConversationText() {
   return conversationHistory
     .filter(message => message && (message.role === "user" || message.role === "assistant") && typeof message.content === "string")
-    .map(message => (message.role === "user" ? "You" : "Tatv AI") + "\n\n" + message.content.trim())
+    .map(message => (message.role === "user" ? "You" : "Dhwani AI") + "\n\n" + message.content.trim())
     .join("\n\n---\n\n");
 }
 function syncChatMenuAvailability() {
@@ -5581,7 +5581,7 @@ async function shareCurrentConversation() {
   const title = currentConversationTitle();
   try {
     if (typeof navigator.share === "function") {
-      await navigator.share({ title: title + " · Tatv AI", text });
+      await navigator.share({ title: title + " · Dhwani AI", text });
     } else {
       await navigator.clipboard.writeText("# " + title + "\n\n" + text);
       toast("Conversation copied. You can now share it anywhere.");
@@ -5673,7 +5673,7 @@ document.addEventListener('keydown', event => {
 function updateHeroGreeting() {
   const name = currentUser?.displayName?.trim();
   const element = document.getElementById("heroGreeting");
-  if (element) element.textContent = name ? "नमस्ते, " + name + "! मैं तत्व हूँ" : "नमस्ते, मैं तत्व हूँ";
+  if (element) element.textContent = name ? "नमस्ते, " + name + "! मैं ध्वनि हूँ" : "नमस्ते, मैं ध्वनि हूँ";
 }
 updateHeroGreeting();
 
@@ -5699,16 +5699,16 @@ updateHeroGreeting();
   view.id = 'legalView';
   view.innerHTML = `
     <div class="legal-heading">
-      <div class="eyebrow left-eyebrow">तत्व · TATV AI · LEGAL</div>
+      <div class="eyebrow left-eyebrow">ध्वनि · DHWANI AI · LEGAL</div>
       <h1>Privacy Policy</h1>
       <p class="legal-updated">Effective date: 29 October 2026 · Please read this page before using paid features.</p>
-      <p>This page explains how Tatv AI handles information and sets out the current subscription cancellation and refund rules. Please also review the linked public policies before purchasing.</p>
+      <p>This page explains how Dhwani AI handles information and sets out the current subscription cancellation and refund rules. Please also review the linked public policies before purchasing.</p>
     </div>
     <article class="legal-card">
       <h2>1. Who we are</h2>
-      <p>Tatv AI is an AI workspace intended to help users chat, learn, write, code, and work with supported tools. For privacy questions, email <a href="mailto:codefroge.academy@gmail.com">codefroge.academy@gmail.com</a>.</p>
+      <p>Dhwani AI is an AI workspace intended to help users chat, learn, write, code, and work with supported tools. For privacy questions, email <a href="mailto:codefroge.academy@gmail.com">codefroge.academy@gmail.com</a>.</p>
       <h2>2. Information we may collect</h2>
-      <ul><li><strong>Account information:</strong> name and email address when you create an account or sign in.</li><li><strong>Content you submit:</strong> prompts, messages, and files you choose to upload or send to a connected feature.</li><li><strong>Service and usage information:</strong> selected features, plan/credit usage, transaction references, error reports, and basic device/browser logs where generated by the service.</li><li><strong>Payment information:</strong> payment status and transaction identifiers supplied by our payment provider. We do not intend to store full card details on Tatv AI servers.</li></ul>
+      <ul><li><strong>Account information:</strong> name and email address when you create an account or sign in.</li><li><strong>Content you submit:</strong> prompts, messages, and files you choose to upload or send to a connected feature.</li><li><strong>Service and usage information:</strong> selected features, plan/credit usage, transaction references, error reports, and basic device/browser logs where generated by the service.</li><li><strong>Payment information:</strong> payment status and transaction identifiers supplied by our payment provider. We do not intend to store full card details on Dhwani AI servers.</li></ul>
       <h2>3. How information is used</h2>
       <p>Information may be used to provide and maintain the service, authenticate accounts, respond to support requests, process subscriptions and credits, prevent fraud or abuse, troubleshoot errors, and meet legal obligations. We should not use account information for unrelated purposes without an appropriate legal basis or notice.</p>
       <h2>4. AI providers and connected services</h2>

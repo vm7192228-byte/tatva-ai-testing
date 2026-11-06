@@ -33,8 +33,8 @@ export function speechVoiceQuality(voice) {
 export const SPEECH_VOICE_SLOTS = [
   { id: "hi-male", language: "hi", gender: "male", label: "Male · Hindi", preview: "नमस्ते! मैं तत्व AI हूँ। आज मैं आपकी किस तरह मदद कर सकता हूँ?" },
   { id: "hi-female", language: "hi", gender: "female", label: "Female · Hindi", preview: "नमस्ते! मैं तत्व AI हूँ। आज मैं आपकी किस तरह मदद कर सकती हूँ?" },
-  { id: "en-male", language: "en", gender: "male", label: "Male · English", preview: "Hello! I’m Tatv AI. How can I help you today?" },
-  { id: "en-female", language: "en", gender: "female", label: "Female · English", preview: "Hello! I’m Tatv AI. How can I help you today?" },
+  { id: "en-male", language: "en", gender: "male", label: "Male · English", preview: "Hello! I’m Dhwani AI. How can I help you today?" },
+  { id: "en-female", language: "en", gender: "female", label: "Female · English", preview: "Hello! I’m Dhwani AI. How can I help you today?" },
 ];
 
 export function selectSpeechVoiceOptions(voices) {

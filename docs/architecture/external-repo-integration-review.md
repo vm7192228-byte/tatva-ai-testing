@@ -59,7 +59,7 @@ Instead, the Workbench adds an opt-in provider adapter for the official base mod
 - Current input support: text only; the existing Gemini route continues to handle inline image, PDF, audio and video attachments.
 - Current Qwen tool loop: disabled by default. Enable only after the inference server has the matching Qwen `qwen3_coder` parser and the Workbench approval flow is validated end-to-end.
 
-The provider uses the existing streaming adapter and the Workbench server's system instruction. It does not switch the default model away from Tatv Smart/Gemini and does not add any client-side API key.
+The provider uses the existing streaming adapter and the Workbench server's system instruction. It does not switch the default model away from Dhwani Smart/Gemini and does not add any client-side API key.
 
 ### Hosting and operational requirements
 

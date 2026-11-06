@@ -63,7 +63,7 @@ jobs:
           src/lib/codeforge-markup.ts
           src/routes/index.tsx
           src/routes/__root.tsx
-          src/test/tatv-branding.test.ts
+          src/test/dhwani-branding.test.ts
           src/test/github-api.server.test.ts
           src/lib/media-api.server.ts
           src/lib/kie-video-provider.server.ts
@@ -115,7 +115,7 @@ jobs:
           src/test/voice-input.test.ts
           src/test/setup.ts
           src/test/app-routing.test.tsx
-          src/test/tatv-branding-ui.test.ts
+          src/test/dhwani-branding-ui.test.ts
           src/lib/file-tools.test.ts
           public/codeforge/file-tools.js
           --rule 'prettier/prettier: off'

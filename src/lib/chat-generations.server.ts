@@ -319,7 +319,7 @@ function isTerminal(status: GenerationStatus): boolean {
 }
 
 /**
- * Persists each Tatv SSE envelope before it is delivered to the browser.
+ * Persists each Dhwani SSE envelope before it is delivered to the browser.
  * On a browser disconnect, the pump deliberately keeps consuming the upstream
  * stream; ExecutionContext.waitUntil keeps the task alive on supported workers.
  */
@@ -529,7 +529,7 @@ export async function persistChatGenerationStream(
             );
             if (finalStatus === "cancelled") terminalStatus = "cancelled";
           } catch {
-            console.error("[Tatv AI] Durable generation finalization was not confirmed.");
+            console.error("[Dhwani AI] Durable generation finalization was not confirmed.");
           }
         } catch (error) {
           generationAbort.abort(error);
@@ -547,7 +547,7 @@ export async function persistChatGenerationStream(
             try {
               await finishChatGeneration(runtimeEnv, userId, generationId, "cancelled", "Cancelled by the account owner.");
             } catch {
-              console.error("[Tatv AI] Durable cancellation state could not be saved.");
+              console.error("[Dhwani AI] Durable cancellation state could not be saved.");
             }
           } else {
             const payload = {
@@ -562,7 +562,7 @@ export async function persistChatGenerationStream(
             try {
               await finishChatGeneration(runtimeEnv, userId, generationId, "failed", "Event persistence failed.");
             } catch {
-              console.error("[Tatv AI] Durable generation failure state could not be saved.");
+              console.error("[Dhwani AI] Durable generation failure state could not be saved.");
             }
           }
         } finally {
@@ -577,7 +577,7 @@ export async function persistChatGenerationStream(
       const waitUntil = (executionContext as ExecutionContextLike | undefined)?.waitUntil;
       if (typeof waitUntil === "function") {
         try { waitUntil.call(executionContext, pumpPromise); }
-        catch { console.error("[Tatv AI] The runtime did not accept the background generation task."); }
+        catch { console.error("[Dhwani AI] The runtime did not accept the background generation task."); }
       }
     },
     cancel() {
@@ -704,7 +704,7 @@ export async function handleChatGenerationsApiRequest(
         signal: AbortSignal.timeout(8_000),
       });
       if (!conversationResponse.ok) {
-        return json({ error: "CONVERSATION_VERIFY_FAILED", message: "Tatv could not verify that this saved conversation belongs to your account." }, 503, session.cookies);
+        return json({ error: "CONVERSATION_VERIFY_FAILED", message: "Dhwani could not verify that this saved conversation belongs to your account." }, 503, session.cookies);
       }
       const ownedConversations = await conversationResponse.json() as Array<{ id?: string }>;
       if (!Array.isArray(ownedConversations) || ownedConversations.length === 0) {

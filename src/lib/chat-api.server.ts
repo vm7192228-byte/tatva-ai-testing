@@ -135,10 +135,10 @@ export function shouldConsumeSuperChatAllowance(_provider: unknown, _paidAccess:
   return false;
 }
 
-export type TatvChatMode = "flash" | "smart" | "ultra";
+export type DhwaniChatMode = "flash" | "smart" | "ultra";
 
 /** Parse only the three public Dhwani modes; unknown input safely falls back to Smart. */
-export function parseTatvChatMode(value: unknown): TatvChatMode {
+export function parseDhwaniChatMode(value: unknown): DhwaniChatMode {
   return value === "flash" || value === "ultra" ? value : "smart";
 }
 
@@ -3005,7 +3005,7 @@ export async function handleChatApiRequest(
     const usageError = await checkUsageAndChatQuota();
     if (usageError) return usageError;
 
-    const chatMode = parseTatvChatMode(payload.chatMode);
+    const chatMode = parseDhwaniChatMode(payload.chatMode);
     const modeModelVariable = chatMode === "flash"
       ? "CODEFORGE_GATEWAY_FLASH_MODEL"
       : chatMode === "ultra"
@@ -3086,7 +3086,7 @@ export async function handleChatApiRequest(
     const fallbackBaseUrl = available.codeforgeGatewayFallbackBaseUrl;
     const fallback2BaseUrl = available.codeforgeGatewayFallback2BaseUrl;
     const fallback3BaseUrl = available.codeforgeGatewayFallback3BaseUrl;
-    const chatMode = parseTatvChatMode(payload.chatMode);
+    const chatMode = parseDhwaniChatMode(payload.chatMode);
     const publicModeLabel = chatMode === "flash" ? "Dhwani Flash" : chatMode === "ultra" ? "Dhwani Ultra" : "Dhwani Smart";
     const baseModel = envValue("CODEFORGE_GATEWAY_MODEL", runtimeEnv) ?? "auto";
     const modeModelVariable = chatMode === "flash"

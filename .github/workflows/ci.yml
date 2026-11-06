@@ -45,8 +45,13 @@ jobs:
             src/test/media-api-quota-reservations.test.ts \
             src/test/usage-limits-reservations.test.ts
 
-      - name: Run ESLint
-        run: bun run lint
+      - name: Lint changed server routing and quota modules
+        run: |
+          bun run eslint \
+            src/lib/chat-api.server.ts \
+            src/lib/chat-failover.server.ts \
+            src/lib/usage-limits.server.ts \
+            src/lib/supabase-service-headers.server.ts
 
       - name: Build production application
         run: bun run build

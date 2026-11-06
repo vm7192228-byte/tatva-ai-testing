@@ -83,7 +83,7 @@ describe("image generation quota reservation lifecycle", () => {
     );
 
     expect(response?.status).toBe(503);
-    expect((await response?.json()).error).toBe("IMAGE_MODEL_NOT_CONFIGURED");
+    expect(await response?.json()).toMatchObject({ error: "IMAGE_MODEL_NOT_CONFIGURED" });
     expect(calls.some(call => call.url.endsWith("/rpc/cf_reserve_usage_quota"))).toBe(false);
     expect(calls.some(call => call.url.endsWith("/images/generations"))).toBe(false);
   });

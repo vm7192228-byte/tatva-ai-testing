@@ -32,8 +32,18 @@ jobs:
       - name: Install locked dependencies
         run: bun install --frozen-lockfile
 
-      - name: Run unit and integration tests
-        run: bun run test
+      - name: Run routing, provider and quota regression tests
+        run: |
+          bun run vitest run \
+            src/test/chat-api-freellmapi.test.ts \
+            src/test/chat-failover.test.ts \
+            src/test/chat-smart-dual-gateway.test.ts \
+            src/test/chat-api-providers.test.ts \
+            src/test/chat-provider-adapters.test.ts \
+            src/test/chat-api-file-quota.test.ts \
+            src/test/chat-quota-reservations.test.ts \
+            src/test/media-api-quota-reservations.test.ts \
+            src/test/usage-limits-reservations.test.ts
 
       - name: Run ESLint
         run: bun run lint

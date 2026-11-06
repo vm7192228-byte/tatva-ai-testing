@@ -5,8 +5,8 @@
 - Keep the FreeLLMAPI unified key server-side and never forward it to a private gateway.
 - Preserve user-level authentication, suspension, permissions, quota and content-policy decisions as terminal; never replay after output or tool side effects begin.
 - Sanitize upstream diagnostics into a neutral user-facing failure message.
-- Replace all customer-facing Tatv AI names and logos with the Dhwani AI sound-wave identity, including login/signup, app shell, assistant avatars, loading indicators, plan screens, favicon and public/legal pages.
-- Remove the retired Tatv SVG and favicon assets and rename the old theme stylesheet.
+- Replace all customer-facing previous product names and logos with the Dhwani AI sound-wave identity, including login/signup, app shell, assistant avatars, loading indicators, plan screens, favicon and public/legal pages.
+- Remove the retired logo SVG and favicon assets and rename the old theme stylesheet.
 - Fix the Supabase admin-key recursion that previously broke usage reservations.
 
 ## Verification

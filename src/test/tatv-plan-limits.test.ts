@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-describe("Tatv subscription limit migration", () => {
+describe("Dhwani subscription limit migration", () => {
   const migration = readFileSync(
     resolve(process.cwd(), "supabase/migrations/20261105170900_align_tatv_plan_limits.sql"),
     "utf8",

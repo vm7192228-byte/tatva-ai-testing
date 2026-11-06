@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Dhwani AI — a simple workspace to chat, think, build, and connect your tools." },
       { property: "og:title", content: "Dhwani AI" },
       { property: "og:description", content: "A simple workspace to chat, think, build, and connect your tools." },
-      { name: "theme-color", content: #f4f6ff },
+      { name: "theme-color", content: "#f4f6ff" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

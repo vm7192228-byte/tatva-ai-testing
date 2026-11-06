@@ -53,9 +53,14 @@ function envValue(name: string, runtimeEnv: unknown): string | undefined {
 }
 
 function configFromEnv(runtimeEnv: unknown): SupabaseConfig | null {
-  const rawUrl = envValue("SUPABASE_URL", runtimeEnv);
-  const key = envValue("SUPABASE_ANON_KEY", runtimeEnv)
-    ?? envValue("SUPABASE_PUBLISHABLE_KEY", runtimeEnv);
+  // Prefer app-owned variables over Vercel Marketplace integration variables.
+  // This prevents an attached Supabase integration for another project from
+  // silently routing Google/Auth requests to that project's Auth endpoint.
+  const rawUrl = envValue("TATV_SUPABASE_URL", runtimeEnv)
+    ?? envValue("SUPABASE_URL", runtimeEnv);
+  const key = envValue("TATV_SUPABASE_PUBLISHABLE_KEY", runtimeEnv)
+    ?? envValue("SUPABASE_PUBLISHABLE_KEY", runtimeEnv)
+    ?? envValue("SUPABASE_ANON_KEY", runtimeEnv);
   if (!rawUrl || !key) return null;
   try {
     const parsed = new URL(rawUrl);

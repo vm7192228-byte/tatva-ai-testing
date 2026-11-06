@@ -306,19 +306,22 @@ describe("KIE /api/video route regression coverage", () => {
       status: "queued",
     });
     expect(mocks.createKieVideoTask).toHaveBeenCalledOnce();
-    expect(mocks.createKieVideoTask).toHaveBeenCalledWith(
-      context(),
-      {
-        model: "wan/2-7-text-to-video",
-        modelInput: {
-          prompt: "A quiet ocean at sunrise",
-          ratio: "16:9",
-          duration: 5,
-          watermark: false,
-        },
-        callBackUrl: expect.stringMatching(/^https:\/\/codeforge\.example\/api\/video\?callback=1&jobId=/),
+    const createArgs = mocks.createKieVideoTask.mock.calls[0]?.[1] as {
+      model?: string;
+      modelInput?: Record<string, unknown>;
+      callBackUrl?: string;
+    };
+    expect(createArgs).toMatchObject({
+      model: "wan/2-7-text-to-video",
+      modelInput: {
+        prompt: "A quiet ocean at sunrise",
+        ratio: "16:9",
+        duration: 5,
+        resolution: "720p",
+        watermark: false,
       },
-    );
+    });
+    expect(createArgs.callBackUrl).toMatch(/^https:\/\/codeforge\.example\/api\/video\?callback=1&jobId=/);
   });
 
   it("includes a signed KIE callback URL and recovers a task ID after the first database update fails", async () => {

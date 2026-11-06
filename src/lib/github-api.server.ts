@@ -95,9 +95,9 @@ async function readPayload(response: Response): Promise<Record<string, unknown>>
 async function requireToken(request: Request, runtimeEnv: unknown): Promise<{ token: GitHubToken; cookies: string[] } | { response: Response }> {
   const session = await getAuthenticatedSession(request, runtimeEnv);
   if (session.unavailable) return { response: json({ error: "AUTH_UNAVAILABLE", message: "The account service is temporarily unavailable. Your existing session has been preserved; please retry." }, 503, session.cookies) };
-  if (!session.user) return { response: json({ error: "AUTH_REQUIRED", message: "Sign in to Tatv AI before connecting GitHub." }, 401, session.cookies) };
+  if (!session.user) return { response: json({ error: "AUTH_REQUIRED", message: "Sign in to Dhwani AI before connecting GitHub." }, 401, session.cookies) };
   const token = await getToken(request, runtimeEnv, session.user["id"]);
-  if (!token) return { response: json({ error: "GITHUB_NOT_CONNECTED", message: "Connect your GitHub account to this Tatv AI account first." }, 401, session.cookies) };
+  if (!token) return { response: json({ error: "GITHUB_NOT_CONNECTED", message: "Connect your GitHub account to this Dhwani AI account first." }, 401, session.cookies) };
   return { token, cookies: session.cookies };
 }
 async function readBody(request: Request): Promise<Record<string, unknown> | null> {
@@ -137,7 +137,7 @@ export async function handleGitHubApiRequest(request: Request, runtimeEnv: unkno
   if (path === "connect" && request.method === "GET") {
     const session = await getAuthenticatedSession(request, runtimeEnv);
     if (session.unavailable) return json({ error: "AUTH_UNAVAILABLE", message: "The account service is temporarily unavailable. Your existing session has been preserved; please retry." }, 503, session.cookies);
-    if (!session.user) return json({ error: "AUTH_REQUIRED", message: "Sign in to Tatv AI before connecting GitHub." }, 401, session.cookies);
+    if (!session.user) return json({ error: "AUTH_REQUIRED", message: "Sign in to Dhwani AI before connecting GitHub." }, 401, session.cookies);
     if (!clientId || !clientSecret || !secret) return json({ error: "GITHUB_NOT_CONFIGURED", message: "GitHub OAuth requires the client ID, client secret and token-encryption secret in server environment variables." }, 503, session.cookies);
     const state = toBase64Url(crypto.getRandomValues(new Uint8Array(24)));
     const authorize = new URL("https://github.com/login/oauth/authorize");
@@ -187,7 +187,7 @@ export async function handleGitHubApiRequest(request: Request, runtimeEnv: unkno
     if (!sameOrigin(request)) return json({ error: "ORIGIN_NOT_ALLOWED" }, 403);
     const session = await getAuthenticatedSession(request, runtimeEnv);
     if (session.unavailable) return json({ error: "AUTH_UNAVAILABLE", message: "The account service is temporarily unavailable. Your existing session has been preserved; please retry." }, 503, session.cookies);
-    if (!session.user) return json({ error: "AUTH_REQUIRED", message: "Sign in to Tatv AI before disconnecting GitHub." }, 401, session.cookies);
+    if (!session.user) return json({ error: "AUTH_REQUIRED", message: "Sign in to Dhwani AI before disconnecting GitHub." }, 401, session.cookies);
     const token = secret ? await getToken(request, runtimeEnv, session.user["id"]) : null;
     let revoked = false;
     if (token && clientId && clientSecret) {
@@ -206,7 +206,7 @@ export async function handleGitHubApiRequest(request: Request, runtimeEnv: unkno
   }
   if (request.method === "OPTIONS") return new Response(null, { status: 204 });
   if (request.method !== "GET" && request.method !== "POST") return json({ error: "METHOD_NOT_ALLOWED" }, 405);
-  if (request.method === "POST" && !sameOrigin(request)) return json({ error: "ORIGIN_NOT_ALLOWED", message: "This GitHub action must come from Tatv AI." }, 403);
+  if (request.method === "POST" && !sameOrigin(request)) return json({ error: "ORIGIN_NOT_ALLOWED", message: "This GitHub action must come from Dhwani AI." }, 403);
 
   const auth = await requireToken(request, runtimeEnv);
   if ("response" in auth) return auth.response;

@@ -277,8 +277,8 @@ describe("Claude Messages API stream adapter", () => {
     const failure = events.find(event => event["error"]);
 
     expect(failure?.["code"]).toBe("UPSTREAM_UNAVAILABLE");
-    expect(failure?.["error"]).toContain("overloaded");
-    expect(failure?.["retryAfterSeconds"]).toBe(2);
+    expect(failure?.["error"]).toBe("Tatv could not complete this reply. Please try again in a moment.");
+    expect(failure?.["retryAfterSeconds"]).toBeUndefined();
     expect(JSON.stringify(events)).not.toContain("internal details");
   });
 });
@@ -349,8 +349,8 @@ describe("provider throttling and safe error handling", () => {
     const failure = events.find(event => event["error"]);
 
     expect(failure?.["code"]).toBe("UPSTREAM_RATE_LIMITED");
-    expect(failure?.["retryAfterSeconds"]).toBe(3);
-    expect(failure?.["error"]).toContain("quota");
+    expect(failure?.["retryAfterSeconds"]).toBeUndefined();
+    expect(failure?.["error"]).toBe("Tatv could not complete this reply. Please try again in a moment.");
     expect(JSON.stringify(events)).not.toContain("raw account-specific details");
     expect(JSON.stringify(events)).not.toContain("deepseek-test-secret");
   });

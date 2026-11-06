@@ -12,7 +12,7 @@ describe("Dhwani AI brand and chat shell", () => {
     expect(codeforgeMarkup).toContain("Dhwani AI");
     expect(codeforgeMarkup).toContain("What's on the agenda today?");
     expect(codeforgeMarkup).toContain('placeholder="How can I help you today?"');
-    expect(codeforgeMarkup).toContain("dhwani-suggestions");
+    expect(codeforgeMarkup).toContain("hero-brand-mark");
   });
 
   it("keeps the existing chat, attachment, voice and AI model controls available", () => {

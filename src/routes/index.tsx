@@ -5,11 +5,11 @@ import { codeforgeMarkup } from "@/lib/codeforge-markup";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "तत्व · Tatv AI" },
-      { name: "description", content: "Tatv AI — a simple workspace to chat, think, build, and connect your tools." },
-      { property: "og:title", content: "Tatv AI" },
+      { title: "ध्वनि · Dhwani AI" },
+      { name: "description", content: "Dhwani AI — a simple workspace to chat, think, build, and connect your tools." },
+      { property: "og:title", content: "Dhwani AI" },
       { property: "og:description", content: "A simple workspace to chat, think, build, and connect your tools." },
-      { name: "theme-color", content: "#f6f3fb" },
+      { name: "theme-color", content: #f4f6ff },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -19,7 +19,8 @@ export const Route = createFileRoute("/")({
       { rel: "stylesheet", href: "/codeforge/styles.css" },
       { rel: "stylesheet", href: "/codeforge/video-studio.css" },
       { rel: "stylesheet", href: "/codeforge/tatv-theme.css" },
-      { rel: "icon", type: "image/svg+xml", href: "/tatv/tatv-mark.svg" },
+      { rel: "stylesheet", href: "/codeforge/dhwani-ui.css" },
+      { rel: "icon", type: "image/svg+xml", href: "/dhwani/dhwani-mark.svg" },
     ],
   }),
   component: Index,

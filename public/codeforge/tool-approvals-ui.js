@@ -65,7 +65,7 @@ export function renderToolApprovalCard(container, approval) {
     card.appendChild(detail);
   }
   if (approval.destructive === true) {
-    card.appendChild(textElement("p", "This is a destructive action. Tatv will ask you to confirm again on the review page.", styles.warning));
+    card.appendChild(textElement("p", "This is a destructive action. Dhwani will ask you to confirm again on the review page.", styles.warning));
   } else {
     card.appendChild(textElement("p", "Nothing has been published or changed yet.", styles.body));
   }

@@ -12,7 +12,7 @@ function approval(overrides: Record<string, unknown> = {}) {
     destructive: false,
     preview: {
       pageId: "page-123",
-      message: "Hello from CodeForge",
+      message: "Hello from Dhwani",
     },
     status: "pending",
     createdAt: new Date(Date.now() - 60_000).toISOString(),
@@ -50,7 +50,7 @@ describe("authenticated approval review page browser flow", () => {
 
     try {
       expect(await screen.findByRole("heading", { name: "Publish Facebook post" })).toBeTruthy();
-      expect(screen.getByText("Hello from CodeForge")).toBeTruthy();
+      expect(screen.getByText("Hello from Dhwani")).toBeTruthy();
       expect(screen.getByText("page-123")).toBeTruthy();
 
       expect(fetchMock).toHaveBeenCalledWith(
@@ -218,7 +218,7 @@ describe("authenticated approval review page browser flow", () => {
       .mockResolvedValueOnce(response({
         ok: false,
         status: "uncertain",
-        message: "CodeForge could not verify the platform response. Check your connected account before requesting the action again.",
+        message: "Dhwani could not verify the platform response. Check your connected account before requesting the action again.",
       }, 502));
     vi.stubGlobal("fetch", fetchMock);
     const page = renderApprovalPage();

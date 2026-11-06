@@ -1,0 +1,139 @@
+name: Chat engine feature CI
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/**"
+      - "feature/**"
+      - "fix/**"
+  pull_request:
+    branches:
+      - main
+      - feat/part-1-core-chat-engine
+      - "fix/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chat-engine-feature-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Tests, lint and production build
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run unit and regression tests
+        run: bun run test
+
+      - name: Type-check application and tests
+        run: bunx tsc --noEmit
+
+      - name: Check all browser scripts for undefined runtime identifiers
+        if: always()
+        run: >-
+          bunx eslint public/codeforge
+          --rule 'prettier/prettier: off'
+          --rule 'no-empty: off'
+          --rule 'no-useless-escape: off'
+          --rule 'no-misleading-character-class: off'
+
+      - name: Lint changed chat-engine TypeScript files
+        if: always()
+        run: >-
+          bunx eslint
+          src/lib/chat-api.server.ts
+          src/lib/conversations-api.server.ts
+          src/lib/chat-limits.ts
+          src/lib/codeforge-markup.ts
+          src/routes/index.tsx
+          src/routes/__root.tsx
+          src/test/tatv-branding.test.ts
+          src/test/github-api.server.test.ts
+          src/lib/media-api.server.ts
+          src/lib/kie-video-provider.server.ts
+          src/lib/video-job-polling.server.ts
+          src/lib/chat-failover.server.ts
+          src/routes/api.video.ts
+          src/routes/api.transcribe.ts
+          src/lib/usage-limits.server.ts
+          src/lib/billing-api.server.ts
+          src/lib/auth-api.server.ts
+          src/test/auth-api.server.test.ts
+          src/lib/github-api.server.ts
+          src/lib/shared-rate-limit.server.ts
+          src/lib/uploads-api.server.ts
+          src/lib/server-tools.server.ts
+          src/lib/chat-tool-streams.server.ts
+          src/lib/tool-approvals.server.ts
+          src/lib/chat-generations.server.ts
+          src/test/conversations-api.server.test.ts
+          src/workflows/durable-chat-generation.ts
+          src/server.ts
+          'src/routes/tool-approvals/$id.tsx'
+          src/test/media-api-long-form.test.ts
+          src/test/kie-video-provider.test.ts
+          src/test/video-job-polling.test.ts
+          src/test/api-video-route.test.ts
+          src/test/api-transcribe.test.ts
+          src/test/uploads-api.server.test.ts
+          src/test/tus-upload.test.ts
+          src/test/chat-failover.test.ts
+          src/test/video-studio-ui.test.ts
+          src/test/usage-limits-reservations.test.ts
+          src/test/billing-subscription-recovery.test.ts
+          src/test/billing-create-order.test.ts
+          src/test/shared-rate-limit.test.ts
+          src/test/media-api-quota-reservations.test.ts
+          src/test/chat-quota-reservations.test.ts
+          src/test/client-media-intent.test.ts
+          src/test/chat-api-limits.test.ts
+          src/test/chat-api-providers.test.ts
+          src/test/chat-api-file-quota.test.ts
+          src/test/chat-provider-adapters.test.ts
+          src/test/server-tools.test.ts
+          src/test/tool-approvals.test.ts
+          src/test/tool-approvals-page.test.tsx
+          src/test/tool-approvals-card.test.ts
+          src/test/chat-tool-streams.test.ts
+          src/test/chat-generations.test.ts
+          src/test/voice-input.test.ts
+          src/test/setup.ts
+          src/test/app-routing.test.tsx
+          src/test/tatv-branding-ui.test.ts
+          src/lib/file-tools.test.ts
+          public/codeforge/file-tools.js
+          --rule 'prettier/prettier: off'
+
+      - name: Validate browser chat and approval scripts
+        if: always()
+        run: |
+          node --input-type=module --check < public/codeforge/app.js
+          node --input-type=module --check < public/codeforge/github-client.js
+          node --input-type=module --check < public/codeforge/tool-approvals-ui.js
+          node --input-type=module --check < public/codeforge/voice-input.js
+          node --input-type=module --check < public/codeforge/file-tools.js
+          node --input-type=module --check < public/codeforge/tus-upload.js
+
+      - name: Build production bundle
+        if: always()
+        run: bun run build
+
+      - name: Build Vercel output and Workflow transforms
+        if: always()
+        run: VERCEL=1 bun run build

@@ -1,0 +1,62 @@
+name: Private Alpha Browser E2E
+
+on:
+  push:
+    branches:
+      - "fix/**"
+  pull_request:
+    branches:
+      - main
+      - "fix/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: private-alpha-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-e2e:
+    name: Chromium private-alpha smoke and voice flows
+    runs-on: ubuntu-26.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install locked application dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install isolated Playwright test runner
+        run: npm install --no-save --package-lock=false @playwright/test@1.64.1
+
+      - name: Install Chromium and OS dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Run private-alpha browser and voice tests
+        run: npx playwright test
+        env:
+          CI: "true"
+
+      - name: Upload browser traces and reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: private-alpha-playwright-results
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7

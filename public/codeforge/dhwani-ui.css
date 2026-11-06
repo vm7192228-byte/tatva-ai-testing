@@ -255,7 +255,7 @@ body { background-image: radial-gradient(ellipse at 76% 0%, rgba(218, 226, 255, 
   font-size: 14px;
   line-height: 1.75;
 }
-.tatv-suggestions.dhwani-suggestions {
+.dhwani-suggestions.dhwani-suggestions {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   width: min(850px, 100%);
@@ -471,7 +471,7 @@ body { background-image: radial-gradient(ellipse at 76% 0%, rgba(218, 226, 255, 
 
 @media (max-width: 1050px) {
   .sidebar { width: 248px; min-width: 248px; }
-  .tatv-suggestions.dhwani-suggestions { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 640px; }
+  .dhwani-suggestions.dhwani-suggestions { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 640px; }
   .dhwani-suggestions button { min-height: 82px; }
   #chatView:not(.has-messages) .composer-zone { top: 79%; }
 }
@@ -492,7 +492,7 @@ body { background-image: radial-gradient(ellipse at 76% 0%, rgba(218, 226, 255, 
   .hero-mark { width: 43px; height: 43px; }
   .hero-greeting { font-size: clamp(27px, 7vw, 36px) !important; letter-spacing: -.9px !important; }
   .hero-subtitle { max-width: 34ch; font-size: 12px; margin-bottom: 17px !important; }
-  .tatv-suggestions.dhwani-suggestions {
+  .dhwani-suggestions.dhwani-suggestions {
     width: min(520px, 100%);
     gap: 8px;
     margin-top: 21px;
@@ -528,7 +528,7 @@ body { background-image: radial-gradient(ellipse at 76% 0%, rgba(218, 226, 255, 
   .main-area:has(#chatView.active-view) .topbar { padding: 0 9px; }
   .sidebar-toggle { width: 34px; height: 34px; }
   .topbar-brand-copy { display: none; }
-  .tatv-suggestions.dhwani-suggestions { gap: 7px; }
+  .dhwani-suggestions.dhwani-suggestions { gap: 7px; }
   .dhwani-suggestions button { min-height: 69px; }
   .dhwani-suggestion-copy small { display: none; }
   #chatView:not(.has-messages) .chat-scroll { padding: 17px 10px 112px; }
@@ -579,7 +579,7 @@ body{background-image:none!important;font-family:"DM Sans","Inter",system-ui,san
 #chatView:not(.has-messages) .welcome{width:min(760px,100%);margin:0;transform:translateY(-66px);animation:none;text-align:center}
 .hero-brand-mark{display:none!important}
 .hero-greeting{display:block;margin:0 0 18px!important;color:var(--text)!important;font-family:"DM Sans","Inter",system-ui,sans-serif!important;font-size:clamp(25px,3.1vw,31px)!important;font-weight:450!important;line-height:1.3!important;letter-spacing:-.65px!important}
-.hero-subtitle{display:none!important}.tatv-suggestions,.dhwani-suggestions{display:none!important}
+.hero-subtitle{display:none!important}.dhwani-suggestions,.dhwani-suggestions{display:none!important}
 #chatView:not(.has-messages) .composer-zone{position:absolute;z-index:6;top:52%;left:50%;width:min(720px,calc(100% - 52px));margin:0;padding:0;transform:translate(-50%,0)}
 #chatView.has-messages .composer-zone{position:relative;top:auto;left:auto;width:min(820px,calc(100% - 48px));margin:0 auto;padding:8px 0 14px;transform:none}
 #chatView .composer-zone::before{display:none}
@@ -672,7 +672,7 @@ body{background-image:none!important}
 #chatView:not(.has-messages) .welcome{width:min(720px,100%);margin:0;transform:none;animation:none;text-align:center}
 .hero-brand-mark{display:none!important}
 .hero-greeting{display:block;margin:0 0 21px!important;color:var(--text)!important;font-family:Georgia,"Times New Roman",serif!important;font-size:clamp(28px,3vw,32px)!important;font-weight:400!important;line-height:1.2!important;letter-spacing:-.35px!important}
-.hero-subtitle{display:none!important}.tatv-suggestions,.dhwani-suggestions{display:none!important}
+.hero-subtitle{display:none!important}.dhwani-suggestions,.dhwani-suggestions{display:none!important}
 #chatView:not(.has-messages) .composer-zone{position:relative!important;inset:auto!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;z-index:6;flex:0 0 auto;width:min(660px,calc(100% - 48px));max-width:660px;margin:24px auto 0;padding:0;transform:none!important}
 #chatView.has-messages .composer-zone{position:relative;inset:auto;top:auto;left:auto;right:auto;bottom:auto;flex:0 0 auto;width:min(790px,calc(100% - 48px));margin:0 auto;padding:8px 0 max(12px,env(safe-area-inset-bottom));transform:none}
 #chatView .composer-zone::before{display:none!important}

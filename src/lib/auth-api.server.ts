@@ -2,7 +2,7 @@ import { consumeSharedRateLimit } from "./shared-rate-limit.server";
 
 type RuntimeEnv = Record<string, unknown>;
 
-export type TatvUser = {
+export type DhwaniUser = {
   id: string;
   email: string;
   displayName: string;
@@ -29,7 +29,7 @@ type SupabaseConfig = { url: string; key: string };
 
 export type AuthSession = {
   configured: boolean;
-  user: TatvUser | null;
+  user: DhwaniUser | null;
   accessToken?: string;
   /** Upstream Auth was unavailable; preserve tokens and let callers retry. */
   unavailable?: boolean;
@@ -121,7 +121,7 @@ function cookiesFromRequest(request: Request): Record<string, string> {
   return output;
 }
 
-function normalizeUser(user: SupabaseUser | undefined): TatvUser | null {
+function normalizeUser(user: SupabaseUser | undefined): DhwaniUser | null {
   if (!user || typeof user.id !== "string" || typeof user.email !== "string") return null;
   const metadata = user.user_metadata ?? {};
   const displayName = typeof metadata["display_name"] === "string"
@@ -131,7 +131,7 @@ function normalizeUser(user: SupabaseUser | undefined): TatvUser | null {
   return {
     id: user.id,
     email: user.email,
-    displayName: displayName.trim() || user.email.split("@")[0] || "Tatv user",
+    displayName: displayName.trim() || user.email.split("@")[0] || "Dhwani user",
     avatarUrl: typeof metadata["avatar_url"] === "string" ? metadata["avatar_url"] : "",
     ...(Number.isInteger(age) && age >= 13 && age <= 120 ? { age } : {}),
   };

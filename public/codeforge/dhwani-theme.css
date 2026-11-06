@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Tatv AI – final polish layer. Loads after styles.css and video-studio.css.
+   Dhwani AI – final polish layer. Loads after styles.css and video-studio.css.
    Goals: one design on phone, tablet and PC, no repeated options, every page
    (chat, Integrations, AI Models, Library, Settings, Video studio) matching.
    Sidebar position/collapse behaviour is left to the existing app code.
@@ -54,8 +54,8 @@
   height: 22px; background: linear-gradient(transparent, var(--bg)); pointer-events: none;
 }
 .composer { background: var(--surface); }
-.tatv-suggestions button { border: 1px solid var(--line); background: var(--surface); }
-.tatv-suggestions button:hover { border-color: var(--accent); }
+.dhwani-suggestions button { border: 1px solid var(--line); background: var(--surface); }
+.dhwani-suggestions button:hover { border-color: var(--accent); }
 
 /* ---- 4. Other pages: one consistent page frame ---------------------------- */
 #connectionsView, #modelsView, #settingsView, #libraryView, .legal-view {
@@ -168,8 +168,8 @@
   .hero-brand-mark { width: 200px; }
   .hero-greeting { font-size: 3.1rem; }
   .hero-subtitle { max-width: 44ch; font-size: 15px; }
-  .tatv-suggestions { width: min(100%, 680px); }
-  .tatv-suggestions button { font-size: 13px; padding: 10px 16px; }
+  .dhwani-suggestions { width: min(100%, 680px); }
+  .dhwani-suggestions button { font-size: 13px; padding: 10px 16px; }
   .messages { width: min(100%, 820px); gap: 26px; }
   #chatView .message-content { max-width: min(680px, 84%); }
   #chatView .message-text { font-size: 15px; line-height: 1.8; }

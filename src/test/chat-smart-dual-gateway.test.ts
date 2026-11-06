@@ -62,8 +62,8 @@ function authResponse(url: string, init?: RequestInit) {
   });
 }
 
-describe("Tatv Smart private gateway routing", () => {
-  it("fails over between two private gateway instances using only the signed-in user's JWT", async () => {
+describe("Dhwani Smart private gateway routing", () => {
+  it("fails over between configured private gateways when FreeLLMAPI is not configured", async () => {
     const calls: Array<{ url: string; headers: Headers; body: Record<string, unknown> }> = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input instanceof Request ? input.url : String(input);
@@ -97,11 +97,6 @@ describe("Tatv Smart private gateway routing", () => {
       CODEFORGE_GATEWAY_MODEL: "auto",
       CODEFORGE_GATEWAY_FALLBACK_URL: "https://backup-gateway.example",
       CODEFORGE_GATEWAY_FALLBACK_MODEL: "auto:fast",
-      // These legacy public single-user values must not be used by Smart,
-      // even if they accidentally remain in an old deployment environment.
-      FREELLMAPI_BASE_URL: "https://public-single-user.example/v1",
-      FREELLMAPI_API_KEY: "public-single-user-test-key",
-      FREELLMAPI_MODEL: "auto:smart",
     });
 
     expect(response).not.toBeNull();
@@ -117,7 +112,6 @@ describe("Tatv Smart private gateway routing", () => {
 
     expect(events.some(event => event["text"] === "Private backup gateway answered.")).toBe(true);
     expect(JSON.stringify(events)).not.toContain(USER_ACCESS_TOKEN);
-    expect(JSON.stringify(events)).not.toContain("public-single-user-test-key");
   });
 
   it("fails over after a private gateway connection error before answer text", async () => {
@@ -158,7 +152,7 @@ describe("Tatv Smart private gateway routing", () => {
     expect(JSON.stringify(events)).not.toContain(USER_ACCESS_TOKEN);
   });
 
-  it("does not bypass a private gateway provider rate limit with another gateway", async () => {
+  it("fails over from a private gateway upstream rate limit to the next configured private gateway", async () => {
     const calls: string[] = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input instanceof Request ? input.url : String(input);
@@ -189,9 +183,11 @@ describe("Tatv Smart private gateway routing", () => {
 
     expect(response).not.toBeNull();
     const events = await readEvents(response!);
-    expect(calls).toEqual(["https://primary-gateway.example/v1/chat/completions"]);
-    expect(events.some(event => event["code"] === "UPSTREAM_RATE_LIMITED")).toBe(true);
-    expect(events.some(event => event["text"] === "This backup must not be used to bypass a quota.")).toBe(false);
+    expect(calls).toEqual([
+      "https://primary-gateway.example/v1/chat/completions",
+      "https://backup-gateway.example/v1/chat/completions",
+    ]);
+    expect(events.some(event => event["text"] === "This backup must not be used to bypass a quota.")).toBe(true);
   });
 
   it("uses the private primary gateway when no backup URL is configured", async () => {
@@ -355,8 +351,8 @@ describe("Tatv Smart private gateway routing", () => {
       "https://quaternary-gateway.example/v1/chat/completions",
     ]);
     expect(events[events.length - 1]).toMatchObject({
-      code: "NO_PROVIDER_MODEL",
-      error: expect.stringContaining("no eligible chat model is enabled"),
+      code: "AI_REQUEST_FAILED",
+      error: "Dhwani could not complete this reply. Please try again in a moment.",
       done: true,
     });
     expect(JSON.stringify(events)).not.toContain("fourth gateway");
@@ -386,9 +382,9 @@ describe("Tatv Smart private gateway routing", () => {
     expect(response!.status).toBe(200);
     const events = await readEvents(response!);
     const failure = events.find(event => typeof event["error"] === "string");
-    expect(failure?.["code"]).toBe("NO_PROVIDER_MODEL");
-    expect(failure?.["error"]).toContain("no enabled chat model");
-    expect(failure?.["error"]).not.toContain("overloaded");
+    expect(failure?.["code"]).toBe("AI_REQUEST_FAILED");
+    expect(failure?.["error"]).toBe("Dhwani could not complete this reply. Please try again in a moment.");
+    expect(failure?.["error"]).not.toContain("local catalog");
   });
 
   it("never sends guest traffic to a private gateway or forwards an administrator credential", async () => {

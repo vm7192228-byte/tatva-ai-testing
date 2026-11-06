@@ -4,30 +4,44 @@ import { describe, expect, it } from "vitest";
 
 import { codeforgeMarkup } from "@/lib/codeforge-markup";
 
-describe("Tatv AI visual identity", () => {
-  it("uses the Tatv mark as the navigation control and opens the shared drawer", () => {
+describe("Dhwani AI visual identity", () => {
+  it("uses the Dhwani mark as the navigation control and opens the shared drawer", () => {
     expect(codeforgeMarkup).toContain('id="sidebarToggle"');
-    expect(codeforgeMarkup).toContain('tatv-menu-toggle');
-    expect(codeforgeMarkup).toContain('src="/tatv/tatv-mark.svg"');
+    expect(codeforgeMarkup).toContain('dhwani-menu-toggle');
+    expect(codeforgeMarkup).toContain('src="/dhwani/dhwani-mark.svg"');
     expect(codeforgeMarkup).toContain('id="sidebar"');
     expect(codeforgeMarkup).toContain('id="sidebarOverlay"');
     expect(codeforgeMarkup).not.toContain('id="sidebarToggle" aria-label="Open navigation menu">☰');
   });
 
   it("keeps the welcome view and message composer clean and connected to the existing chat controls", () => {
-    expect(codeforgeMarkup).toContain("नमस्ते, मैं तत्व हूँ");
-    expect(codeforgeMarkup).toContain("Hindi, English ya Hinglish");
+    expect(codeforgeMarkup).toContain("What's on the agenda today?");
+    expect(codeforgeMarkup).toContain('placeholder="How can I help you today?"');
     expect(codeforgeMarkup).toContain('id="promptInput"');
     expect(codeforgeMarkup).toContain('id="plusMenuButton"');
     expect(codeforgeMarkup).toContain('id="plusMenu"');
     expect(codeforgeMarkup).toContain('data-action="upload-media"');
     expect(codeforgeMarkup).toContain('data-action="upload-files"');
     expect(codeforgeMarkup).toContain('id="sendButton"');
-    expect(codeforgeMarkup).toContain("topbar-plus-button");
+    expect(codeforgeMarkup).toContain("topbar-menu-button");
     expect(codeforgeMarkup).not.toContain("composer-tools");
   });
 
-  it("uses Tatv typing dots and animated chat bubbles instead of a live progress checklist", () => {
+  it("uses Dhwani branding in GitHub, approval and voice controls", () => {
+    const github = readFileSync(resolve(process.cwd(), "public/codeforge/github-client.js"), "utf8");
+    const approvals = readFileSync(resolve(process.cwd(), "public/codeforge/tool-approvals-ui.js"), "utf8");
+    const voices = readFileSync(resolve(process.cwd(), "public/codeforge/voice-options.js"), "utf8");
+
+    expect(github).toContain("[Dhwani AI GitHub]");
+    expect(github).toContain("Dhwani AI improvements");
+    expect(github).not.toContain("Tatv");
+    expect(approvals).toContain("Dhwani will ask you to confirm again");
+    expect(approvals).not.toContain("Tatv");
+    expect(voices).toContain("I’m Dhwani AI");
+    expect(voices).not.toContain("Tatv");
+  });
+
+  it("uses Dhwani typing dots and animated chat bubbles instead of a live progress checklist", () => {
     const app = readFileSync(resolve(process.cwd(), "public/codeforge/app.js"), "utf8");
     const css = readFileSync(resolve(process.cwd(), "public/codeforge/styles.css"), "utf8");
     expect(app).toContain("cf-typing-indicator");
@@ -36,7 +50,7 @@ describe("Tatv AI visual identity", () => {
     expect(app).not.toContain("cf-chat-progress");
     expect(css).toContain(".message-arrival");
     expect(css).toContain(".pending-typing");
-    expect(css).toContain("tatv-answer-arrive");
+    expect(css).toContain("dhwani-answer-arrive");
     expect(codeforgeMarkup).toContain('id="messages" class="messages"');
     expect(codeforgeMarkup.indexOf('id="messages"')).toBeLessThan(codeforgeMarkup.indexOf('class="composer-zone"'));
   });
@@ -88,24 +102,24 @@ describe("Tatv AI visual identity", () => {
   });
 
   it("does not render the previous product name in the customer-facing app shell", () => {
-    expect(codeforgeMarkup).toContain("Tatv AI");
+    expect(codeforgeMarkup).toContain("Dhwani AI");
+    expect(codeforgeMarkup).not.toContain("Tatv AI");
+    expect(codeforgeMarkup).not.toContain("/tatv/");
     expect(codeforgeMarkup).not.toContain("CodeForge");
   });
 
-  it("ships the animated three-lines-and-bindu mark and Tatv chat styles", () => {
-    const svg = readFileSync(resolve(process.cwd(), "public/tatv/tatv-mark.svg"), "utf8");
+  it("ships the Dhwani sound-wave mark and Dhwani chat styles", () => {
+    const svg = readFileSync(resolve(process.cwd(), "public/dhwani/dhwani-mark.svg"), "utf8");
     const css = readFileSync(resolve(process.cwd(), "public/codeforge/styles.css"), "utf8");
-    expect(svg).toContain("तीन");
-    expect(svg).toContain('M74 86 Q120 72 166 86');
-    expect(svg).toContain('M74 106 Q120 92 166 106');
-    expect(svg).toContain('M74 126 Q120 112 166 126');
-    expect(svg).toContain('animateTransform');
-    expect(css).toContain(".tatv-menu-toggle");
-    expect(css).toContain(".tatv-suggestions");
+    expect(svg).toContain('viewBox="0 0 48 48"');
+    expect(svg).toContain("Dhwani AI sound wave");
+    expect(svg).toContain('<rect x="22" y="5" width="5" height="38" rx="2.5"/>');
+    expect(css).toContain(".dhwani-menu-toggle");
+    expect(css).toContain(".dhwani-suggestions");
     expect(css).toContain(".composer-bottom #promptInput");
     expect(css).toContain(".sidebar.open");
   });
-  it("shows exactly three branded Tatv modes and no upstream provider choices", () => {
+  it("shows exactly three branded Dhwani modes and no upstream provider choices", () => {
     const app = readFileSync(resolve(process.cwd(), "public/codeforge/app.js"), "utf8");
     const providerStart = app.indexOf("const providers = [");
     const providerEnd = app.indexOf("\n];", providerStart);
@@ -113,10 +127,10 @@ describe("Tatv AI visual identity", () => {
     expect(providerEnd).toBeGreaterThan(providerStart);
     const providerOptions = app.slice(providerStart, providerEnd);
     const css = readFileSync(resolve(process.cwd(), "public/codeforge/styles.css"), "utf8");
-    expect(css).toContain(".platform-mark.tatv");
-    expect(providerOptions).toContain('id: "tatv-flash", name: "Tatv Flash"');
-    expect(providerOptions).toContain('id: "tatv-smart", name: "Tatv Smart"');
-    expect(providerOptions).toContain('id: "tatv-ultra", name: "Tatv Ultra"');
+    expect(css).toContain(".platform-mark.dhwani");
+    expect(providerOptions).toContain('id: "tatv-flash", name: "Dhwani Flash"');
+    expect(providerOptions).toContain('id: "tatv-smart", name: "Dhwani Smart"');
+    expect(providerOptions).toContain('id: "tatv-ultra", name: "Dhwani Ultra"');
     expect(providerOptions).not.toContain("Gemini");
     expect(providerOptions).not.toContain("Claude");
     expect(providerOptions).not.toContain("OpenAI");
@@ -152,7 +166,7 @@ describe("Tatv AI visual identity", () => {
 
   it("keeps Integration cards visible when connection status endpoints are unavailable", () => {
     const app = readFileSync(resolve(process.cwd(), "public/codeforge/app.js"), "utf8");
-    const css = readFileSync(resolve(process.cwd(), "public/codeforge/tatv-theme.css"), "utf8");
+    const css = readFileSync(resolve(process.cwd(), "public/codeforge/dhwani-theme.css"), "utf8");
     expect(app).toContain("const unknownItems = integrations.filter(item => !statusFor(item));");
     expect(app).toContain('data-retry-integrations');
     expect(app).toContain('data-connect="' + "' + item.id + '" + '"');

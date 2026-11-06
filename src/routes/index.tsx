@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Outfit:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" },
       { rel: "stylesheet", href: "/codeforge/styles.css" },
       { rel: "stylesheet", href: "/codeforge/video-studio.css" },
-      { rel: "stylesheet", href: "/codeforge/tatv-theme.css" },
+      { rel: "stylesheet", href: "/codeforge/dhwani-theme.css" },
       { rel: "stylesheet", href: "/codeforge/dhwani-ui.css?v=claude-clean-3" },
       { rel: "icon", type: "image/svg+xml", href: "/dhwani/dhwani-mark.svg" },
     ],

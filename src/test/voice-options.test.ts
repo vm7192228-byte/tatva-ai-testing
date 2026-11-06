@@ -16,11 +16,11 @@ function voice(name: string, lang: string, extra: Partial<SpeechVoiceLike> = {})
   };
 }
 
-describe("Tatv AI speech voice options", () => {
-  it("uses Tatv AI in every spoken voice preview", () => {
+describe("Dhwani AI speech voice options", () => {
+  it("uses Dhwani AI in every spoken voice preview", () => {
     const previews = SPEECH_VOICE_SLOTS.map(option => option.preview).join(" ");
-    expect(previews).toContain("तत्व AI");
-    expect(previews).toContain("Tatv AI");
+    expect(previews).toContain("ध्वनि AI");
+    expect(previews).toContain("Dhwani AI");
     expect(previews).not.toContain("CodeForge");
   });
 

@@ -17,14 +17,14 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function chatRequest(ip = "198.51.100.230", chatMode = "smart") {
+function chatRequest(ip = "198.51.100.230", chatMode = "smart", signedIn = true) {
   return new Request("https://codeforge.example/api/chat", {
     method: "POST",
     headers: {
       "content-type": "application/json",
       origin: "https://codeforge.example",
       "x-real-ip": ip,
-      cookie: "cf_access=" + USER_ACCESS_TOKEN,
+      ...(signedIn ? { cookie: "cf_access=" + USER_ACCESS_TOKEN } : {}),
     },
     body: JSON.stringify({
       provider: "smart",
@@ -71,7 +71,6 @@ async function readEvents(response: Response) {
 function ownerRouteEnv() {
   return {
     ...authEnv,
-    FREELLMAPI_OWNER_EMAIL: OWNER_EMAIL,
     FREELLMAPI_BASE_URL: "https://personal-freellmapi.example/v1",
     FREELLMAPI_API_KEY: PERSONAL_API_KEY,
     FREELLMAPI_MODEL: "auto:smart",
@@ -80,7 +79,7 @@ function ownerRouteEnv() {
   };
 }
 
-describe("owner-only FreeLLMAPI personal route", () => {
+describe("shared FreeLLMAPI-first Smart route", () => {
   it("keeps the personal endpoint out of shared provider discovery and never exposes its key", async () => {
     const response = await handleChatApiRequest(
       new Request("https://codeforge.example/api/chat", { method: "GET" }),
@@ -94,7 +93,7 @@ describe("owner-only FreeLLMAPI personal route", () => {
     expect(JSON.stringify(payload)).not.toContain(PERSONAL_API_KEY);
   });
 
-  it("routes the verified owner to FreeLLMAPI first and keeps the personal key server-side", async () => {
+  it("routes a signed-in user to FreeLLMAPI first and keeps the personal key server-side", async () => {
     const calls: Array<{ url: string; authorization: string | null; body: Record<string, unknown> }> = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input instanceof Request ? input.url : String(input);
@@ -106,7 +105,7 @@ describe("owner-only FreeLLMAPI personal route", () => {
         body: JSON.parse(String(init?.body)) as Record<string, unknown>,
       });
       if (url === "https://personal-freellmapi.example/v1/chat/completions") {
-        return new Response(completedSse("Owner-only FreeLLMAPI answered."), {
+        return new Response(completedSse("FreeLLMAPI answered."), {
           status: 200,
           headers: { "content-type": "text/event-stream; charset=utf-8" },
         });
@@ -126,16 +125,16 @@ describe("owner-only FreeLLMAPI personal route", () => {
       authorization: "Bearer " + PERSONAL_API_KEY,
       body: { model: "auto:smart", stream: true },
     });
-    expect(events.some(event => event["text"] === "Owner-only FreeLLMAPI answered.")).toBe(true);
+    expect(events.some(event => event["text"] === "FreeLLMAPI answered.")).toBe(true);
     expect(JSON.stringify(events)).not.toContain(PERSONAL_API_KEY);
     expect(JSON.stringify(events)).not.toContain(USER_ACCESS_TOKEN);
   });
 
-  it("switches to the private multi-user gateway only on FreeLLMAPI quota_exceeded", async () => {
+  it("switches any user's request to the private gateway when FreeLLMAPI quota_exceeded", async () => {
     const calls: Array<{ url: string; authorization: string | null }> = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input instanceof Request ? input.url : String(input);
-      if (new URL(url).pathname === "/auth/v1/user") return authResponse(init, OWNER_EMAIL);
+      if (new URL(url).pathname === "/auth/v1/user") return authResponse(init, TESTER_EMAIL);
 
       const authorization = new Headers(init?.headers).get("authorization");
       calls.push({ url, authorization });
@@ -171,16 +170,52 @@ describe("owner-only FreeLLMAPI personal route", () => {
     expect(JSON.stringify(events)).not.toContain(USER_ACCESS_TOKEN);
   });
 
-  it("keeps tester traffic on the private multi-user gateway, never on the personal endpoint", async () => {
+
+  it("fails over from a transient FreeLLMAPI outage to the private gateway for any user", async () => {
     const calls: string[] = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input instanceof Request ? input.url : String(input);
       if (new URL(url).pathname === "/auth/v1/user") return authResponse(init, TESTER_EMAIL);
       calls.push(url);
+      if (url === "https://personal-freellmapi.example/v1/chat/completions") {
+        return Response.json(
+          { error: { message: "private upstream outage details" } },
+          { status: 503 },
+        );
+      }
       if (url === "https://private-gateway.example/v1/chat/completions") {
         expect(new Headers(init?.headers).get("authorization")).toBe("Bearer " + USER_ACCESS_TOKEN);
-        expect(JSON.parse(String(init?.body)).chatMode).toBe("flash");
-        return new Response(completedSse("Tester used the private gateway."), {
+        return new Response(completedSse("Private gateway answered after FreeLLMAPI outage."), {
+          status: 200,
+          headers: { "content-type": "text/event-stream; charset=utf-8" },
+        });
+      }
+      throw new Error("Unexpected upstream URL: " + url);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await handleChatApiRequest(chatRequest("198.51.100.236"), ownerRouteEnv());
+    expect(response).not.toBeNull();
+    const events = await readEvents(response!);
+
+    expect(calls).toEqual([
+      "https://personal-freellmapi.example/v1/chat/completions",
+      "https://private-gateway.example/v1/chat/completions",
+    ]);
+    expect(events.some(event => event["text"] === "Private gateway answered after FreeLLMAPI outage.")).toBe(true);
+    expect(JSON.stringify(events)).not.toContain("private upstream outage details");
+  });
+
+  it("routes a non-owner tester through FreeLLMAPI before the private gateway", async () => {
+    const calls: string[] = [];
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = input instanceof Request ? input.url : String(input);
+      if (new URL(url).pathname === "/auth/v1/user") return authResponse(init, TESTER_EMAIL);
+      calls.push(url);
+      if (url === "https://personal-freellmapi.example/v1/chat/completions") {
+        expect(new Headers(init?.headers).get("authorization")).toBe("Bearer " + PERSONAL_API_KEY);
+        expect(JSON.parse(String(init?.body)).model).toBe("auto:smart");
+        return new Response(completedSse("Tester used FreeLLMAPI first."), {
           status: 200,
           headers: { "content-type": "text/event-stream; charset=utf-8" },
         });
@@ -193,11 +228,11 @@ describe("owner-only FreeLLMAPI personal route", () => {
     expect(response).not.toBeNull();
     const events = await readEvents(response!);
 
-    expect(calls).toEqual(["https://private-gateway.example/v1/chat/completions"]);
-    expect(events.some(event => event["text"] === "Tester used the private gateway.")).toBe(true);
+    expect(calls).toEqual(["https://personal-freellmapi.example/v1/chat/completions"]);
+    expect(events.some(event => event["text"] === "Tester used FreeLLMAPI first.")).toBe(true);
   });
 
-  it("switches to the private gateway on an ordinary FreeLLMAPI rate limit too", async () => {
+  it("falls through from a FreeLLMAPI ordinary rate limit to the private gateway", async () => {
     const calls: string[] = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input instanceof Request ? input.url : String(input);
@@ -205,14 +240,14 @@ describe("owner-only FreeLLMAPI personal route", () => {
       calls.push(url);
       if (url === "https://personal-freellmapi.example/v1/chat/completions") {
         return Response.json(
-          { error: { code: "rate_limit_exceeded", message: "Short window rate limit." } },
-          { status: 429 },
+          { error: { code: "rate_limit_exceeded", message: "Shared provider throttling details." } },
+          { status: 429, headers: { "retry-after": "60" } },
         );
       }
       if (url === "https://private-gateway.example/v1/chat/completions") {
-        return new Response(completedSse("Backup answered after a rate limit."), {
-          status: 200,
-          headers: { "content-type": "text/event-stream; charset=utf-8" },
+        expect(new Headers(init?.headers).get("authorization")).toBe("Bearer " + USER_ACCESS_TOKEN);
+        return new Response(completedSse("Private gateway answered after primary rate limit."), {
+          status: 200, headers: { "content-type": "text/event-stream; charset=utf-8" },
         });
       }
       throw new Error("Unexpected upstream URL: " + url);
@@ -222,103 +257,112 @@ describe("owner-only FreeLLMAPI personal route", () => {
     const response = await handleChatApiRequest(chatRequest("198.51.100.233"), ownerRouteEnv());
     expect(response).not.toBeNull();
     const events = await readEvents(response!);
-
     expect(calls).toEqual([
       "https://personal-freellmapi.example/v1/chat/completions",
       "https://private-gateway.example/v1/chat/completions",
     ]);
-    expect(events.some(event => event["text"] === "Backup answered after a rate limit.")).toBe(true);
-    expect(events.some(event => event["code"] === "UPSTREAM_RATE_LIMITED")).toBe(false);
+    expect(events.some(event => event["text"] === "Private gateway answered after primary rate limit.")).toBe(true);
+    expect(JSON.stringify(events)).not.toContain("rate_limit_exceeded");
+    expect(JSON.stringify(events)).not.toContain("Shared provider throttling details.");
   });
 
-  it("uses FreeLLMAPI first for every signed-in user when FREELLMAPI_SHARED_PRIMARY is enabled", async () => {
-    const calls: string[] = [];
+  it("tries OpenAI after FreeLLMAPI and every configured private gateway fail", async () => {
+    const calls: Array<{ url: string; authorization: string | null }> = [];
+    const frames = [
+      'event: response.output_text.delta\ndata: {"type":"response.output_text.delta","delta":"OpenAI tertiary fallback answered."}',
+      'event: response.completed\ndata: {"type":"response.completed","response":{"status":"completed"}}',
+      "",
+    ].join("\n\n");
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input instanceof Request ? input.url : String(input);
       if (new URL(url).pathname === "/auth/v1/user") return authResponse(init, TESTER_EMAIL);
-      calls.push(url);
+      const authorization = new Headers(init?.headers).get("authorization");
+      calls.push({ url, authorization });
       if (url === "https://personal-freellmapi.example/v1/chat/completions") {
-        expect(new Headers(init?.headers).get("authorization")).toBe("Bearer " + PERSONAL_API_KEY);
-        return new Response(completedSse("Shared primary FreeLLMAPI answered."), {
-          status: 200,
-          headers: { "content-type": "text/event-stream; charset=utf-8" },
+        expect(authorization).toBe("Bearer " + PERSONAL_API_KEY);
+        return Response.json({ error: { code: "UPSTREAM_UNAVAILABLE" } }, { status: 503 });
+      }
+      if (url === "https://private-gateway.example/v1/chat/completions") {
+        expect(authorization).toBe("Bearer " + USER_ACCESS_TOKEN);
+        return Response.json({ error: { code: "NO_PROVIDER_MODEL", message: "internal gateway catalog" } }, { status: 503 });
+      }
+      if (url === "https://api.openai.com/v1/responses") {
+        expect(authorization).toBe("Bearer openai-fallback-secret");
+        return new Response(frames, {
+          status: 200, headers: { "content-type": "text/event-stream; charset=utf-8" },
         });
       }
       throw new Error("Unexpected upstream URL: " + url);
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const response = await handleChatApiRequest(chatRequest("198.51.100.235"), {
-      ...ownerRouteEnv(),
-      FREELLMAPI_SHARED_PRIMARY: "true",
+    const response = await handleChatApiRequest(chatRequest("198.51.100.237"), {
+      ...ownerRouteEnv(), OPENAI_API_KEY: "openai-fallback-secret",
     });
     expect(response).not.toBeNull();
     const events = await readEvents(response!);
-
-    expect(calls).toEqual(["https://personal-freellmapi.example/v1/chat/completions"]);
-    expect(events.some(event => event["text"] === "Shared primary FreeLLMAPI answered.")).toBe(true);
+    expect(calls.map(call => call.url)).toEqual([
+      "https://personal-freellmapi.example/v1/chat/completions",
+      "https://private-gateway.example/v1/chat/completions",
+      "https://api.openai.com/v1/responses",
+    ]);
+    expect(events.some(event => event["text"] === "OpenAI tertiary fallback answered.")).toBe(true);
     expect(JSON.stringify(events)).not.toContain(PERSONAL_API_KEY);
+    expect(JSON.stringify(events)).not.toContain("openai-fallback-secret");
+    expect(JSON.stringify(events)).not.toContain("internal gateway catalog");
   });
 
-  it("keeps Tatv Flash on the private gateway even when shared FreeLLMAPI primary is enabled", async () => {
+  it("allows a guest to use a configured alternate provider when the first two tiers are absent", async () => {
     const calls: string[] = [];
+    const frames = [
+      'event: response.output_text.delta\ndata: {"type":"response.output_text.delta","delta":"Guest fallback answered."}',
+      'event: response.completed\ndata: {"type":"response.completed","response":{"status":"completed"}}',
+      "",
+    ].join("\n\n");
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input instanceof Request ? input.url : String(input);
-      if (new URL(url).pathname === "/auth/v1/user") return authResponse(init, TESTER_EMAIL);
       calls.push(url);
-      if (url === "https://private-gateway.example/v1/chat/completions") {
-        expect(JSON.parse(String(init?.body)).chatMode).toBe("flash");
-        return new Response(completedSse("Flash stayed on the private gateway."), {
-          status: 200,
-          headers: { "content-type": "text/event-stream; charset=utf-8" },
-        });
-      }
-      throw new Error("Unexpected upstream URL: " + url);
+      expect(url).toBe("https://api.openai.com/v1/responses");
+      expect(new Headers(init?.headers).get("authorization")).toBe("Bearer openai-fallback-secret");
+      return new Response(frames, {
+        status: 200, headers: { "content-type": "text/event-stream; charset=utf-8" },
+      });
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const response = await handleChatApiRequest(chatRequest("198.51.100.237", "flash"), {
-      ...ownerRouteEnv(),
-      FREELLMAPI_SHARED_PRIMARY: "true",
-    });
+    const response = await handleChatApiRequest(
+      chatRequest("198.51.100.238", "smart", false),
+      { ...authEnv, OPENAI_API_KEY: "openai-fallback-secret" },
+    );
     expect(response).not.toBeNull();
     const events = await readEvents(response!);
-    expect(calls).toEqual(["https://private-gateway.example/v1/chat/completions"]);
-    expect(events.some(event => event["text"] === "Flash stayed on the private gateway.")).toBe(true);
+    expect(calls).toEqual(["https://api.openai.com/v1/responses"]);
+    expect(events.some(event => event["text"] === "Guest fallback answered.")).toBe(true);
+    expect(JSON.stringify(events)).not.toContain("openai-fallback-secret");
   });
 
-  it("falls back to the private gateway for any user when shared FreeLLMAPI quota runs out", async () => {
-    const calls: string[] = [];
+  it("allows guest Smart chat to use the server-side FreeLLMAPI first hop", async () => {
+    const calls: Array<{ url: string; authorization: string | null }> = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = input instanceof Request ? input.url : String(input);
-      if (new URL(url).pathname === "/auth/v1/user") return authResponse(init, TESTER_EMAIL);
-      calls.push(url);
-      if (url === "https://personal-freellmapi.example/v1/chat/completions") {
-        return Response.json({ error: { code: "quota_exceeded" } }, { status: 429 });
-      }
-      if (url === "https://private-gateway.example/v1/chat/completions") {
-        expect(new Headers(init?.headers).get("authorization")).toBe("Bearer " + USER_ACCESS_TOKEN);
-        return new Response(completedSse("Gateway took over for the tester."), {
-          status: 200,
-          headers: { "content-type": "text/event-stream; charset=utf-8" },
-        });
-      }
-      throw new Error("Unexpected upstream URL: " + url);
+      calls.push({ url, authorization: new Headers(init?.headers).get("authorization") });
+      expect(url).toBe("https://personal-freellmapi.example/v1/chat/completions");
+      return new Response(completedSse("Guest FreeLLMAPI answer."), {
+        status: 200,
+        headers: { "content-type": "text/event-stream; charset=utf-8" },
+      });
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const response = await handleChatApiRequest(chatRequest("198.51.100.236"), {
-      ...ownerRouteEnv(),
-      FREELLMAPI_SHARED_PRIMARY: "true",
-    });
+    const response = await handleChatApiRequest(chatRequest("198.51.100.235", "smart", false), ownerRouteEnv());
     expect(response).not.toBeNull();
     const events = await readEvents(response!);
-
-    expect(calls).toEqual([
-      "https://personal-freellmapi.example/v1/chat/completions",
-      "https://private-gateway.example/v1/chat/completions",
-    ]);
-    expect(events.some(event => event["text"] === "Gateway took over for the tester.")).toBe(true);
+    expect(calls).toEqual([{
+      url: "https://personal-freellmapi.example/v1/chat/completions",
+      authorization: "Bearer " + PERSONAL_API_KEY,
+    }]);
+    expect(events.some(event => event["text"] === "Guest FreeLLMAPI answer.")).toBe(true);
+    expect(JSON.stringify(events)).not.toContain(PERSONAL_API_KEY);
   });
 
   it("does not allow a client to select the legacy personal route directly", async () => {

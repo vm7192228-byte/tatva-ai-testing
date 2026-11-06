@@ -1,41 +1,33 @@
-# Tatv AI Testing — Stage 1
+# Dhwani AI Testing — Stage 1
 
 ## Scope
 
-This package imports the complete current Workbench source into the new `tatva-ai-testing` testing repository. The first review is intentionally limited to the app shell, logo rendering, and text-chat diagnosis. Production is not changed or deployed by this package.
+This repository is the isolated Testing workspace. The current Testing branch contains the Dhwani AI brand refresh and universal Smart routing work. Production Workbench code, settings and deployments remain separate.
 
-## Logo fix
+## Dhwani logo and sign-in branding
 
-The original `public/tatv/tatv-mark.svg` had an unterminated quote in the final `stroke-width` attribute (`stroke-width="1/>`). It is now valid XML (`stroke-width="1"/>`). All visible broken logo instances use this same public asset path. A regression test parses the SVG as `image/svg+xml` and fails if the browser parser reports an error.
+The canonical customer-facing brand asset is `public/dhwani/dhwani-mark.svg`. It is used by the sign-in/sign-up overlay, sidebar, top bar, assistant avatars, loading indicators, subscription UI and browser favicon metadata.
 
-## Chat diagnosis from the 2026-11-06 screenshot
+The retired logo asset and old favicon have been removed. The app root metadata now declares Dhwani AI, and the old theme stylesheet has been renamed to `dhwani-theme.css`. Public About, Contact, Pricing, Terms, Privacy, Refund, Shipping and Data Deletion pages use Dhwani AI branding.
 
-The screenshot shows an authenticated user session in the Workbench, but the chat response says:
+## Dhwani Smart routing
 
-`The private gateway has no enabled chat model for this request.`
+Dhwani Smart follows one server-side routing order for the owner, signed-in users and guests:
 
-The user sign-in is therefore not the missing step in this observed failure. The Workbench maps the gateway's `NO_PROVIDER_MODEL` error to this message. The next checks are:
+1. FreeLLMAPI first.
+2. Authenticated private CodeForge gateway instances, using only the verified signed-in user's Supabase JWT.
+3. Configured direct provider fallbacks.
 
-1. Confirm the Workbench `CODEFORGE_GATEWAY_URL` points to the active private gateway deployment.
-2. Confirm that gateway has at least one enabled **chat** model in its model catalog and that the model's provider credential is active.
-3. Confirm the gateway trusts the same Supabase Auth project/issuer used by the Workbench.
-4. Confirm the Workbench and gateway are both deployed and using the intended testing environment.
+Guests skip the private JWT-protected gateway tier. The shared FreeLLMAPI key is never sent to the browser or forwarded to a private gateway. Upstream provider errors are sanitized; user access, suspension, permission, quota and content-policy decisions remain terminal. A request is not replayed after answer text or tool side effects begin.
 
-Do not add a gateway administrator key to the Workbench browser. Workbench forwards the signed-in user's Supabase access token; gateway provider credentials remain server-side in the gateway.
+## Quota safety
 
-This import does **not** claim that chat is fixed. The chat error must be re-tested after the gateway model/catalog and environment configuration are checked.
+The recursive Supabase admin-key lookup in the testing copy caused stack overflows and 503 responses in quota tests. The helper now reads the configured Supabase server key directly, while image, video and file-analysis quota reservations remain enforced.
 
-## Deliberately unchanged
+## Verification
 
-- Chat routing and gateway failover implementation.
-- Image generation, video generation, and image/video failover.
-- Plan limits, usage quotas, billing, and production settings.
-
-## Validation status
-
-- The SVG asset parses as XML after the fix.
-- A regression test was added for browser SVG parsing.
-- SVG XML validation passed.
-- Dependency installation did not complete in this environment, so Vitest, lint, and the Cloudflare production build remain unverified.
-- A Cloudflare Workers testing deployment guide documents the current Nitro target and the first text-chat variables.
-- The package contains `.env.example` placeholders only; no real `.env` file is included.
+- Focused routing, provider and quota regression tests: passed in CI.
+- Changed server routing and quota lint: passed in CI.
+- Production application build: passed in CI.
+- Vercel Preview deployment: READY.
+- Branding regression tests are being added to the same Testing CI gate.

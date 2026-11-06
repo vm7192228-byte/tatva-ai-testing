@@ -98,7 +98,7 @@ export async function handleConversationsApiRequest(
         { headers, signal: AbortSignal.timeout(12_000) },
       );
       if (!response.ok) {
-        console.error("[Tatv AI] Conversation list failed", { status: response.status });
+        console.error("[Dhwani AI] Conversation list failed", { status: response.status });
         return json({ error: "CONVERSATIONS_LOAD_FAILED", message: "Saved conversations could not be loaded. Check the database setup." }, 502, session.cookies);
       }
       return json({ ok: true, conversations: await response.json() }, 200, session.cookies);
@@ -127,7 +127,7 @@ export async function handleConversationsApiRequest(
         },
       );
       if (!response.ok) {
-        console.error("[Tatv AI] Conversation delete failed", { status: response.status });
+        console.error("[Dhwani AI] Conversation delete failed", { status: response.status });
         return json({ error: "CONVERSATION_DELETE_FAILED", message: "This conversation could not be deleted. Please retry." }, 502, session.cookies);
       }
       const deletedRows = await response.json().catch(() => []);
@@ -176,7 +176,7 @@ export async function handleConversationsApiRequest(
     if (!response.ok) {
       const status = response.status;
       const detail = (await response.text().catch(() => "")).slice(0, 180);
-      console.error("[Tatv AI] Conversation save failed", { status, detail });
+      console.error("[Dhwani AI] Conversation save failed", { status, detail });
       return json({ error: "CONVERSATION_SAVE_FAILED", message: "This conversation could not be saved. Please retry." }, 502, session.cookies);
     }
     return json({ ok: true, saved: true }, 200, session.cookies);

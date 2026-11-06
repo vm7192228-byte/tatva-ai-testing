@@ -114,7 +114,7 @@ async function executeChatGeneration(generationId: string, userId: string): Prom
       }),
     });
 
-    // Reuse Tatv's existing provider adapters, tool authorization,
+    // Reuse Dhwani's existing provider adapters, tool authorization,
     // quota reservations, stream finalization and Supabase event persistence.
     // This trusted identity override is only passed by this server-side step.
     const response = await handleChatApiRequest(

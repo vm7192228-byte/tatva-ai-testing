@@ -19,17 +19,28 @@ describe("App routing", () => {
   
   it("describes provider processing and account/device chat storage accurately", () => {
     expect(codeforgeMarkup).toContain("When you send a message, its conversation context is sent to the selected AI provider");
-    expect(codeforgeMarkup).toContain("Signed-in conversations are saved to your Tatv account. Guest conversations are stored in this browser.");
+    expect(codeforgeMarkup).toContain("Signed-in conversations are saved to your Dhwani account. Guest conversations are stored in this browser.");
     expect(codeforgeMarkup).not.toContain("Nothing is sent to an AI provider in this preview.");
     expect(codeforgeMarkup).not.toContain("This prototype keeps conversation messages in the current page session only.");
   });
 
-  it("uses Tatv branding in document metadata", () => {
+  it("uses Dhwani branding in document metadata", () => {
     const rootOptions = (RootRoute as unknown as {
-      options: { head?: () => { meta?: Array<Record<string, unknown>> } };
+      options: { head?: () => {
+        meta?: Array<Record<string, unknown>>;
+        links?: Array<Record<string, unknown>>;
+      } };
     }).options;
-    const meta = rootOptions.head?.().meta ?? [];
-    expect(meta).toContainEqual(expect.objectContaining({ name: "author", content: "Tatv AI" }));
+    const head = rootOptions.head?.();
+    const meta = head?.meta ?? [];
+    const links = head?.links ?? [];
+    expect(meta).toContainEqual(expect.objectContaining({ title: "Dhwani AI" }));
+    expect(meta).toContainEqual(expect.objectContaining({ name: "author", content: "Dhwani AI" }));
+    expect(links).toContainEqual(expect.objectContaining({
+      rel: "icon",
+      href: "/dhwani/dhwani-mark.svg",
+      type: "image/svg+xml",
+    }));
     expect(meta.some(item => item["name"] === "twitter:site" && item["content"] === "@Lovable")).toBe(false);
   });
 });

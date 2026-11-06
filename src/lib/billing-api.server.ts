@@ -116,7 +116,7 @@ function supabaseAdminHeaders(key: string): Record<string, string> {
     "content-type": "application/json",
   };
   // sb_secret_* is an opaque API key, not a JWT; legacy service_role is a JWT.
-  if (!key.startsWith("sb_secret_")) headers.authorization = "Bearer " + key;
+  if (!key.startsWith("sb_secret_")) headers["authorization"] = "Bearer " + key;
   return headers;
 }
 function json(data: unknown, status = 200, extra: Record<string, string> = {}) {
@@ -627,7 +627,7 @@ export async function handleBillingApiRequest(request: Request, runtimeEnv: unkn
       });
     } catch (error) {
       const reason = error instanceof Error ? error.message.slice(0, 120) : "unknown";
-      console.error("[Tatv billing] Monthly usage lookup failed:", reason);
+      console.error("[Dhwani billing] Monthly usage lookup failed:", reason);
       return json({ error: "USAGE_STATUS_UNAVAILABLE", message: "Your credit balance is temporarily unavailable." }, 503);
     }
   }
@@ -745,7 +745,7 @@ export async function handleBillingApiRequest(request: Request, runtimeEnv: unkn
         return json({
           error: "CHECKOUT_ALREADY_PROCESSED",
           message: orderRow["status"] === "paid"
-            ? "This checkout was already paid. Tatv is verifying the existing payment instead of creating another order."
+            ? "This checkout was already paid. Dhwani is verifying the existing payment instead of creating another order."
             : "This payment attempt is no longer payable. Check its status before starting a new checkout.",
           orderId: orderRow["cashfree_order_id"],
           orderStatus: orderRow["status"],
@@ -784,7 +784,7 @@ export async function handleBillingApiRequest(request: Request, runtimeEnv: unkn
           order_meta: {
             return_url: origin + "/?cashfree_return=1&order_id={order_id}",
           },
-          order_note: ("Tatv " + planCode + " subscription").slice(0, 200),
+          order_note: ("Dhwani " + planCode + " subscription").slice(0, 200),
         }),
       });
       const cashfreeOrder = await readJson(cashfreeResponse);
@@ -792,7 +792,7 @@ export async function handleBillingApiRequest(request: Request, runtimeEnv: unkn
           cashfreeOrder["order_id"] !== orderRow["cashfree_order_id"] ||
           typeof cashfreeOrder["payment_session_id"] !== "string" ||
           !cashfreeOrder["payment_session_id"]) {
-        console.error("[Tatv billing] Cashfree order creation failed:", cashfreeResponse.status);
+        console.error("[Dhwani billing] Cashfree order creation failed:", cashfreeResponse.status);
         return json({
           error: "CASHFREE_ORDER_FAILED",
           message: "Cashfree could not confirm this checkout attempt. Retry this same checkout before starting another payment.",
@@ -815,7 +815,7 @@ export async function handleBillingApiRequest(request: Request, runtimeEnv: unkn
         },
       );
       if (!saveSession.ok) {
-        return json({ error: "ORDER_STORAGE_FAILED", message: "Cashfree prepared the order, but Tatv could not save its checkout session. Retry this same checkout to recover it safely." }, 503);
+        return json({ error: "ORDER_STORAGE_FAILED", message: "Cashfree prepared the order, but Dhwani could not save its checkout session. Retry this same checkout to recover it safely." }, 503);
       }
 
       return json({

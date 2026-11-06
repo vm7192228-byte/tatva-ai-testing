@@ -55,7 +55,7 @@ function esc(value) {
 function showToast(message) {
   const toast = document.querySelector("#toast");
   if (toast) { toast.textContent = message; toast.classList.add("show"); }
-  else console.info("[Tatv AI GitHub]", message);
+  else console.info("[Dhwani AI GitHub]", message);
 }
 function ensurePanel() {
   if (panel?.isConnected) return;
@@ -87,7 +87,7 @@ async function connectGitHub() {
   try {
     const status = await refreshStatus();
     if (status.requiresSignIn) {
-      showToast("Sign in to Tatv AI from the profile menu before connecting GitHub.");
+      showToast("Sign in to Dhwani AI from the profile menu before connecting GitHub.");
       return;
     }
     if (!status.configured) {
@@ -110,7 +110,7 @@ async function openWorkspace() {
     await refreshStatus();
     if (!githubStatus?.connected) {
       closePanel();
-      showToast("GitHub is not connected to this Tatv AI account. Connect it again from Integrations.");
+      showToast("GitHub is not connected to this Dhwani AI account. Connect it again from Integrations.");
       return;
     }
     const identity = panel.querySelector("#cfgh-identity");
@@ -122,13 +122,13 @@ async function openWorkspace() {
   }
 }
 async function disconnectGitHub() {
-  if (!confirm("Disconnect GitHub from this Tatv AI account? Repository access will stop until you connect again.")) return;
+  if (!confirm("Disconnect GitHub from this Dhwani AI account? Repository access will stop until you connect again.")) return;
   try {
     const result = await api("disconnect", { method: "POST", body: JSON.stringify({}) });
     closePanel();
     showToast(result.revoked
       ? "GitHub disconnected and its OAuth grant was revoked."
-      : "GitHub disconnected locally. If the authorization remains in GitHub, remove Tatv AI from Settings → Applications.");
+      : "GitHub disconnected locally. If the authorization remains in GitHub, remove Dhwani AI from Settings → Applications.");
     window.location.reload();
   } catch (error) { showToast(error.message || "GitHub could not be disconnected."); }
 }
@@ -261,9 +261,9 @@ async function createPullRequest() {
     showToast("Create a feature branch before opening a pull request.");
     return;
   }
-  const title = prompt("Pull request title", "Tatv AI improvements");
+  const title = prompt("Pull request title", "Dhwani AI improvements");
   if (!title) return;
-  const description = prompt("Describe the changes", "Changes prepared in Tatv AI GitHub Workspace.");
+  const description = prompt("Describe the changes", "Changes prepared in Dhwani AI GitHub Workspace.");
   if (description === null) return;
   try {
     const payload = await api("pulls", { method: "POST", body: JSON.stringify({ repo: selectedRepo.fullName, title, body: description, head: currentBranch, base: selectedRepo.defaultBranch || "main" }) });

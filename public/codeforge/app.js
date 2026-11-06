@@ -38,9 +38,9 @@ const integrations = [
   { id: 'facebook', name: 'Facebook', mark: 'f', className: 'facebook', tagline: 'Your pages and community', detail: 'Connect your Facebook profile first. Page access for publishing and Insights is a separate optional permission step, available only when Meta approves it.', permissions: 'Profile · Optional Pages · Insights · Publishing (as approved)', steps: ['Configure Facebook Login and basic profile access.', 'Connect your profile first; the login does not request Page permissions.', 'Choose Connect Facebook Pages later if you need Page publishing or Insights, then complete any Meta review required for those permissions.'] },
 ];
 const providers = [
-  { id: "tatv-flash", name: "Dhwani Flash", mark: "✳", className: "tatv", desc: "Fast replies for everyday questions, quick tasks and simple explanations.", status: "Automatic Dhwani routing" },
-  { id: "tatv-smart", name: "Dhwani Smart", mark: "✦", className: "tatv", desc: "Balanced help for study, research, writing and everyday coding.", status: "Automatic Dhwani routing" },
-  { id: "tatv-ultra", name: "Dhwani Ultra", mark: "✧", className: "tatv", desc: "Deeper reasoning for complex questions, planning and coding.", status: "Automatic Dhwani routing" }
+  { id: "tatv-flash", name: "Dhwani Flash", mark: "✳", className: "dhwani", desc: "Fast replies for everyday questions, quick tasks and simple explanations.", status: "Automatic Dhwani routing" },
+  { id: "tatv-smart", name: "Dhwani Smart", mark: "✦", className: "dhwani", desc: "Balanced help for study, research, writing and everyday coding.", status: "Automatic Dhwani routing" },
+  { id: "tatv-ultra", name: "Dhwani Ultra", mark: "✧", className: "dhwani", desc: "Deeper reasoning for complex questions, planning and coding.", status: "Automatic Dhwani routing" }
 ];
 let activeView = 'chat';
 let messageCount = 0;
@@ -329,7 +329,7 @@ function openAuthModal(mode = "welcome", notice = "") {
     '<main class="cf-auth-screen" aria-label="Dhwani account access">' +
       '<a class="cf-auth-contact" href="mailto:codefroge.academy@gmail.com">Contact us <span aria-hidden="true">↗</span></a>' +
       '<section class="cf-auth-content">' +
-        '<div class="cf-auth-brand-stage"><img class="cf-auth-logo" src="/tatv/tatv-mark.svg" alt="Dhwani logo">' +
+        '<div class="cf-auth-brand-stage"><img class="cf-auth-logo" src="/dhwani/dhwani-mark.svg" alt="Dhwani logo">' +
         '<div class="cf-auth-brand-name">Dhwani <span>AI</span></div><p class="cf-auth-tagline">Your workspace for ideas, learning and creation.</p></div>' +
         '<div class="cf-auth-options">' +
           '<button type="button" class="cf-auth-action cf-auth-google" id="cfWelcomeGoogle"><span class="cf-auth-google-icon" aria-hidden="true">G</span><span>Continue with Google</span></button>' +
@@ -852,7 +852,7 @@ function renderSubscriptionPlans(status, unavailable = false) {
       : '<button class="subscription-main-cta" type="button" data-buy-plan="' + selectedPlan.code + '">Continue with ' + escapeHTML(selectedPlan.name) + ' · ' + escapeHTML(selectedPlan.price) + ' <span aria-hidden="true">→</span></button>';
   openModal("Upgrade to Dhwani AI Plus", detail,
     '<section class="subscription-content subscription-upgrade" aria-label="Upgrade subscription">' +
-      '<header class="subscription-upgrade-header"><span class="subscription-upgrade-icon" aria-hidden="true"><img src="/tatv/tatv-mark.svg" alt="Dhwani AI logo"></span><div><span class="subscription-eyebrow">ध्वनि · DHWANI AI</span><h2>Choose your plan</h2><p>Simple plans. Clear benefits. Pick what works for you.</p></div></header>' +
+      '<header class="subscription-upgrade-header"><span class="subscription-upgrade-icon" aria-hidden="true"><img src="/dhwani/dhwani-mark.svg" alt="Dhwani AI logo"></span><div><span class="subscription-eyebrow">ध्वनि · DHWANI AI</span><h2>Choose your plan</h2><p>Simple plans. Clear benefits. Pick what works for you.</p></div></header>' +
       toggle +
       '<div class="subscription-carousel-hint"><span>Choose your plan</span><span class="subscription-desktop-hint">Compare plans side by side</span><span class="subscription-mobile-hint" aria-hidden="true">Swipe ← →</span></div>' +
       '<div class="subscription-plan-carousel" aria-label="Available plans">' + options + '</div>' +
@@ -1045,7 +1045,7 @@ async function beginCheckout(planCode, button) {
     // The API still enforces idempotency for retries within this page.
   }
   button.disabled = true;
-  button.innerHTML = '<img class="cf-button-loader-logo" src="/tatv/tatv-mark.svg" alt=""> Preparing…';
+  button.innerHTML = '<img class="cf-button-loader-logo" src="/dhwani/dhwani-mark.svg" alt=""> Preparing…';
   showGlobalBrandLoader("Preparing secure checkout…");
 
   try {
@@ -1349,7 +1349,7 @@ function showGlobalBrandLoader(message = "Please wait…") {
     overlay.className = "cf-global-brand-loader";
     overlay.setAttribute("role", "status");
     overlay.setAttribute("aria-live", "polite");
-    overlay.innerHTML = '<div class="cf-global-brand-loader-card"><img src="/tatv/tatv-mark.svg" alt="" class="cf-global-brand-loader-logo"><span class="cf-global-brand-loader-message"></span></div>';
+    overlay.innerHTML = '<div class="cf-global-brand-loader-card"><img src="/dhwani/dhwani-mark.svg" alt="" class="cf-global-brand-loader-logo"><span class="cf-global-brand-loader-message"></span></div>';
     document.body.appendChild(overlay);
   }
   const label = overlay.querySelector(".cf-global-brand-loader-message");
@@ -1645,7 +1645,7 @@ async function openWanVideoStudio(initialPrompt = "", autoSubmit = false) {
   stopKieVideoPolling();
   const body =
     '<section class="kie-video-studio" aria-label="Dhwani video studio">' +
-      '<div class="kie-video-studio-head"><div><span class="vs-eyebrow">TATV STUDIO</span><h2>AI video generation</h2><p>Generate a short 5-second video and track its rendering status.</p></div><span class="vs-pill">KIE · Preview</span></div>' +
+      '<div class="kie-video-studio-head"><div><span class="vs-eyebrow">DHWANI STUDIO</span><h2>AI video generation</h2><p>Generate a short 5-second video and track its rendering status.</p></div><span class="vs-pill">KIE · Preview</span></div>' +
       '<form id="cfKieVideoForm" class="kie-video-form">' +
         '<label class="vs-label" for="cfKieVideoPrompt">Describe your video</label>' +
         '<textarea id="cfKieVideoPrompt" name="prompt" rows="4" maxlength="1800" required placeholder="Describe the scene, subject, movement, and visual style…"></textarea>' +
@@ -1830,7 +1830,7 @@ function downloadMessageText(text, role) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = role === "user" ? "tatv-prompt.txt" : "tatv-response.txt";
+  link.download = role === "user" ? "dhwani-prompt.txt" : "dhwani-response.txt";
   link.hidden = true;
   document.body.appendChild(link);
   link.click();
@@ -2144,7 +2144,7 @@ function addMessage(role, text, options = {}) {
       $('.message-content', item).appendChild(tray);
     }
   } else {
-    item.innerHTML = `<span class="message-avatar" aria-hidden="true"><img src="/tatv/tatv-mark.svg" alt=""></span><div class="message-content"><div class="message-text"></div><div class="demo-warning" hidden></div></div>`;
+    item.innerHTML = `<span class="message-avatar" aria-hidden="true"><img src="/dhwani/dhwani-mark.svg" alt=""></span><div class="message-content"><div class="message-text"></div><div class="demo-warning" hidden></div></div>`;
     $('.message-text', item).textContent = text;
     renderAssistantContent($('.message-text', item), text);
     const warning = $('.demo-warning', item);
@@ -2307,7 +2307,7 @@ async function resumeSavedConversationGeneration(conversationId, sessionToken, g
 
     pending = document.createElement("article");
     pending.className = "message response pending-message";
-    pending.innerHTML = `<span class="message-avatar" aria-hidden="true"><img src="/tatv/tatv-mark.svg" alt=""></span><div class="message-content"><div class="message-text pending-typing" role="status" aria-live="polite" aria-label="Dhwani is responding"><span class="cf-typing-indicator" aria-hidden="true"><span></span><span></span><span></span></span></div></div>`;
+    pending.innerHTML = `<span class="message-avatar" aria-hidden="true"><img src="/dhwani/dhwani-mark.svg" alt=""></span><div class="message-content"><div class="message-text pending-typing" role="status" aria-live="polite" aria-label="Dhwani is responding"><span class="cf-typing-indicator" aria-hidden="true"><span></span><span></span><span></span></span></div></div>`;
     const messageContent = $(".message-content", pending);
     const text = $(".message-text", pending);
     const revealRecoveredText = () => {
@@ -4373,7 +4373,7 @@ async function sendMessage(text, options = {}) {
 
   const pending = document.createElement("article");
   pending.className = "message response pending-message";
-  pending.innerHTML = `<span class="message-avatar" aria-hidden="true"><img src="/tatv/tatv-mark.svg" alt=""></span><div class="message-content"><div class="message-text pending-typing" role="status" aria-live="polite" aria-label="Dhwani is responding"><span class="cf-typing-indicator" aria-hidden="true"><span></span><span></span><span></span></span></div><button type="button" class="pending-stop-button" data-stop-generation aria-label="Stop response" title="Stop response"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"></rect></svg></button></div>`;
+  pending.innerHTML = `<span class="message-avatar" aria-hidden="true"><img src="/dhwani/dhwani-mark.svg" alt=""></span><div class="message-content"><div class="message-text pending-typing" role="status" aria-live="polite" aria-label="Dhwani is responding"><span class="cf-typing-indicator" aria-hidden="true"><span></span><span></span><span></span></span></div><button type="button" class="pending-stop-button" data-stop-generation aria-label="Stop response" title="Stop response"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2" fill="currentColor"></rect></svg></button></div>`;
   $("#messages").appendChild(pending);
 
   const stopButton = $("[data-stop-generation]", pending);
@@ -4648,7 +4648,7 @@ async function sendMessage(text, options = {}) {
       const confirmed = window.confirm(
         "Confirm action: " + socialAction.summary + "\n\n" + socialAction.detail +
         (selectedPageName ? "\n\nTarget Page: " + selectedPageName : "") +
-        "\n\nTatv will send this to your connected " + socialAction.provider + " account. Continue?"
+        "\n\nDhwani will send this to your connected " + socialAction.provider + " account. Continue?"
       );
       if (!confirmed) {
         directActionReply = "Action cancelled. Nothing was changed or published.";
@@ -4810,7 +4810,7 @@ async function sendMessage(text, options = {}) {
       };
       const download = document.createElement("a");
       download.href = mediaUrl;
-      download.download = isVideo ? "tatv-ai-video.mp4" : "tatv-ai-image.jpg";
+      download.download = isVideo ? "dhwani-ai-video.mp4" : "dhwani-ai-image.jpg";
       download.className = "media-action-button media-download-button";
       download.setAttribute("aria-label", isVideo ? "Download video" : "Download image");
       download.title = isVideo ? "Download video" : "Download image";
@@ -4832,7 +4832,7 @@ async function sendMessage(text, options = {}) {
       share.addEventListener("click", async () => {
         try {
           const mediaBlob = await fetch(mediaUrl).then(result => result.blob());
-          const file = new File([mediaBlob], isVideo ? "tatv-ai-video.mp4" : "tatv-ai-image.png", { type: mediaBlob.type || (isVideo ? "video/mp4" : "image/png") });
+          const file = new File([mediaBlob], isVideo ? "dhwani-ai-video.mp4" : "dhwani-ai-image.png", { type: mediaBlob.type || (isVideo ? "video/mp4" : "image/png") });
           if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
             await navigator.share({ files: [file], title: isVideo ? "Dhwani AI video" : "Dhwani AI image" });
           } else {
@@ -5051,7 +5051,7 @@ async function sendMessage(text, options = {}) {
             : "The safe archive entries were carried over. Your original ZIP was not changed.";
         } else {
           zipBlob = createProjectZip(projectBundle.files);
-          zipFilename = "tatv-project-" + new Date().toISOString().slice(0, 10) + ".zip";
+          zipFilename = "dhwani-project-" + new Date().toISOString().slice(0, 10) + ".zip";
           headingText = "Project ZIP ready";
           detailText = projectBundle.files.length + " source files · " + bytesToLabel(zipBlob.size);
         }
@@ -5116,7 +5116,7 @@ async function sendMessage(text, options = {}) {
         preview.alt = "PDF preview";
         const download = document.createElement("a");
         download.href = documentUrl;
-        download.download = "tatv-" + documentIntent + "-" + new Date().toISOString().slice(0, 10) + ".pdf";
+        download.download = "dhwani-" + documentIntent + "-" + new Date().toISOString().slice(0, 10) + ".pdf";
         download.textContent = "Download PDF (" + documentResult.pages + (documentResult.pages === 1 ? " page" : " pages") + ")";
         card.append(preview, download);
         $(".message-content", pending).appendChild(card);
@@ -5362,7 +5362,7 @@ async function showCreatorMilestones() {
     const card = document.createElement("section");
     card.className = "creator-celebration" + (celebration ? " is-milestone" : "");
     card.setAttribute("aria-label", celebration ? "YouTube milestone congratulations" : "Creator welcome");
-    card.innerHTML = '<button class="creator-celebration-dismiss" type="button" aria-label="Dismiss congratulations">×</button><div class="creator-celebration-top"><span class="creator-celebration-icon">' + (celebration ? celebration.milestone.icon : latestUpload ? "▶" : "✳") + '</span><span class="creator-celebration-kicker">TATV CREATOR MOMENT</span></div><h2>' + title + '</h2><p>' + message + '</p>' + (celebration ? '<div class="creator-milestone-number"><strong>' + celebration.milestone.label + '</strong><small>' + number(celebration.views) + ' total public views</small></div>' : '') + videoLink;
+    card.innerHTML = '<button class="creator-celebration-dismiss" type="button" aria-label="Dismiss congratulations">×</button><div class="creator-celebration-top"><span class="creator-celebration-icon">' + (celebration ? celebration.milestone.icon : latestUpload ? "▶" : "✳") + '</span><span class="creator-celebration-kicker">DHWANI CREATOR MOMENT</span></div><h2>' + title + '</h2><p>' + message + '</p>' + (celebration ? '<div class="creator-milestone-number"><strong>' + celebration.milestone.label + '</strong><small>' + number(celebration.views) + ' total public views</small></div>' : '') + videoLink;
     card.querySelector(".creator-celebration-dismiss").addEventListener("click", () => card.remove());
     const subtitle = welcome.querySelector(".welcome-subtitle");
     if (subtitle) subtitle.insertAdjacentElement("afterend", card);
@@ -5561,7 +5561,7 @@ function downloadCurrentConversation() {
     .normalize("NFKD")
     .replace(/[^\p{L}\p{N}]+/gu, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, 54) || "tatv-chat";
+    .slice(0, 54) || "dhwani-chat";
   const body = "# " + title + "\n\n" + text + "\n";
   const blob = new Blob([body], { type: "text/markdown;charset=utf-8" });
   const url = URL.createObjectURL(blob);

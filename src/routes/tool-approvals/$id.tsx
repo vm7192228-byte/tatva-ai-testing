@@ -24,7 +24,7 @@ type ApiPayload = {
 export const Route = createFileRoute("/tool-approvals/$id")({
   head: () => ({
     meta: [
-      { title: "Review action — Tatv AI" },
+      { title: "Review action — Dhwani AI" },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
@@ -69,7 +69,7 @@ export function ToolApprovalPageView({ id }: { id: string }) {
       const payload = await response.json().catch(() => ({})) as ApiPayload;
       if (!response.ok || !payload.approval) {
         const message = payload.error === "AUTH_REQUIRED"
-          ? "Sign in to the same Tatv account that created this approval, then reopen this link."
+          ? "Sign in to the same Dhwani account that created this approval, then reopen this link."
           : payload.message || "This approval could not be loaded.";
         throw new Error(message);
       }
@@ -153,11 +153,11 @@ export function ToolApprovalPageView({ id }: { id: string }) {
     <main className="min-h-screen bg-slate-50 px-4 py-12 text-slate-900">
       <div className="mx-auto w-full max-w-xl">
         <a href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900">
-          <span aria-hidden="true">←</span> Tatv AI
+          <span aria-hidden="true">←</span> Dhwani AI
         </a>
         <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="text-xs font-bold uppercase tracking-[0.14em] text-blue-600">Action approval</div>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight">Review before Tatv acts</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight">Review before Dhwani acts</h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Nothing is sent to a social platform until the signed-in account owner approves this exact request.
           </p>

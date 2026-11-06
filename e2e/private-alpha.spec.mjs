@@ -51,19 +51,16 @@ async function installApiMocks(page, { authUnavailable = false, signedOut = fals
     if (path === "/api/chat" && method === "POST") {
       try { chatRequests.push(JSON.parse(request.postData() || "{}")); } catch { chatRequests.push({}); }
       if (signedOut) {
-        return json({
-          error: "SIGN_IN_REQUIRED",
-          message: "Sign in to use Tatv Smart. The private AI gateway verifies each user's Supabase session and applies a separate per-user usage limit.",
-        }, 401);
+        return json({ reply: "Dhwani AI test reply received.", model: "Dhwani Smart", route: "freellmapi" });
       }
-      return json({ reply: "Tatv AI test reply received.", model: "Tatv Smart" });
+      return json({ reply: "Dhwani AI test reply received.", model: "Dhwani Smart" });
     }
     if (path === "/api/chat/generations" && method === "POST") {
       return json({ ok: false, message: "Durable generation storage is unavailable in this isolated browser test." }, 503);
     }
     if (path === "/api/transcribe" && method === "POST") {
       transcriptionRequests.push({ contentType: request.headers()["content-type"] || "" });
-      return json({ ok: true, text: "Hello Tatv, this is a voice test." });
+      return json({ ok: true, text: "Hello Dhwani, this is a voice test." });
     }
     if (path === "/api/billing/status") {
       return json({ ok: true, paid: false, planCode: "free", expiresAt: null });
@@ -220,11 +217,11 @@ async function installFakeVoiceRuntime(page) {
   });
 }
 
-test.describe("Tatv AI private-alpha browser smoke", () => {
+test.describe("Dhwani AI private-alpha browser smoke", () => {
   test("loads the workspace shell and accessible chat/voice controls", async ({ page }) => {
     await installApiMocks(page);
     await page.goto("/");
-    await expect(page.locator(".brand-wordmark")).toContainText("Tatv AI");
+    await expect(page.locator(".brand-wordmark")).toContainText("Dhwani AI");
     await expect(page.locator("#promptInput")).toBeVisible();
     await expect(page.getByRole("button", { name: "Send message" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Dictate a message" })).toBeVisible();
@@ -243,7 +240,7 @@ test.describe("Tatv AI private-alpha browser smoke", () => {
     await page.locator("#promptInput").fill("Test the private alpha chat path.");
     await page.getByRole("button", { name: "Send message" }).click();
     await expect.poll(() => chatRequests.length, { timeout: 20_000 }).toBe(1);
-    await expect(page.locator("#messages")).toContainText("Tatv AI test reply received.", { timeout: 20_000 });
+    await expect(page.locator("#messages")).toContainText("Dhwani AI test reply received.", { timeout: 20_000 });
     expect(pageErrors).toEqual([]);
   });
 
@@ -288,27 +285,25 @@ test.describe("Tatv AI private-alpha browser smoke", () => {
     await page.evaluate(() => { window.__voiceTestAudioActive = false; });
     await expect.poll(() => transcriptionRequests.length, { timeout: 15_000 }).toBe(1);
     await expect.poll(() => chatRequests.length, { timeout: 15_000 }).toBe(1);
-    await expect(page.locator("#messages")).toContainText("Tatv AI test reply received.", { timeout: 15_000 });
+    await expect(page.locator("#messages")).toContainText("Dhwani AI test reply received.", { timeout: 15_000 });
     await expect.poll(
       () => page.evaluate(() => window.__playedVoiceUtterances.join(" ")),
       { timeout: 10_000 },
-    ).toContain("Tatv AI test reply received");
+    ).toContain("Dhwani AI test reply received");
     expect(await page.evaluate(() => window.__getUserMediaCalls)).toBe(1);
     expect(transcriptionRequests[0].contentType).toContain("multipart/form-data");
-    expect(JSON.stringify(chatRequests[0])).toContain("Hello Tatv, this is a voice test.");
+    expect(JSON.stringify(chatRequests[0])).toContain("Hello Dhwani, this is a voice test.");
   });
-  test("allows guest workspace browsing but requires sign-in before using Tatv Smart", async ({ page }) => {
+  test("allows guest Smart chat through the shared FreeLLMAPI first hop", async ({ page }) => {
     const { chatRequests } = await installApiMocks(page, { signedOut: true });
     await page.goto("/");
     await continueAsGuest(page);
     await page.locator("#promptInput").fill("Test private Smart access without signing in.");
     await page.getByRole("button", { name: "Send message" }).click();
     await expect.poll(() => chatRequests.length, { timeout: 20_000 }).toBe(1);
-    await expect(page.locator("#messages")).toContainText(
-      "Sign in to use Tatv Smart. The private AI gateway verifies each user's Supabase session",
-      { timeout: 20_000 },
-    );
-    await expect(page.locator("#messages")).not.toContainText("Tatv AI test reply received.");
+    await expect(page.locator("#messages")).toContainText("Dhwani AI test reply received.", { timeout: 20_000 });
+    expect(chatRequests[0]?.provider).toBe("smart");
+    expect(chatRequests[0]?.chatMode).toBe("smart");
   });
 
   test("requires explicit terms consent before starting Google OAuth", async ({ page }) => {
@@ -329,7 +324,7 @@ test.describe("Tatv AI private-alpha browser smoke", () => {
 });
 
 
-test.describe("Tatv AI responsive desktop and mobile layout", () => {
+test.describe("Dhwani AI responsive desktop and mobile layout", () => {
   for (const viewport of [
     { name: "desktop", width: 1440, height: 900 },
     { name: "laptop", width: 1280, height: 800 },

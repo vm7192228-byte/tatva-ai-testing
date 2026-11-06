@@ -15,8 +15,8 @@ describe("Dhwani AI visual identity", () => {
   });
 
   it("keeps the welcome view and message composer clean and connected to the existing chat controls", () => {
-    expect(codeforgeMarkup).toContain("नमस्ते, मैं तत्व हूँ");
-    expect(codeforgeMarkup).toContain("Hindi, English ya Hinglish");
+    expect(codeforgeMarkup).toContain("What's on the agenda today?");
+    expect(codeforgeMarkup).toContain('placeholder="How can I help you today?"');
     expect(codeforgeMarkup).toContain('id="promptInput"');
     expect(codeforgeMarkup).toContain('id="plusMenuButton"');
     expect(codeforgeMarkup).toContain('id="plusMenu"');
@@ -94,14 +94,12 @@ describe("Dhwani AI visual identity", () => {
     expect(codeforgeMarkup).not.toContain("CodeForge");
   });
 
-  it("ships the animated three-lines-and-bindu mark and Dhwani chat styles", () => {
-    const svg = readFileSync(resolve(process.cwd(), "public/tatv/tatv-mark.svg"), "utf8");
+  it("ships the Dhwani sound-wave mark and Dhwani chat styles", () => {
+    const svg = readFileSync(resolve(process.cwd(), "public/dhwani/dhwani-mark.svg"), "utf8");
     const css = readFileSync(resolve(process.cwd(), "public/codeforge/styles.css"), "utf8");
-    expect(svg).toContain("तीन");
-    expect(svg).toContain('M74 86 Q120 72 166 86');
-    expect(svg).toContain('M74 106 Q120 92 166 106');
-    expect(svg).toContain('M74 126 Q120 112 166 126');
-    expect(svg).toContain('animateTransform');
+    expect(svg).toContain('viewBox="0 0 48 48"');
+    expect(svg).toContain("Dhwani AI sound wave");
+    expect(svg).toContain('<rect x="22" y="5" width="5" height="38" rx="2.5"/>');
     expect(css).toContain(".dhwani-menu-toggle");
     expect(css).toContain(".dhwani-suggestions");
     expect(css).toContain(".composer-bottom #promptInput");

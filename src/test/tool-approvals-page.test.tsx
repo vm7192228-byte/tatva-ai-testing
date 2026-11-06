@@ -71,14 +71,14 @@ describe("authenticated approval review page browser flow", () => {
   it("shows a sign-in message and no action controls when the API rejects an unauthenticated session", async () => {
     const fetchMock = vi.fn().mockResolvedValue(response({
       error: "AUTH_REQUIRED",
-      message: "Sign in to the same Tatv account that created this approval.",
+      message: "Sign in to the same Dhwani account that created this approval.",
     }, 401));
     vi.stubGlobal("fetch", fetchMock);
     const page = renderApprovalPage();
 
     try {
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "Sign in to the same Tatv account that created this approval",
+        "Sign in to the same Dhwani account that created this approval",
       );
       expect(screen.queryByRole("button", { name: "Approve action" })).toBeNull();
       expect(screen.queryByRole("button", { name: "Reject" })).toBeNull();

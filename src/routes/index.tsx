@@ -5,11 +5,11 @@ import { codeforgeMarkup } from "@/lib/codeforge-markup";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ध्वनि · Dhwani AI" },
+      { title: "Dhwani AI" },
       { name: "description", content: "Dhwani AI — a simple workspace to chat, think, build, and connect your tools." },
       { property: "og:title", content: "Dhwani AI" },
       { property: "og:description", content: "A simple workspace to chat, think, build, and connect your tools." },
-      { name: "theme-color", content: "#f4f6ff" },
+      { name: "theme-color", content: "#ffffff" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/")({
       { rel: "stylesheet", href: "/codeforge/styles.css" },
       { rel: "stylesheet", href: "/codeforge/video-studio.css" },
       { rel: "stylesheet", href: "/codeforge/tatv-theme.css" },
-      { rel: "stylesheet", href: "/codeforge/dhwani-ui.css" },
+      { rel: "stylesheet", href: "/codeforge/dhwani-ui.css?v=claude-clean-3" },
       { rel: "icon", type: "image/svg+xml", href: "/dhwani/dhwani-mark.svg" },
     ],
   }),

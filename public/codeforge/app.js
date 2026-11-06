@@ -5289,7 +5289,7 @@ function applyTheme(theme) {
   if (themeGlyph) themeGlyph.textContent = isDark ? '☀' : '☾';
   if (themeMenuLabel) themeMenuLabel.textContent = isDark ? 'Light theme' : 'Dark theme';
   if (themeToggle) { themeToggle.title = isDark ? 'Switch to light theme' : 'Switch to dark theme'; themeToggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme'); themeToggle.setAttribute('aria-pressed', String(isDark)); }
-  const tc = $('meta[name="theme-color"]'); if (tc) tc.content = isDark ? '#171717' : '#ffffff';
+  const tc = $('meta[name="theme-color"]'); if (tc) tc.content = isDark ? '#1f1e1c' : '#ffffff';
 }
 function saveTheme(theme) {
   try { localStorage.setItem('codeforge-ai-theme', theme); } catch { /* Storage may be unavailable in private browsing. */ }
@@ -5672,11 +5672,8 @@ document.addEventListener('keydown', event => {
 });
 
 function updateHeroGreeting() {
-  const name = currentUser?.displayName?.trim();
   const element = document.getElementById("heroGreeting");
-  if (element) element.textContent = name
-    ? "Good to see you, " + name + ". What's on the agenda today?"
-    : "What's on the agenda today?";
+  if (element) element.textContent = "What's on the agenda today?";
 }
 updateHeroGreeting();
 

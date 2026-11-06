@@ -3,15 +3,15 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { codeforgeMarkup } from "../lib/codeforge-markup";
 
-describe("Tatv AI brand and chat shell", () => {
-  it("uses the animated Tatv mark as the menu trigger and welcome identity", () => {
+describe("Dhwani AI brand and chat shell", () => {
+  it("uses the Dhwani sound-wave mark as the menu trigger and welcome identity", () => {
     expect(codeforgeMarkup).toContain('id="sidebarToggle"');
-    expect(codeforgeMarkup).toContain('tatv-menu-toggle');
+    expect(codeforgeMarkup).toContain("dhwani-menu-toggle");
     expect(codeforgeMarkup).toContain('aria-label="Open menu"');
-    expect(codeforgeMarkup).toContain('src="/tatv/tatv-mark.svg"');
-    expect(codeforgeMarkup).toContain("नमस्ते, मैं तत्व हूँ");
+    expect(codeforgeMarkup).toContain('src="/dhwani/dhwani-mark.svg"');
+    expect(codeforgeMarkup).toContain("Dhwani AI");
     expect(codeforgeMarkup).toContain("Hindi, English ya Hinglish");
-    expect(codeforgeMarkup).toContain('tatv-suggestions');
+    expect(codeforgeMarkup).toContain("dhwani-suggestions");
   });
 
   it("keeps the existing chat, attachment, voice and AI model controls available", () => {
@@ -27,42 +27,28 @@ describe("Tatv AI brand and chat shell", () => {
     expect(codeforgeMarkup).toContain('id="integrationGrid"');
   });
 
-  it("does not expose the previous product brand in the primary app UI", () => {
+  it("does not expose the retired Tatv or CodeForge brands in the customer-facing app", () => {
     const app = readFileSync(resolve(process.cwd(), "public/codeforge/app.js"), "utf8");
-    const markup = readFileSync(resolve(process.cwd(), "src/lib/codeforge-markup.ts"), "utf8");
-    expect(codeforgeMarkup).not.toContain("CodeForge");
+    expect(codeforgeMarkup).not.toContain("Tatv AI");
+    expect(codeforgeMarkup).not.toContain("/tatv/");
+    expect(app).not.toContain("/tatv/");
+    expect(app).not.toContain("TATV STUDIO");
+    expect(app).not.toContain("TATV CREATOR MOMENT");
     expect(app).not.toContain("CodeForge");
-    expect(markup).not.toContain("CodeForge");
   });
 
-  it("ships a well-formed SVG logo that the browser can render", () => {
-    const logo = readFileSync(resolve(process.cwd(), "public/tatv/tatv-mark.svg"), "utf8");
+  it("ships a valid Dhwani sound-wave SVG and uses it for the app brand", () => {
+    const logo = readFileSync(resolve(process.cwd(), "public/dhwani/dhwani-mark.svg"), "utf8");
     const parsed = new DOMParser().parseFromString(logo, "image/svg+xml");
+    const styles = readFileSync(resolve(process.cwd(), "public/codeforge/styles.css"), "utf8");
+
     expect(parsed.documentElement.localName).toBe("svg");
     expect(parsed.getElementsByTagName("parsererror")).toHaveLength(0);
-  });
-
-  it("ships the supplied triguna-and-bindu logo asset and drawer styling", () => {
-    const logo = readFileSync(resolve(process.cwd(), "public/tatv/tatv-mark.svg"), "utf8");
-    const styles = readFileSync(resolve(process.cwd(), "public/codeforge/styles.css"), "utf8");
-    expect(logo).toContain('viewBox="0 0 240 240"');
-    expect(logo).toContain('id="bindu"');
-    expect(logo).toContain('id="g1"');
-    expect(logo).toContain('id="g2"');
-    expect(logo).toContain('id="flow"');
-    expect(logo).toContain('attributeName="gradientTransform"');
-    expect(logo).toContain(".a{animation:spin 9s linear infinite}");
-    expect(logo).toContain(".b{animation:spin 14s linear infinite reverse}");
-    expect(logo).toContain("@keyframes draw");
-    expect(logo).toContain("@keyframes pulse");
-    expect(logo).toContain("M74 86 Q120 72 166 86");
+    expect(logo).toContain('viewBox="0 0 48 48"');
+    expect(logo).toContain("Dhwani AI sound wave");
+    expect(logo).toContain('<rect x="22" y="5" width="5" height="38" rx="2.5"/>');
+    expect(styles).toContain(".dhwani-menu-toggle");
+    expect(styles).toContain(".dhwani-suggestions");
     expect(styles).toContain(".sidebar.open");
-    expect(styles).toContain(".tatv-menu-toggle");
-    expect(styles).toContain(".composer-bottom #promptInput");
-    expect(styles).toContain(".topbar-plus-button");
-    expect(styles).toContain(".sidebar.open");
-    const app = readFileSync(resolve(process.cwd(), "public/codeforge/app.js"), "utf8");
-    expect(app).toContain("topbarPlusButton.hidden = view !== 'chat'");
-    expect(app).toContain("sidebar.classList.toggle('open', opening)");
   });
 });

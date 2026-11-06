@@ -305,7 +305,7 @@ async function createSignedUpload(
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) payload = parsed as Record<string, unknown>;
   } catch { /* Return a generic error below; do not expose upstream internals. */ }
   if (!response.ok || typeof payload["url"] !== "string") {
-    console.error("[Tatv uploads] Supabase could not create a signed upload URL:", response.status);
+    console.error("[Dhwani uploads] Supabase could not create a signed upload URL:", response.status);
     return json({
       error: "UPLOAD_SIGN_FAILED",
       message: response.status === 404
@@ -375,7 +375,7 @@ async function deleteOwnedUploads(
     return json({ error: "UPLOAD_CLEANUP_FAILED", message: "Temporary uploaded files could not be cleaned up." }, 502, cookies);
   }
   if (!response.ok) {
-    console.error("[Tatv uploads] Supabase could not delete temporary chat uploads:", response.status);
+    console.error("[Dhwani uploads] Supabase could not delete temporary chat uploads:", response.status);
     return json({ error: "UPLOAD_CLEANUP_FAILED", message: "Temporary uploaded files could not be cleaned up." }, 502, cookies);
   }
   return json({ ok: true, deleted: paths.length }, 200, cookies);

@@ -14,31 +14,33 @@ Live preview: https://codeforge-ai-workbench.lovable.app
 
 The sidebar can collapse on desktop; on smaller screens it opens as a drawer. App connections live under the chat composer’s `+` menu instead of taking up the home screen.
 
-## Backend: Tatv Smart private gateway
+## Backend: Tatv Smart provider routing
 
 The server-side chat handler is `src/lib/chat-api.server.ts`, called by `src/server.ts` before the app router. Provider credentials and verified session tokens stay on the server.
 
 - `GET /api/chat` returns provider-readiness flags without exposing secret values.
-- `POST /api/chat` validates requests and streams assistant output. Tatv Smart requires a signed-in user because the private gateway verifies that user's Supabase access token and applies per-user limits.
-- Tatv Smart uses a privately operated, multi-user CodeForge gateway. The Workbench forwards only the current user's verified Supabase access JWT; it never forwards a gateway administrator token or a personal shared provider key.
-- Up to four distinct private gateway instances can be configured. Failover is limited to safe pre-answer transient errors and an empty local model catalog. It does not bypass authentication, permission, billing, 429/rate-limit, or provider quota errors, and it does not replay a request after answer text or tool side effects begin.
-- Every gateway must trust the same Workbench Supabase Auth issuer, expose the OpenAI-compatible `/v1/chat/completions` route, and have its own reviewed/enabled chat model catalog and authorized provider connection.
-- The public, single-user FreeLLMAPI service is not a multi-user Tatv Smart backend. Do not use its personal key as a shared student entitlement.
+- `POST /api/chat` applies the same Smart routing order to the owner, signed-in users and guests: **FreeLLMAPI first, eligible private CodeForge gateways second, then configured direct providers**.
+- FreeLLMAPI is the shared first hop for Tatv Smart. Any upstream credential, model, billing, quota, rate-limit or service failure before answer output moves to the next eligible route.
+- Private CodeForge gateways are used only when a signed-in user's verified Supabase access JWT is available. The gateway never receives the shared FreeLLMAPI key or an administrator credential.
+- After the configured private gateways, Smart can try server-side OpenAI, Anthropic, DeepSeek, xAI, Qwen, Cloudflare Workers AI and Pollinations credentials. Guest traffic skips the authenticated-only private gateway tier and can continue to configured direct providers.
+- Provider/API configuration and upstream errors are kept out of user-facing messages and recorded only as normalized server diagnostics. User authentication/access denials, bans, suspension, user-level quotas/permissions, and content-policy decisions remain terminal. Failover never replays a request after answer text or tool side effects begin.
+- Text chat remains free on every plan. Existing server-side subscription/quota reservations for image generation, video generation and file analysis remain enforced independently of the selected chat provider.
 - Gemini is disabled for this learner-facing release. Inline image, audio and video analysis remain unavailable until an approved multimodal provider is configured.
 - API keys and session tokens are never embedded in frontend JavaScript. Browser sessions use HttpOnly cookies.
 
 Configure these values in the hosting provider's **server-side environment** panel:
 
+- `FREELLMAPI_BASE_URL`, `FREELLMAPI_API_KEY`, and `FREELLMAPI_MODEL` — shared first-hop settings for Tatv Smart. Keep the unified key server-side only.
 - `CODEFORGE_GATEWAY_URL` — primary private gateway HTTPS URL. The Workbench appends `/v1` when needed.
 - `CODEFORGE_GATEWAY_MODEL` — optional primary model/routing profile; defaults to `auto`.
 - `CODEFORGE_GATEWAY_FALLBACK_URL` and `CODEFORGE_GATEWAY_FALLBACK_MODEL` — optional second private gateway.
 - `CODEFORGE_GATEWAY_FALLBACK_2_URL` and `CODEFORGE_GATEWAY_FALLBACK_2_MODEL` — optional third private gateway.
 - `CODEFORGE_GATEWAY_FALLBACK_3_URL` and `CODEFORGE_GATEWAY_FALLBACK_3_MODEL` — optional fourth private gateway.
-- `SUPABASE_URL` and `SUPABASE_ANON_KEY` (or the supported publishable-key alias) — Workbench Auth configuration. Each gateway's JWT verifier must use this same project's trusted issuer/JWKS.
+- Optional final-tier keys: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`, `QWEN_BASE_URL` / `QWEN_API_KEY`, `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_API_TOKEN`, and `POLLINATIONS_API_KEY`.
+- `SUPABASE_URL` and `SUPABASE_ANON_KEY` (or the supported publishable-key alias) — Workbench Auth configuration. Each private gateway's JWT verifier must use this same project's trusted issuer/JWKS.
 - `SUPABASE_SERVICE_ROLE_KEY` (or the supported secret-key alias) — server-only database operations, usage limits, shared rate limits and saved conversations. Never expose this key in browser code.
-- `FREELLMAPI_BASE_URL`, `FREELLMAPI_API_KEY`, and `FREELLMAPI_MODEL` — legacy settings retained only for explicitly supported legacy integrations; they are not a fallback for multi-user Tatv Smart chat.
 
-For failover, configure only independently operated private gateways. Do not repeat the same URL in multiple slots. A backup URL alone is not enough: it needs a healthy service, matching user-JWT trust, eligible provider credentials and at least one enabled chat model.
+For private-gateway failover, configure only independently operated instances. Do not repeat the same URL in multiple slots. Each backup needs a healthy service, matching user-JWT trust, eligible provider credentials and at least one enabled chat model.
 
 ## App connections
 

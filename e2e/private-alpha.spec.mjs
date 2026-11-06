@@ -302,7 +302,8 @@ test.describe("Dhwani AI private-alpha browser smoke", () => {
     await page.getByRole("button", { name: "Send message" }).click();
     await expect.poll(() => chatRequests.length, { timeout: 20_000 }).toBe(1);
     await expect(page.locator("#messages")).toContainText("Dhwani AI test reply received.", { timeout: 20_000 });
-    expect(chatRequests[0]?.provider).toBe("tatv-smart");
+    expect(chatRequests[0]?.provider).toBe("smart");
+    expect(chatRequests[0]?.chatMode).toBe("smart");
   });
 
   test("requires explicit terms consent before starting Google OAuth", async ({ page }) => {

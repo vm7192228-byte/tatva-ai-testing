@@ -149,9 +149,11 @@ async function getActiveSubscriptionPlan(runtimeEnv: unknown, userId: string | u
     const value = cfg[name] ?? processLike?.env?.[name];
     return typeof value === "string" && value.trim() ? value.trim() : undefined;
   };
-  const baseUrl = getEnv("SUPABASE_URL");
-  // Prefer the current Supabase server-only secret key; keep legacy service_role as a migration fallback.
-  const serviceKey = getEnv("SUPABASE_SECRET_KEY") ?? getEnv("SUPABASE_SERVICE_ROLE_KEY");
+  const baseUrl = getEnv("TATV_SUPABASE_URL") ?? getEnv("SUPABASE_URL");
+  const dedicatedSecretKey = getEnv("TATV_SUPABASE_SECRET_KEY");
+  const serviceKey = dedicatedSecretKey?.startsWith("sb_secret_")
+    ? dedicatedSecretKey
+    : getEnv("SUPABASE_SECRET_KEY") ?? getEnv("SUPABASE_SERVICE_ROLE_KEY");
   if (!baseUrl || !serviceKey) return null;
   try {
     const query = new URL("/rest/v1/cf_subscriptions", baseUrl);
@@ -160,8 +162,12 @@ async function getActiveSubscriptionPlan(runtimeEnv: unknown, userId: string | u
     query.searchParams.set("status", "eq.active");
     query.searchParams.set("order", "expires_at.desc.nullslast");
     query.searchParams.set("limit", "10");
+    const headers: Record<string, string> = { apikey: serviceKey };
+    // Supabase's new sb_secret_* keys are opaque API keys, not JWTs.
+    // Send them only as apikey; legacy service_role keys are JWTs.
+    if (!serviceKey.startsWith("sb_secret_")) headers.authorization = "Bearer " + serviceKey;
     const response = await fetch(query, {
-      headers: { apikey: serviceKey, authorization: "Bearer " + serviceKey },
+      headers,
       signal: AbortSignal.timeout(2500),
     });
     if (!response.ok) return null;

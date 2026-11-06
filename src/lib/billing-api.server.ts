@@ -103,6 +103,22 @@ function envValue(name: string, runtimeEnv: unknown): string | undefined {
   const value = processLike?.env?.[name];
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
+
+function getSupabaseAdminKey(runtimeEnv: unknown): string | undefined {
+  const dedicated = envValue("TATV_SUPABASE_SECRET_KEY", runtimeEnv);
+  if (dedicated?.startsWith("sb_secret_")) return dedicated;
+  return envValue("SUPABASE_SECRET_KEY", runtimeEnv) ?? envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv);
+}
+
+function supabaseAdminHeaders(key: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    apikey: key,
+    "content-type": "application/json",
+  };
+  // sb_secret_* is an opaque API key, not a JWT; legacy service_role is a JWT.
+  if (!key.startsWith("sb_secret_")) headers.authorization = "Bearer " + key;
+  return headers;
+}
 function json(data: unknown, status = 200, extra: Record<string, string> = {}) {
   return new Response(JSON.stringify(data), { status, headers: {
     "content-type": "application/json; charset=utf-8", "cache-control": "no-store",
@@ -120,15 +136,17 @@ function sameOrigin(request: Request): boolean {
   return request.headers.get("sec-fetch-site") === "same-origin";
 }
 function dbConfig(runtimeEnv: unknown) {
-  const url = envValue("SUPABASE_URL", runtimeEnv);
-  const key = envValue("SUPABASE_SECRET_KEY", runtimeEnv) ?? envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv);
+  const url = envValue("TATV_SUPABASE_URL", runtimeEnv) ?? envValue("SUPABASE_URL", runtimeEnv);
+  const key = getSupabaseAdminKey(runtimeEnv);
   return url && key ? { url: url.replace(/\/$/, ""), key } : null;
 }
 async function dbRequest(runtimeEnv: unknown, path: string, init: RequestInit = {}) {
   const cfg = dbConfig(runtimeEnv);
   if (!cfg) throw new Error("BILLING_DATABASE_NOT_CONFIGURED");
   const headers = new Headers(init.headers);
-  headers.set("apikey", cfg.key); headers.set("authorization", "Bearer " + cfg.key);
+  headers.set("apikey", cfg.key);
+  if (cfg.key.startsWith("sb_secret_")) headers.delete("authorization");
+  else headers.set("authorization", "Bearer " + cfg.key);
   headers.set("content-type", "application/json");
   return fetch(cfg.url + "/rest/v1/" + path, { ...init, headers, signal: init.signal ?? AbortSignal.timeout(12_000) });
 }

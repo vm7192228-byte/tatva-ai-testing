@@ -19,13 +19,29 @@ function envValue(name: string, runtimeEnv: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
+function getSupabaseAdminKey(runtimeEnv: unknown): string | undefined {
+  const dedicated = envValue("TATV_SUPABASE_SECRET_KEY", runtimeEnv);
+  if (dedicated?.startsWith("sb_secret_")) return dedicated;
+  return getSupabaseAdminKey(runtimeEnv);
+}
+
+function supabaseAdminHeaders(key: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    apikey: key,
+    "content-type": "application/json",
+  };
+  // sb_secret_* is an opaque API key, not a JWT; legacy service_role is a JWT.
+  if (!key.startsWith("sb_secret_")) headers.authorization = "Bearer " + key;
+  return headers;
+}
+
 export async function consumeUsageQuota(runtimeEnv: unknown, userId: string, feature: UsageFeature): Promise<UsageDecision> {
-  const url = envValue("SUPABASE_URL", runtimeEnv)?.replace(/\/$/, "");
-  const key = envValue("SUPABASE_SECRET_KEY", runtimeEnv) ?? envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv);
+  const url = (envValue("TATV_SUPABASE_URL", runtimeEnv) ?? envValue("SUPABASE_URL", runtimeEnv))?.replace(/\/$/, "");
+  const key = getSupabaseAdminKey(runtimeEnv);
   if (!url || !key) throw new Error("USAGE_DATABASE_NOT_CONFIGURED");
   const response = await fetch(url + "/rest/v1/rpc/cf_consume_usage_quota", {
     method: "POST",
-    headers: { apikey: key, authorization: "Bearer " + key, "content-type": "application/json" },
+    headers: supabaseAdminHeaders(key),
     body: JSON.stringify({ p_user_id: userId, p_feature_code: feature }),
     signal: AbortSignal.timeout(10_000),
   });
@@ -114,12 +130,12 @@ export async function reserveUsageQuota(
   feature: UsageFeature,
   idempotencyKey: string,
 ): Promise<UsageReservationDecision> {
-  const url = envValue("SUPABASE_URL", runtimeEnv)?.replace(/\/$/, "");
-  const key = envValue("SUPABASE_SECRET_KEY", runtimeEnv) ?? envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv);
+  const url = (envValue("TATV_SUPABASE_URL", runtimeEnv) ?? envValue("SUPABASE_URL", runtimeEnv))?.replace(/\/$/, "");
+  const key = getSupabaseAdminKey(runtimeEnv);
   if (!url || !key) throw new Error("USAGE_DATABASE_NOT_CONFIGURED");
   const response = await fetch(url + "/rest/v1/rpc/cf_reserve_usage_quota", {
     method: "POST",
-    headers: { apikey: key, authorization: "Bearer " + key, "content-type": "application/json" },
+    headers: supabaseAdminHeaders(key),
     body: JSON.stringify({
       p_user_id: userId,
       p_feature_code: feature,
@@ -156,12 +172,12 @@ export async function finalizeUsageQuota(
   reservationId: string,
   action: UsageReservationAction,
 ): Promise<{ ok: boolean; status?: "committed" | "released"; error?: string }> {
-  const url = envValue("SUPABASE_URL", runtimeEnv)?.replace(/\/$/, "");
-  const key = envValue("SUPABASE_SECRET_KEY", runtimeEnv) ?? envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv);
+  const url = (envValue("TATV_SUPABASE_URL", runtimeEnv) ?? envValue("SUPABASE_URL", runtimeEnv))?.replace(/\/$/, "");
+  const key = getSupabaseAdminKey(runtimeEnv);
   if (!url || !key) throw new Error("USAGE_DATABASE_NOT_CONFIGURED");
   const response = await fetch(url + "/rest/v1/rpc/cf_finalize_usage_quota", {
     method: "POST",
-    headers: { apikey: key, authorization: "Bearer " + key, "content-type": "application/json" },
+    headers: supabaseAdminHeaders(key),
     body: JSON.stringify({
       p_user_id: userId,
       p_reservation_id: reservationId,

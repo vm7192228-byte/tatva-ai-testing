@@ -315,7 +315,7 @@ describe("tool execution boundaries", () => {
   });
 
   it("caps Tavily live searches at two calls per chat request", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [] }), {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ results: [] }), {
       status: 200,
       headers: { "content-type": "application/json" },
     }));

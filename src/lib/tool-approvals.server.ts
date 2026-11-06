@@ -305,7 +305,7 @@ function sameOriginStrict(request: Request): boolean {
 
 const STALE_APPROVAL_EXECUTION_MS = 5 * 60_000;
 const STALE_APPROVAL_RESULT = {
-  message: "The action was started, but Tatv could not confirm its final result. Check the connected platform before requesting it again.",
+  message: "The action was started, but Dhwani could not confirm its final result. Check the connected platform before requesting it again.",
 };
 
 async function reconcileStaleApprovalExecution(
@@ -391,7 +391,7 @@ export async function handleToolApprovalsApiRequest(
     return json({ error: "NOT_FOUND", message: "Approval endpoint not found." }, 404, session.cookies);
   }
   if (!sameOriginStrict(request)) {
-    return json({ error: "ORIGIN_NOT_ALLOWED", message: "Approval decisions must come from this Tatv page." }, 403, session.cookies);
+    return json({ error: "ORIGIN_NOT_ALLOWED", message: "Approval decisions must come from this Dhwani page." }, 403, session.cookies);
   }
 
   let decisionPayload: Record<string, unknown> = {};
@@ -423,7 +423,7 @@ export async function handleToolApprovalsApiRequest(
         decided_at: new Date().toISOString(),
       });
     } catch { /* The expiry check still denies execution. */ }
-    return json({ error: "APPROVAL_EXPIRED", status: "expired", message: "This approval has expired. Ask Tatv to create a new one." }, 410, session.cookies);
+    return json({ error: "APPROVAL_EXPIRED", status: "expired", message: "This approval has expired. Ask Dhwani to create a new one." }, 410, session.cookies);
   }
 
   const config = ACTIONS[record.tool_name];
@@ -495,7 +495,7 @@ export async function handleToolApprovalsApiRequest(
         finished_at: new Date().toISOString(),
       });
     } catch {
-      console.error("[Tatv AI] Tool action finished but its approval status could not be persisted.");
+      console.error("[Dhwani AI] Tool action finished but its approval status could not be persisted.");
     }
     return json({
       ok: succeeded,
@@ -503,7 +503,7 @@ export async function handleToolApprovalsApiRequest(
       message: succeeded
         ? "The connected platform confirmed the action."
         : uncertain
-          ? "Tatv could not verify the platform response. Check your connected account before requesting the action again."
+          ? "Dhwani could not verify the platform response. Check your connected account before requesting the action again."
           : "The platform rejected the action or its permissions. Review the connected account before creating a new request.",
     }, succeeded ? 200 : 502, [...session.cookies, ...cookiesFrom(socialResponse)]);
   } catch {
@@ -514,12 +514,12 @@ export async function handleToolApprovalsApiRequest(
         finished_at: new Date().toISOString(),
       });
     } catch {
-      console.error("[Tatv AI] An approved social action has an unverified outcome; the approval remains non-replayable.");
+      console.error("[Dhwani AI] An approved social action has an unverified outcome; the approval remains non-replayable.");
     }
     return json({
       error: "ACTION_OUTCOME_UNCERTAIN",
       status: "uncertain",
-      message: "Tatv could not verify the platform response. Check your connected account before requesting the action again.",
+      message: "Dhwani could not verify the platform response. Check your connected account before requesting the action again.",
     }, 502, session.cookies);
   }
 }

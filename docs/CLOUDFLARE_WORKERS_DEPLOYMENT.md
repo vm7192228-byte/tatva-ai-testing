@@ -46,18 +46,18 @@ Add these to the **testing Worker only**, in Cloudflare Dashboard → Workers & 
 
 Set `SUPABASE_SERVICE_ROLE_KEY` as a Secret, never a plain-text variable. Never add Supabase keys, provider keys, or secrets to `VITE_*` client variables. The service-role key must remain server-only.
 
-The Gateway must independently trust the same Supabase Auth issuer/JWKS and have at least one enabled **chat** model with an active provider credential. `NO_PROVIDER_MODEL` is emitted by the Gateway when its chat model catalog has no eligible model; adding a Worker variable does not create or enable a Gateway model.
+The private gateway must independently trust the same Supabase Auth issuer/JWKS and have at least one enabled **chat** model with an active provider credential. A missing private-gateway model catalog does not end Smart routing while another eligible route remains; inspect server-side gateway diagnostics only after the configured fallback chain is exhausted.
 
 Do not put a gateway administrator token or upstream provider API key in the Workbench Worker. Keep upstream provider credentials in the Gateway's own server-side secret store. Image/video variables and failover are intentionally out of this first text-chat deployment checklist.
 
 ## Verification order
 
-1. Open the testing Worker URL and confirm the logo appears in the sidebar and top bar.
+1. Open the testing Worker URL and confirm the Dhwani sound-wave logo appears in the sign-in screen, sidebar and top bar.
 2. Sign in with a testing account and confirm the session remains active after refresh.
-3. Send a short plain-text message using Dhwani Smart. Confirm that the FreeLLMAPI first hop is attempted before authenticated private gateways and configured direct-provider fallback.
+3. Send a short plain-text message using Dhwani Smart. The first attempt should go to FreeLLMAPI. If that upstream route is unavailable, authenticated users can continue to the private gateway tier and then configured direct providers; guests skip the authenticated-only private tier. Confirm that the FreeLLMAPI first hop is attempted before authenticated private gateways and configured direct-provider fallback.
 4. If the response still says `NO_PROVIDER_MODEL`, inspect the Gateway model catalogue and provider credential status. Do not change login code based on that Gateway response.
 5. Only after Smart text chat works, test other independent features.
 
 ## CI validation status
 
-The Cloudflare Nitro build and the browser private-alpha E2E workflow have succeeded on the current PR commit. The general CI workflow currently has two failing unit-test expectations (one stale KIE request expectation and one Tavily mock expectation) plus one lint error in a test file. These checks should be resolved before considering the PR fully green; they do not change the Workbench chat or logo code.
+Use the Testing PR's current GitHub Actions results as the verification source. The focused CI gate covers Dhwani branding, universal Smart routing, provider error sanitization, quota reservations, changed-module lint and the production build.

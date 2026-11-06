@@ -150,7 +150,8 @@ async function getActiveSubscriptionPlan(runtimeEnv: unknown, userId: string | u
     return typeof value === "string" && value.trim() ? value.trim() : undefined;
   };
   const baseUrl = getEnv("SUPABASE_URL");
-  const serviceKey = getEnv("SUPABASE_SERVICE_ROLE_KEY") ?? getEnv("SUPABASE_SECRET_KEY");
+  // Prefer the current Supabase server-only secret key; keep legacy service_role as a migration fallback.
+  const serviceKey = getEnv("SUPABASE_SECRET_KEY") ?? getEnv("SUPABASE_SERVICE_ROLE_KEY");
   if (!baseUrl || !serviceKey) return null;
   try {
     const query = new URL("/rest/v1/cf_subscriptions", baseUrl);

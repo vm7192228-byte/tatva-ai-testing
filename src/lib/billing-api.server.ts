@@ -121,7 +121,7 @@ function sameOrigin(request: Request): boolean {
 }
 function dbConfig(runtimeEnv: unknown) {
   const url = envValue("SUPABASE_URL", runtimeEnv);
-  const key = envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv) ?? envValue("SUPABASE_SECRET_KEY", runtimeEnv);
+  const key = envValue("SUPABASE_SECRET_KEY", runtimeEnv) ?? envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv);
   return url && key ? { url: url.replace(/\/$/, ""), key } : null;
 }
 async function dbRequest(runtimeEnv: unknown, path: string, init: RequestInit = {}) {

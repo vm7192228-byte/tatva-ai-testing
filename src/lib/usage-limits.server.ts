@@ -21,7 +21,7 @@ function envValue(name: string, runtimeEnv: unknown): string | undefined {
 
 export async function consumeUsageQuota(runtimeEnv: unknown, userId: string, feature: UsageFeature): Promise<UsageDecision> {
   const url = envValue("SUPABASE_URL", runtimeEnv)?.replace(/\/$/, "");
-  const key = envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv) ?? envValue("SUPABASE_SECRET_KEY", runtimeEnv);
+  const key = envValue("SUPABASE_SECRET_KEY", runtimeEnv) ?? envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv);
   if (!url || !key) throw new Error("USAGE_DATABASE_NOT_CONFIGURED");
   const response = await fetch(url + "/rest/v1/rpc/cf_consume_usage_quota", {
     method: "POST",
@@ -115,7 +115,7 @@ export async function reserveUsageQuota(
   idempotencyKey: string,
 ): Promise<UsageReservationDecision> {
   const url = envValue("SUPABASE_URL", runtimeEnv)?.replace(/\/$/, "");
-  const key = envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv) ?? envValue("SUPABASE_SECRET_KEY", runtimeEnv);
+  const key = envValue("SUPABASE_SECRET_KEY", runtimeEnv) ?? envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv);
   if (!url || !key) throw new Error("USAGE_DATABASE_NOT_CONFIGURED");
   const response = await fetch(url + "/rest/v1/rpc/cf_reserve_usage_quota", {
     method: "POST",
@@ -157,7 +157,7 @@ export async function finalizeUsageQuota(
   action: UsageReservationAction,
 ): Promise<{ ok: boolean; status?: "committed" | "released"; error?: string }> {
   const url = envValue("SUPABASE_URL", runtimeEnv)?.replace(/\/$/, "");
-  const key = envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv) ?? envValue("SUPABASE_SECRET_KEY", runtimeEnv);
+  const key = envValue("SUPABASE_SECRET_KEY", runtimeEnv) ?? envValue("SUPABASE_SERVICE_ROLE_KEY", runtimeEnv);
   if (!url || !key) throw new Error("USAGE_DATABASE_NOT_CONFIGURED");
   const response = await fetch(url + "/rest/v1/rpc/cf_finalize_usage_quota", {
     method: "POST",

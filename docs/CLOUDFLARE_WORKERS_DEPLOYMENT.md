@@ -1,4 +1,4 @@
-# Tatv AI Workbench — Cloudflare Workers testing deployment
+# Dhwani AI testing workspace — Cloudflare Workers testing deployment
 
 This guide is for the separate `tatva-ai-testing` Worker only. It does not change or deploy the existing production Workbench.
 
@@ -38,7 +38,10 @@ Add these to the **testing Worker only**, in Cloudflare Dashboard → Workers & 
 | `SUPABASE_URL` | Variable | The same Supabase project used by Workbench sign-in and the gateway JWT verifier |
 | `SUPABASE_ANON_KEY` | Variable | The matching Supabase anon/publishable key used by Workbench Auth routes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Secret | Server-only database operations for durable conversations and usage accounting |
-| `CODEFORGE_GATEWAY_URL` | Variable | HTTPS base URL of the private multi-user CodeForge/Tatv gateway |
+| `FREELLMAPI_BASE_URL` | Variable | Shared first-hop URL for Dhwani Smart (HTTPS, server-side only) |
+| `FREELLMAPI_API_KEY` | Secret | Server-only unified key; never exposed to the browser or forwarded to private gateways |
+| `FREELLMAPI_MODEL` | Variable (optional) | Model hint for the FreeLLMAPI first hop; defaults to `auto` |
+| `CODEFORGE_GATEWAY_URL` | Variable | HTTPS base URL of the private multi-user CodeForge/Dhwani gateway |
 | `CODEFORGE_GATEWAY_MODEL` | Variable (optional) | Use `auto` unless the gateway owner explicitly configured a reviewed model ID |
 
 Set `SUPABASE_SERVICE_ROLE_KEY` as a Secret, never a plain-text variable. Never add Supabase keys, provider keys, or secrets to `VITE_*` client variables. The service-role key must remain server-only.
@@ -51,7 +54,7 @@ Do not put a gateway administrator token or upstream provider API key in the Wor
 
 1. Open the testing Worker URL and confirm the logo appears in the sidebar and top bar.
 2. Sign in with a testing account and confirm the session remains active after refresh.
-3. Send a short plain-text message using Tatv Smart.
+3. Send a short plain-text message using Dhwani Smart. Confirm that the FreeLLMAPI first hop is attempted before authenticated private gateways and configured direct-provider fallback.
 4. If the response still says `NO_PROVIDER_MODEL`, inspect the Gateway model catalogue and provider credential status. Do not change login code based on that Gateway response.
 5. Only after Smart text chat works, test other independent features.
 

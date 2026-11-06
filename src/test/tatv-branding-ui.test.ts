@@ -4,11 +4,11 @@ import { describe, expect, it } from "vitest";
 
 import { codeforgeMarkup } from "@/lib/codeforge-markup";
 
-describe("Tatv AI visual identity", () => {
-  it("uses the Tatv mark as the navigation control and opens the shared drawer", () => {
+describe("Dhwani AI visual identity", () => {
+  it("uses the Dhwani mark as the navigation control and opens the shared drawer", () => {
     expect(codeforgeMarkup).toContain('id="sidebarToggle"');
-    expect(codeforgeMarkup).toContain('tatv-menu-toggle');
-    expect(codeforgeMarkup).toContain('src="/tatv/tatv-mark.svg"');
+    expect(codeforgeMarkup).toContain('dhwani-menu-toggle');
+    expect(codeforgeMarkup).toContain('src="/dhwani/dhwani-mark.svg"');
     expect(codeforgeMarkup).toContain('id="sidebar"');
     expect(codeforgeMarkup).toContain('id="sidebarOverlay"');
     expect(codeforgeMarkup).not.toContain('id="sidebarToggle" aria-label="Open navigation menu">☰');
@@ -27,7 +27,7 @@ describe("Tatv AI visual identity", () => {
     expect(codeforgeMarkup).not.toContain("composer-tools");
   });
 
-  it("uses Tatv typing dots and animated chat bubbles instead of a live progress checklist", () => {
+  it("uses Dhwani typing dots and animated chat bubbles instead of a live progress checklist", () => {
     const app = readFileSync(resolve(process.cwd(), "public/codeforge/app.js"), "utf8");
     const css = readFileSync(resolve(process.cwd(), "public/codeforge/styles.css"), "utf8");
     expect(app).toContain("cf-typing-indicator");
@@ -36,7 +36,7 @@ describe("Tatv AI visual identity", () => {
     expect(app).not.toContain("cf-chat-progress");
     expect(css).toContain(".message-arrival");
     expect(css).toContain(".pending-typing");
-    expect(css).toContain("tatv-answer-arrive");
+    expect(css).toContain("dhwani-answer-arrive");
     expect(codeforgeMarkup).toContain('id="messages" class="messages"');
     expect(codeforgeMarkup.indexOf('id="messages"')).toBeLessThan(codeforgeMarkup.indexOf('class="composer-zone"'));
   });
@@ -88,11 +88,13 @@ describe("Tatv AI visual identity", () => {
   });
 
   it("does not render the previous product name in the customer-facing app shell", () => {
-    expect(codeforgeMarkup).toContain("Tatv AI");
+    expect(codeforgeMarkup).toContain("Dhwani AI");
+    expect(codeforgeMarkup).not.toContain("Tatv AI");
+    expect(codeforgeMarkup).not.toContain("/tatv/");
     expect(codeforgeMarkup).not.toContain("CodeForge");
   });
 
-  it("ships the animated three-lines-and-bindu mark and Tatv chat styles", () => {
+  it("ships the animated three-lines-and-bindu mark and Dhwani chat styles", () => {
     const svg = readFileSync(resolve(process.cwd(), "public/tatv/tatv-mark.svg"), "utf8");
     const css = readFileSync(resolve(process.cwd(), "public/codeforge/styles.css"), "utf8");
     expect(svg).toContain("तीन");
@@ -100,12 +102,12 @@ describe("Tatv AI visual identity", () => {
     expect(svg).toContain('M74 106 Q120 92 166 106');
     expect(svg).toContain('M74 126 Q120 112 166 126');
     expect(svg).toContain('animateTransform');
-    expect(css).toContain(".tatv-menu-toggle");
-    expect(css).toContain(".tatv-suggestions");
+    expect(css).toContain(".dhwani-menu-toggle");
+    expect(css).toContain(".dhwani-suggestions");
     expect(css).toContain(".composer-bottom #promptInput");
     expect(css).toContain(".sidebar.open");
   });
-  it("shows exactly three branded Tatv modes and no upstream provider choices", () => {
+  it("shows exactly three branded Dhwani modes and no upstream provider choices", () => {
     const app = readFileSync(resolve(process.cwd(), "public/codeforge/app.js"), "utf8");
     const providerStart = app.indexOf("const providers = [");
     const providerEnd = app.indexOf("\n];", providerStart);
@@ -113,10 +115,10 @@ describe("Tatv AI visual identity", () => {
     expect(providerEnd).toBeGreaterThan(providerStart);
     const providerOptions = app.slice(providerStart, providerEnd);
     const css = readFileSync(resolve(process.cwd(), "public/codeforge/styles.css"), "utf8");
-    expect(css).toContain(".platform-mark.tatv");
-    expect(providerOptions).toContain('id: "tatv-flash", name: "Tatv Flash"');
-    expect(providerOptions).toContain('id: "tatv-smart", name: "Tatv Smart"');
-    expect(providerOptions).toContain('id: "tatv-ultra", name: "Tatv Ultra"');
+    expect(css).toContain(".platform-mark.dhwani");
+    expect(providerOptions).toContain('id: "tatv-flash", name: "Dhwani Flash"');
+    expect(providerOptions).toContain('id: "tatv-smart", name: "Dhwani Smart"');
+    expect(providerOptions).toContain('id: "tatv-ultra", name: "Dhwani Ultra"');
     expect(providerOptions).not.toContain("Gemini");
     expect(providerOptions).not.toContain("Claude");
     expect(providerOptions).not.toContain("OpenAI");
@@ -152,7 +154,7 @@ describe("Tatv AI visual identity", () => {
 
   it("keeps Integration cards visible when connection status endpoints are unavailable", () => {
     const app = readFileSync(resolve(process.cwd(), "public/codeforge/app.js"), "utf8");
-    const css = readFileSync(resolve(process.cwd(), "public/codeforge/tatv-theme.css"), "utf8");
+    const css = readFileSync(resolve(process.cwd(), "public/codeforge/dhwani-theme.css"), "utf8");
     expect(app).toContain("const unknownItems = integrations.filter(item => !statusFor(item));");
     expect(app).toContain('data-retry-integrations');
     expect(app).toContain('data-connect="' + "' + item.id + '" + '"');

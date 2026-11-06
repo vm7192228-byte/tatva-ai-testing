@@ -5284,6 +5284,8 @@ function startNewChat() {
 function applyTheme(theme) {
   const next = theme === 'dark' ? 'dark' : 'light';
   document.documentElement.dataset.theme = next;
+  document.documentElement.style.colorScheme = next;
+  document.body?.setAttribute('data-theme', next);
   const isDark = next === 'dark';
   const themeGlyph = $('#themeGlyph'), themeToggle = $('#themeToggle'), themeMenuLabel = $('#themeMenuLabel');
   if (themeGlyph) themeGlyph.textContent = isDark ? '☀' : '☾';

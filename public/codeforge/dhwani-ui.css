@@ -719,3 +719,161 @@ body{background-image:none!important}
  #chatView .quick-tag{font-size:10px;padding:4px 9px}
 }
 @media(max-width:430px){.hero-greeting{font-size:26px!important}#chatView:not(.has-messages) .chat-scroll{padding:0 9px}#chatView:not(.has-messages) .composer-zone{width:calc(100% - 18px)}#chatView .quick-tags{gap:5px}}
+
+
+
+/* Dark mode surfaces: override legacy hard-coded light surfaces in the chat. */
+:root { color-scheme: light; }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1f1e1c;
+  --sidebar: #252320;
+  --surface: #292724;
+  --surface-soft: #33302c;
+  --line: #403d38;
+  --line-strong: #514c45;
+  --text: #f0ece6;
+  --muted: #c0b8ae;
+  --subtle: #968e84;
+  --accent: #e59a78;
+  --accent-strong: #f0ab8c;
+  --accent-soft: #3a302b;
+}
+:root[data-theme="dark"] html,
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .app-shell,
+:root[data-theme="dark"] .main-area,
+:root[data-theme="dark"] #chatView,
+:root[data-theme="dark"] #chatView.active-view {
+  background: var(--bg) !important;
+  background-image: none !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] .sidebar,
+:root[data-theme="dark"] .main-area:has(#chatView.active-view) .topbar {
+  background: var(--sidebar) !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] #chatView .chat-scroll,
+:root[data-theme="dark"] #chatView:not(.has-messages) .chat-scroll,
+:root[data-theme="dark"] #chatView.has-messages .chat-scroll,
+:root[data-theme="dark"] #chatView #messages,
+:root[data-theme="dark"] #chatView .messages {
+  background: var(--bg) !important;
+  background-image: none !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] #chatView .composer-zone,
+:root[data-theme="dark"] #chatView .composer-bottom,
+:root[data-theme="dark"] #chatView .composer-right {
+  background: transparent !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] #chatView .composer,
+:root[data-theme="dark"] #chatForm.composer,
+:root[data-theme="dark"] #chatView form.composer {
+  background: var(--surface) !important;
+  background-image: none !important;
+  border-color: var(--line-strong) !important;
+  color: var(--text) !important;
+  box-shadow: 0 3px 14px rgba(0,0,0,.22) !important;
+}
+:root[data-theme="dark"] #chatView .composer textarea,
+:root[data-theme="dark"] #chatView .composer textarea:focus {
+  background: transparent !important;
+  color: var(--text) !important;
+  caret-color: var(--text);
+}
+:root[data-theme="dark"] #chatView .composer textarea::placeholder {
+  color: var(--subtle) !important;
+}
+:root[data-theme="dark"] #chatView .composer-tool,
+:root[data-theme="dark"] #chatView .dhwani-plus-button,
+:root[data-theme="dark"] #chatView .composer-voice-button,
+:root[data-theme="dark"] #chatView .composer-right > button:not(.send-button) {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--muted) !important;
+}
+:root[data-theme="dark"] #chatView .composer-tool:hover,
+:root[data-theme="dark"] #chatView .dhwani-plus-button:hover,
+:root[data-theme="dark"] #chatView .composer-voice-button:hover,
+:root[data-theme="dark"] #chatView .composer-right > button:not(.send-button):hover {
+  background: var(--surface-soft) !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] #chatView .send-button {
+  background: var(--accent) !important;
+  color: #241b17 !important;
+  border-color: transparent !important;
+}
+:root[data-theme="dark"] #chatView .quick-tag {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+  color: var(--muted) !important;
+}
+:root[data-theme="dark"] #chatView .quick-tag:hover {
+  background: var(--surface-soft) !important;
+  border-color: var(--line-strong) !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] #chatView .message:not(.user) .message-text {
+  background: transparent !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] #chatView .message.user .message-content,
+:root[data-theme="dark"] #chatView .message.user .message-text {
+  background: #38342f !important;
+  color: var(--text) !important;
+  border-color: var(--line) !important;
+}
+:root[data-theme="dark"] #chatView .message-actions .small-action {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+  color: var(--muted) !important;
+}
+:root[data-theme="dark"] #chatView .plus-menu,
+:root[data-theme="dark"] #chatView .topbar-menu {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+  box-shadow: 0 14px 38px rgba(0,0,0,.35) !important;
+}
+:root[data-theme="dark"] #chatView .plus-menu-item,
+:root[data-theme="dark"] #chatView .topbar-menu-item {
+  background: transparent !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] #chatView .plus-menu-item:hover,
+:root[data-theme="dark"] #chatView .topbar-menu-item:hover {
+  background: var(--surface-soft) !important;
+}
+:root[data-theme="dark"] .profile-menu-panel,
+:root[data-theme="dark"] .auth-modal,
+:root[data-theme="dark"] .modal,
+:root[data-theme="dark"] .modal-card {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] .profile-menu-panel button,
+:root[data-theme="dark"] .modal button {
+  color: inherit;
+}
+:root[data-theme="dark"] .sidebar .new-chat,
+:root[data-theme="dark"] .sidebar .profile-button,
+:root[data-theme="dark"] .sidebar-upgrade.dhwani-top-upgrade {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] .sidebar-scroll-content .side-nav .nav-item.active,
+:root[data-theme="dark"] .sidebar-scroll-content .side-nav .nav-item:hover {
+  background: var(--surface-soft) !important;
+  color: var(--text) !important;
+}
+:root[data-theme="dark"] #recentChats .recent-chat:hover {
+  background: var(--surface-soft) !important;
+  color: var(--text) !important;
+}

@@ -44,6 +44,24 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe("Google sign-in Supabase project selection", () => {
+  it("prefers Tatv-owned Supabase settings over integration-provided settings", async () => {
+    const request = new Request("https://tatva-ai-testing-one.vercel.app/api/auth/google");
+    const response = await handleAuthApiRequest(request, {
+      SUPABASE_URL: "https://jfjfiiaxikoyucdssgxu.supabase.co",
+      SUPABASE_ANON_KEY: "old-integration-key",
+      TATV_SUPABASE_URL: "https://iyyltghgqwwapftsivbr.supabase.co",
+      TATV_SUPABASE_PUBLISHABLE_KEY: "testing-publishable-key",
+    });
+
+    expect(response?.status).toBe(302);
+    const location = new URL(response?.headers.get("location") || "https://invalid.example");
+    expect(location.origin).toBe("https://iyyltghgqwwapftsivbr.supabase.co");
+    expect(location.pathname).toBe("/auth/v1/authorize");
+    expect(location.searchParams.get("provider")).toBe("google");
+  });
+});
+
 describe("authentication same-origin protection", () => {
   it("rejects auth POSTs without Origin or same-origin Fetch Metadata", async () => {
     const response = await handleAuthApiRequest(logoutRequest(), runtimeEnv);

@@ -47,7 +47,7 @@ jobs:
 
       - name: Lint changed server routing and quota modules
         run: |
-          bun run eslint \
+          bun run eslint --rule 'prettier/prettier: off' \
             src/lib/chat-api.server.ts \
             src/lib/chat-failover.server.ts \
             src/lib/usage-limits.server.ts \

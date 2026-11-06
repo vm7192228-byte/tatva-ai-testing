@@ -26,10 +26,21 @@ describe("App routing", () => {
 
   it("uses Dhwani branding in document metadata", () => {
     const rootOptions = (RootRoute as unknown as {
-      options: { head?: () => { meta?: Array<Record<string, unknown>> } };
+      options: { head?: () => {
+        meta?: Array<Record<string, unknown>>;
+        links?: Array<Record<string, unknown>>;
+      } };
     }).options;
-    const meta = rootOptions.head?.().meta ?? [];
+    const head = rootOptions.head?.();
+    const meta = head?.meta ?? [];
+    const links = head?.links ?? [];
+    expect(meta).toContainEqual(expect.objectContaining({ title: "Dhwani AI" }));
     expect(meta).toContainEqual(expect.objectContaining({ name: "author", content: "Dhwani AI" }));
+    expect(links).toContainEqual(expect.objectContaining({
+      rel: "icon",
+      href: "/dhwani/dhwani-mark.svg",
+      type: "image/svg+xml",
+    }));
     expect(meta.some(item => item["name"] === "twitter:site" && item["content"] === "@Lovable")).toBe(false);
   });
 });

@@ -7,15 +7,32 @@
 export type FailoverAttempt = {
   label: string;
   start: () => Response;
+  /** Shared/direct provider credentials are administrator-owned; retry upstream errors. */
+  retryErrors?: boolean;
 };
 
 type ParsedFrame = { raw: string; data: Record<string, unknown> | null };
-// FreeLLMAPI + up to four private gateways + Cloudflare + Pollinations.
-const MAX_ATTEMPTS = 7;
+const MAX_ATTEMPTS = 12;
 
-// Never hide credential, billing, permission, model-selection, or policy errors
-// by silently routing the same request to another provider. Only retry failures
-// that are plausibly transient or explicit protocol-capability mismatches.
+const TERMINAL_ERROR_CODES = new Set([
+  "PRIVATE_GATEWAY_ACCESS_DENIED",
+  "USER_AUTH_REQUIRED",
+  "AUTH_REQUIRED",
+  "SIGN_IN_REQUIRED",
+  "USER_BANNED",
+  "ACCOUNT_SUSPENDED",
+  "USER_ACCESS_BLOCKED",
+  "USER_DISABLED",
+  "USER_PERMISSION_DENIED",
+  "USER_RATE_LIMITED",
+  "USER_QUOTA_EXCEEDED",
+  "PLAN_LIMIT_REACHED",
+  "UPSTREAM_CONTENT_FILTERED",
+  "UPSTREAM_POLICY_DENIED",
+]);
+
+// Retry upstream provider failures before answer text is committed. User-level
+// access/quota decisions and content-policy decisions remain terminal.
 const RETRYABLE_UPSTREAM_CODES = new Set([
   "UPSTREAM_UNAVAILABLE",
   "UPSTREAM_TIMEOUT",
@@ -27,9 +44,14 @@ const RETRYABLE_UPSTREAM_CODES = new Set([
   "UPSTREAM_BAD_RESPONSE",
   "UPSTREAM_EMPTY_STREAM",
   "UPSTREAM_EMPTY_ANSWER",
-  // FreeLLMAPI quota / rate-limit (429) is mapped to this code so the next backup is
-  // tried automatically. Private-gateway 429s stay terminal: they can be per-user
-  // fair-use limits that another gateway must not bypass.
+  // Upstream quota, credential, billing, model and service errors are eligible
+  // for the next route. User-level quotas and access denials use terminal codes.
+  "UPSTREAM_RATE_LIMITED",
+  "UPSTREAM_AUTH_FAILED",
+  "UPSTREAM_PERMISSION_DENIED",
+  "UPSTREAM_BILLING_REQUIRED",
+  "UPSTREAM_MODEL_NOT_FOUND",
+  "UPSTREAM_PROVIDER_CONFIG_FAILED",
   "FREELLMAPI_QUOTA_EXHAUSTED",
   "UPSTREAM_TOOL_PROTOCOL_UNSUPPORTED",
   // An empty model catalog is local to this gateway. A different private
@@ -118,11 +140,11 @@ export function streamWithFailover(
               activity: {
                 id: "provider-failover",
                 label: "Switching to a backup AI service",
-                detail: "The previous service could not start the answer, so " + attempt.label + " is being tried.",
+                detail: "The current service could not start the answer, so another available service is being tried.",
                 state: "active",
               },
             });
-            emit({ status: "retrying", message: "Trying " + attempt.label + "…" });
+            emit({ status: "retrying", message: "Trying another available AI service…" });
           }
 
           let response: Response;
@@ -167,7 +189,19 @@ export function streamWithFailover(
             if (data?.["done"] === true) terminalFrameSeen = true;
 
             if (committed) {
-              write(raw, false);
+              if (hasError) {
+                console.warn("[Tatv AI] provider stream failed after response commitment", {
+                  provider: attempt.label,
+                  code: typeof data?.["code"] === "string" ? data["code"] : "UPSTREAM_ERROR",
+                });
+                write(errorFrame(
+                  "Tatv could not complete this reply. Please try again in a moment.",
+                  "AI_REQUEST_FAILED",
+                ), false);
+                terminalFrameSeen = true;
+              } else {
+                write(raw, false);
+              }
               return "continue";
             }
 
@@ -197,16 +231,30 @@ export function streamWithFailover(
             if (hasError) {
               lastErrorFrame = raw;
               const code = typeof data?.["code"] === "string" ? data["code"] : "";
-              if (RETRYABLE_UPSTREAM_CODES.has(code)) {
+              const shouldRetry = !TERMINAL_ERROR_CODES.has(code) && (
+                attempt.retryErrors === true || RETRYABLE_UPSTREAM_CODES.has(code)
+              );
+              if (shouldRetry) {
+                console.warn("[Tatv AI] retrying next provider after upstream failure", {
+                  provider: attempt.label,
+                  code: code || "UPSTREAM_ERROR",
+                });
                 if (code !== "NO_PROVIDER_MODEL") onlyCatalogEmptyFailures = false;
                 failed = true;
                 return "stop";
               }
-              // Authentication, permissions, billing, invalid-model/request,
-              // provider policy, and unknown errors are terminal. Forward the
-              // safe error to the user instead of masking it with another route.
+              // Do not bypass authentication, permission, billing, invalid-model,
+              // or provider-policy failures. Keep diagnostics in server logs and
+              // return only a neutral error to the user.
+              console.warn("[Tatv AI] provider attempt ended without failover", {
+                provider: attempt.label,
+                code: typeof data?.["code"] === "string" ? data["code"] : "UPSTREAM_ERROR",
+              });
               committed = true;
-              write(raw, false);
+              write(errorFrame(
+                "Tatv could not complete this reply. Please try again in a moment.",
+                "AI_REQUEST_FAILED",
+              ), false);
               terminalFrameSeen = true;
               return "continue";
             }
@@ -287,18 +335,19 @@ export function streamWithFailover(
         }
 
         if (!closed) {
-          // Do not expose the last backend's internal catalog/configuration
-          // error after every configured private gateway has already been tried.
-          // Keep one honest, stable message for the user instead of a misleading
-          // "overloaded" error from whichever backend happened to be last.
-          const noEligibleModel = Boolean(lastErrorFrame && onlyCatalogEmptyFailures);
+          // Keep the failure category in server logs for the future admin panel.
+          // End users always receive the same neutral message, never provider or
+          // gateway configuration details.
+          const failureCode = onlyCatalogEmptyFailures && lastErrorFrame
+            ? "NO_PROVIDER_MODEL"
+            : lastErrorFrame ? "ALL_PROVIDERS_FAILED" : "PROVIDER_NOT_CONFIGURED";
+          console.warn("[Tatv AI] provider chain exhausted", {
+            attempts: list.length,
+            failureCode,
+          });
           emit({
-            error: noEligibleModel
-              ? "The private AI gateway is reachable, but no eligible chat model is enabled. The gateway administrator must connect an eligible provider and enable a reviewed chat model."
-              : lastErrorFrame
-                ? "I couldn't get a response from any available AI service. Please try again in a moment."
-                : "No private AI service is configured for this chat yet.",
-            code: noEligibleModel ? "NO_PROVIDER_MODEL" : lastErrorFrame ? "ALL_PROVIDERS_FAILED" : "PROVIDER_NOT_CONFIGURED",
+            error: "Tatv could not complete this reply. Please try again in a moment.",
+            code: "AI_REQUEST_FAILED",
             done: true,
           });
           close();

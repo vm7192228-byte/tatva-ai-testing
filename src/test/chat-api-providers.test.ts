@@ -4,7 +4,7 @@ import {
   handleChatApiRequest,
   isPaidAiChatPlanCode,
   shouldConsumeSuperChatAllowance,
-  parseTatvChatMode,
+  parseDhwaniChatMode,
   streamAnthropicProvider,
   streamOpenAIProvider,
   streamResponsesProvider,
@@ -63,11 +63,11 @@ describe("paid AI chat entitlement and shared quota policy", () => {
   });
 
   it("accepts only the three branded Dhwani modes and defaults safely to Smart", () => {
-    expect(parseTatvChatMode("flash")).toBe("flash");
-    expect(parseTatvChatMode("smart")).toBe("smart");
-    expect(parseTatvChatMode("ultra")).toBe("ultra");
+    expect(parseDhwaniChatMode("flash")).toBe("flash");
+    expect(parseDhwaniChatMode("smart")).toBe("smart");
+    expect(parseDhwaniChatMode("ultra")).toBe("ultra");
     for (const value of [undefined, null, "gemini", "openai", "premium", 123]) {
-      expect(parseTatvChatMode(value)).toBe("smart");
+      expect(parseDhwaniChatMode(value)).toBe("smart");
     }
   });
 });

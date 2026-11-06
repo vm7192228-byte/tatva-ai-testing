@@ -1,25 +1,19 @@
-# Tatv AI Workbench — Stage 1 import
+# Dhwani AI Testing — Universal Smart Routing and Brand Refresh
 
 ## Summary
-- Import the current complete Workbench source into the testing repository.
-- Fix the malformed SVG logo asset so the browser can render the sidebar, header, and assistant mark.
-- Add a regression test to reject malformed SVG markup.
-- Record the observed signed-in `NO_PROVIDER_MODEL` failure and the exact gateway checks needed for the next test.
-- Add a Cloudflare Workers testing deployment guide with server-only variable handling and text-chat verification order.
-- Split known dummy credential examples at runtime to reduce secret-scanner false positives.
+- Apply the same Dhwani Smart routing order for the owner, signed-in users and guests: FreeLLMAPI first, eligible authenticated private gateways second, and configured direct providers last.
+- Keep the FreeLLMAPI unified key server-side and never forward it to a private gateway.
+- Preserve user-level authentication, suspension, permissions, quota and content-policy decisions as terminal; never replay after output or tool side effects begin.
+- Sanitize upstream diagnostics into a neutral user-facing failure message.
+- Replace all customer-facing Tatv AI names and logos with the Dhwani AI sound-wave identity, including login/signup, app shell, assistant avatars, loading indicators, plan screens, favicon and public/legal pages.
+- Remove the retired Tatv SVG and favicon assets and rename the old theme stylesheet.
+- Fix the Supabase admin-key recursion that previously broke usage reservations.
 
-## Scope boundaries
-- No production deployment or production configuration changes.
-- No chat-provider routing/failover changes in this stage.
-- No image/video generation or failover changes.
-- No billing, quota, or plan-limit changes.
+## Verification
+- Focused routing/provider/quota regression tests: passed.
+- Changed server routing/quota lint: passed.
+- Production build: passed.
+- Vercel Preview: READY.
+- Branding regression tests are included in the next CI run for this updated commit.
 
-## Test status
-- SVG XML validation: passed.
-- Static secret-pattern scan: known AWS/Stripe-shaped test literals split into runtime fragments; no real `.env` or `.dev.vars` included.
-- Dependency installation timed out; Vitest/build/lint remain unverified and must run in CI.
-
-## Review focus
-1. Confirm the logo renders across the app shell.
-2. Deploy the testing app and verify its Supabase session.
-3. Confirm the private gateway has at least one enabled chat model and a valid provider credential, then re-test text chat.
+This PR changes the Testing repository only. It does not modify or deploy the Production Workbench.

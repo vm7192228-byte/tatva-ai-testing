@@ -3971,6 +3971,12 @@ function installDhwaniComposerLayout() {
   if (send) {
     send.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5"/><path d="m6 11 6-6 6 6"/></svg>';
     send.setAttribute("aria-label", "Send message");
+    send.addEventListener("click", event => {
+      if (activeChatRequests.size === 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      for (const controller of activeChatRequests) controller.abort();
+    });
   }
   form.classList.toggle("has-content", Boolean(prompt.value.trim()) || selectedAttachments.length > 0);
   updateDhwaniSendControl();
@@ -4559,7 +4565,6 @@ async function sendMessage(text, options = {}) {
     if (session !== chatSessionToken) {
       window.clearTimeout(requestTimeoutId);
       activeChatRequests.delete(requestAbortController);
-      updateDhwaniSendControl?.();
       updateDhwaniSendControl?.();
       return;
     }

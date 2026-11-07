@@ -5944,3 +5944,234 @@ body { overflow: hidden; }
     max-width: 0 !important;
   }
 }
+
+
+/* Dhwani mobile composer: keep typed text visible above the action rail. */
+@media (max-width: 760px) {
+  #chatView .composer-zone,
+  #chatView:not(.has-messages) .composer-zone {
+    width: calc(100% - 28px) !important;
+    margin-inline: auto !important;
+    padding: 8px 0 max(10px, env(safe-area-inset-bottom)) !important;
+  }
+  #chatForm.composer {
+    display: block !important;
+    width: 100% !important;
+    min-height: 62px !important;
+    padding: 7px 9px !important;
+    border: 1px solid var(--line-strong) !important;
+    border-radius: 999px !important;
+    background: var(--surface) !important;
+    box-shadow: 0 5px 20px rgba(35, 31, 25, .07) !important;
+    overflow: visible !important;
+  }
+  #chatForm.composer .composer-bottom {
+    display: grid !important;
+    grid-template-columns: 36px minmax(0, 1fr) auto !important;
+    grid-template-rows: 44px !important;
+    align-items: center !important;
+    gap: 5px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  #chatForm.composer .composer-tools {
+    display: flex !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    gap: 0 !important;
+  }
+  #chatForm.composer #promptInput {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    min-height: 40px !important;
+    max-height: 112px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 9px 2px !important;
+    color: var(--text) !important;
+    -webkit-text-fill-color: var(--text) !important;
+    caret-color: var(--accent) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    font: 400 15px/1.45 "DM Sans", system-ui, sans-serif !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    resize: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    z-index: 3 !important;
+  }
+  #chatForm.composer #promptInput::placeholder {
+    color: var(--muted) !important;
+    -webkit-text-fill-color: var(--muted) !important;
+    opacity: 1 !important;
+  }
+  #chatForm.composer .composer-right {
+    display: flex !important;
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+  #chatForm.composer .plus-menu-button,
+  #chatForm.composer .composer-voice-button,
+  #chatForm.composer .send-button {
+    display: grid !important;
+    place-items: center !important;
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+    border-radius: 50% !important;
+    box-sizing: border-box !important;
+  }
+  #chatForm.composer .plus-menu-button {
+    border: 0 !important;
+    background: var(--surface-soft) !important;
+    color: var(--text) !important;
+    font-size: 22px !important;
+  }
+  #chatForm.composer .composer-voice-button {
+    border: 0 !important;
+    background: var(--surface-soft) !important;
+    color: var(--text) !important;
+  }
+  #chatForm.composer .composer-model-chip {
+    display: none !important;
+  }
+  #chatForm.composer .send-button,
+  #chatForm.composer .send-button.is-stop {
+    display: grid !important;
+    border: 0 !important;
+    background: #C56D4B !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+  #chatForm.composer .send-button.is-hidden {
+    display: none !important;
+  }
+  #chatForm.composer .send-button svg {
+    display: block !important;
+    width: 22px !important;
+    height: 22px !important;
+    fill: none !important;
+    stroke: #fff !important;
+    stroke-width: 2.2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+  #chatForm.composer.is-expanded {
+    min-height: 112px !important;
+    padding: 9px 10px 8px !important;
+    border-radius: 24px !important;
+  }
+  #chatForm.composer.is-expanded .composer-bottom,
+  #chatForm.composer.is-generating .composer-bottom {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: minmax(42px, auto) 40px !important;
+    gap: 6px 8px !important;
+  }
+  #chatForm.composer.is-expanded #promptInput,
+  #chatForm.composer.is-generating #promptInput {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    min-height: 42px !important;
+    padding: 5px 3px 7px !important;
+  }
+  #chatForm.composer.is-expanded .composer-tools,
+  #chatForm.composer.is-generating .composer-tools {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    flex: 0 1 auto !important;
+    justify-content: flex-start !important;
+    gap: 7px !important;
+  }
+  #chatForm.composer.is-expanded .composer-model-chip,
+  #chatForm.composer.is-generating .composer-model-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    max-width: min(44vw, 170px) !important;
+    min-height: 35px !important;
+    padding: 0 11px !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: var(--surface-soft) !important;
+    color: var(--text) !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #chatForm.composer.is-expanded .composer-right,
+  #chatForm.composer.is-generating .composer-right {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-self: end !important;
+  }
+  #chatForm.composer.is-expanded .send-button,
+  #chatForm.composer.is-generating .send-button {
+    display: grid !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+  }
+  #chatForm.composer.is-generating .send-button svg rect {
+    fill: #fff !important;
+    stroke: #fff !important;
+  }
+  /* A retained draft returns to a slim pill, but its actual text stays visible. */
+  #chatForm.composer.has-content:not(.is-expanded):not(.is-generating) {
+    min-height: 62px !important;
+    border-radius: 999px !important;
+  }
+  #chatForm.composer.has-content:not(.is-expanded):not(.is-generating) .composer-model-chip {
+    display: none !important;
+  }
+  #chatView:not(.has-messages) .hero-brand-mark {
+    width: 76px !important;
+    height: 76px !important;
+    min-width: 76px !important;
+    margin: 0 auto 4px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  #chatView:not(.has-messages) .hero-brand-mark::before,
+  #chatView:not(.has-messages) .hero-brand-mark::after {
+    content: none !important;
+    display: none !important;
+    animation: none !important;
+  }
+  #chatView:not(.has-messages) .hero-brand-mark .hero-mark {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    filter: none !important;
+  }
+}

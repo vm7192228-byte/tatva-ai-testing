@@ -3925,6 +3925,76 @@ function toggleDictation() {
   }
   startVoiceRecognition("dictation");
 }
+function installDhwaniComposerLayout() {
+  const form = $("#chatForm");
+  const bottom = form?.querySelector(".composer-bottom");
+  const prompt = $("#promptInput");
+  const plus = $("#plusMenuButton");
+  const model = $("#modelChip");
+  const right = form?.querySelector(".composer-right");
+  if (!form || !bottom || !prompt || !plus || !right) return;
+
+  let tools = bottom.querySelector(".composer-tools");
+  if (!tools) {
+    tools = document.createElement("div");
+    tools.className = "composer-tools";
+    bottom.insertBefore(tools, prompt);
+  }
+  tools.appendChild(plus);
+  if (model) {
+    model.classList.remove("topbar-model-chip");
+    model.classList.add("composer-tool", "composer-model-chip");
+    tools.appendChild(model);
+  }
+
+  const mobile = window.matchMedia("(max-width: 760px)");
+  const syncExpanded = () => {
+    const keyboardOpen = document.activeElement === prompt &&
+      window.visualViewport &&
+      window.visualViewport.height < window.innerHeight * 0.82;
+    form.classList.toggle("is-expanded", Boolean(document.activeElement === prompt && (keyboardOpen || !window.visualViewport)));
+  };
+  prompt.addEventListener("focus", syncExpanded);
+  prompt.addEventListener("blur", () => {
+    window.setTimeout(() => {
+      if (document.activeElement !== prompt) form.classList.remove("is-expanded");
+    }, 120);
+  });
+  window.visualViewport?.addEventListener("resize", syncExpanded);
+  window.visualViewport?.addEventListener("scroll", syncExpanded);
+  prompt.addEventListener("input", () => {
+    form.classList.toggle("has-content", Boolean(prompt.value.trim()) || selectedAttachments.length > 0);
+    updateDhwaniSendControl();
+  });
+
+  const send = $("#sendButton");
+  if (send) {
+    send.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5"/><path d="m6 11 6-6 6 6"/></svg>';
+    send.setAttribute("aria-label", "Send message");
+  }
+  form.classList.toggle("has-content", Boolean(prompt.value.trim()) || selectedAttachments.length > 0);
+  updateDhwaniSendControl();
+  syncExpanded();
+}
+
+function updateDhwaniSendControl() {
+  const form = $("#chatForm");
+  const prompt = $("#promptInput");
+  const send = $("#sendButton");
+  if (!form || !prompt || !send) return;
+  const busy = activeChatRequests.size > 0;
+  const hasContent = Boolean(prompt.value.trim()) || selectedAttachments.length > 0;
+  form.classList.toggle("has-content", hasContent);
+  form.classList.toggle("is-generating", busy);
+  send.classList.toggle("is-hidden", !busy && !hasContent);
+  send.classList.toggle("is-stop", busy);
+  send.setAttribute("aria-label", busy ? "Stop generating" : "Send message");
+  send.title = busy ? "Stop generating" : "Send message";
+  send.innerHTML = busy
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5"/><path d="m6 11 6-6 6 6"/></svg>';
+}
+
 function installVoiceControls() {
   const right = $("#chatForm .composer-right");
   const send = $("#sendButton");
@@ -4370,6 +4440,7 @@ async function sendMessage(text, options = {}) {
     }
   }, 240000);
   activeChatRequests.add(requestAbortController);
+  updateDhwaniSendControl?.();
 
   const pending = document.createElement("article");
   pending.className = "message response pending-message";
@@ -4488,6 +4559,8 @@ async function sendMessage(text, options = {}) {
     if (session !== chatSessionToken) {
       window.clearTimeout(requestTimeoutId);
       activeChatRequests.delete(requestAbortController);
+      updateDhwaniSendControl?.();
+      updateDhwaniSendControl?.();
       return;
     }
   }
@@ -5454,6 +5527,7 @@ document.addEventListener("click", event => {
 });
 $("#attachmentInput").addEventListener("change", handleSelectedFiles);
 installVoiceControls();
+installDhwaniComposerLayout();
 $("#chatForm").addEventListener("submit", event => { event.preventDefault(); sendMessage($("#promptInput").value); });
 $('#promptInput').addEventListener('input', resizeInput);
 $('#promptInput').addEventListener('keydown', event => {

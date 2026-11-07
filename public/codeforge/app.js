@@ -5320,6 +5320,7 @@ async function sendMessage(text, options = {}) {
   } finally {
     window.clearTimeout(requestTimeoutId);
     activeChatRequests.delete(requestAbortController);
+    updateDhwaniSendControl?.();
     stopButton?.remove();
     if (uploadedAttachmentPaths.length) void cleanupChatUploads(uploadedAttachmentPaths);
   }
